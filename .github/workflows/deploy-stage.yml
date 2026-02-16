@@ -1,0 +1,29 @@
+name: Deploy to Stage
+
+on:
+  push:
+    branches: [stage]
+
+jobs:
+  deploy:
+    name: Deploy to Stage Server
+    runs-on: ubuntu-latest
+    environment: stage
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.STAGE_HOST }}
+          username: ${{ secrets.STAGE_USER }}
+          key: ${{ secrets.STAGE_SSH_KEY }}
+          script: |
+            cd /var/www/entropiq-stage
+            git pull origin stage
+            docker compose -f docker-compose.stage.yml up -d --build
+            docker compose -f docker-compose.stage.yml exec -T app php artisan migrate --force
+            docker compose -f docker-compose.stage.yml exec -T app php artisan config:cache
+            docker compose -f docker-compose.stage.yml exec -T app php artisan route:cache
+            docker compose -f docker-compose.stage.yml exec -T app php artisan view:cache
+            docker compose -f docker-compose.stage.yml exec -T app php artisan event:cache
+            echo "Stage deployment complete at $(date)"
