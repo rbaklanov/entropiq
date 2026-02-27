@@ -6,6 +6,7 @@ use App\Enums\Locale;
 use App\Enums\SubscriptionPlan;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -37,6 +38,24 @@ class User extends Authenticatable
             'subscription_plan' => SubscriptionPlan::class,
             'onboarding_completed_at' => 'datetime',
         ];
+    }
+
+    /** @return HasMany<Transaction, $this> */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /** @return HasMany<Category, $this> */
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class);
+    }
+
+    /** @return HasMany<RecurringRule, $this> */
+    public function recurringRules(): HasMany
+    {
+        return $this->hasMany(RecurringRule::class);
     }
 
     public function hasCompletedOnboarding(): bool
