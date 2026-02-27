@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TransactionType;
+use Database\Factories\TransactionFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ use Illuminate\Support\Carbon;
  */
 class Transaction extends Model
 {
+    /** @use HasFactory<TransactionFactory> */
     use HasFactory;
 
     protected $fillable = [
