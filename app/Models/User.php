@@ -64,6 +64,12 @@ class User extends Authenticatable
         return $this->hasMany(Goal::class);
     }
 
+    /** @return HasMany<AiAdvice, $this> */
+    public function aiAdvices(): HasMany
+    {
+        return $this->hasMany(AiAdvice::class);
+    }
+
     public function hasCompletedOnboarding(): bool
     {
         return $this->onboarding_completed_at !== null;
