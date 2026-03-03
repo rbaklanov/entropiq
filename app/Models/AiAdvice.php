@@ -52,9 +52,6 @@ class AiAdvice extends Model
         $query->whereNotNull('rating');
     }
 
-    /**
-     * @return void
-     */
     public function markAsRead(): void
     {
         $this->update(['is_read' => true]);
