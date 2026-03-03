@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\PaymentStatus;
+use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -15,6 +17,9 @@ use Illuminate\Support\Carbon;
  */
 class Payment extends Model
 {
+    /** @use HasFactory<PaymentFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'subscription_id',

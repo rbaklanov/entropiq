@@ -4,7 +4,9 @@ namespace App\Models;
 
 use App\Enums\RecurringInterval;
 use App\Enums\TransactionType;
+use Database\Factories\RecurringRuleFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -16,6 +18,9 @@ use Illuminate\Support\Carbon;
  */
 class RecurringRule extends Model
 {
+    /** @use HasFactory<RecurringRuleFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'type',
