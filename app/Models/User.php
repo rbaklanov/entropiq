@@ -58,6 +58,12 @@ class User extends Authenticatable
         return $this->hasMany(RecurringRule::class);
     }
 
+    /** @return HasMany<Goal, $this> */
+    public function goals(): HasMany
+    {
+        return $this->hasMany(Goal::class);
+    }
+
     public function hasCompletedOnboarding(): bool
     {
         return $this->onboarding_completed_at !== null;
