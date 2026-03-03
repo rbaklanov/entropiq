@@ -2,6 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', fn () => view('pages.guest.landing'))->name('landing');
+
+Route::get('/dashboard', fn () => view('pages.app.dashboard'))->name('dashboard');
