@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\GoalStatus;
 use App\Enums\GoalType;
+use Database\Factories\GoalFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,13 +15,14 @@ use Illuminate\Support\Carbon;
 /**
  * @property GoalType $type
  * @property GoalStatus $status
+ * @property int $target_amount
+ * @property int $current_amount
  * @property Carbon $started_at
  * @property ?Carbon $target_date
- * @property mixed $target_amount
- * @property mixed $current_amount
  */
 class Goal extends Model
 {
+    /** @use HasFactory<GoalFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -67,9 +69,6 @@ class Goal extends Model
         $query->where('status', GoalStatus::Active);
     }
 
-    /**
-     * @return float
-     */
     public function progressPercent(): float
     {
         if ($this->target_amount === 0) {
@@ -79,17 +78,11 @@ class Goal extends Model
         return min(100, round($this->current_amount / $this->target_amount * 100, 1));
     }
 
-    /**
-     * @return bool
-     */
     public function isAchieved(): bool
     {
         return $this->status === GoalStatus::Achieved;
     }
 
-    /**
-     * @return int
-     */
     public function remainingAmount(): int
     {
         return max(0, $this->target_amount - $this->current_amount);
