@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\GoalContributionFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -11,6 +13,9 @@ use Illuminate\Support\Carbon;
  */
 class GoalContribution extends Model
 {
+    /** @use HasFactory<GoalContributionFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'goal_id',
         'transaction_id',

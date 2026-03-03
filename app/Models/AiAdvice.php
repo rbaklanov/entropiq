@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Database\Factories\AiAdviceFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -13,6 +15,9 @@ use Illuminate\Support\Carbon;
  */
 class AiAdvice extends Model
 {
+    /** @use HasFactory<AiAdviceFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'title',
