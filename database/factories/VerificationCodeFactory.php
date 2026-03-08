@@ -8,13 +8,15 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /** @extends Factory<VerificationCode> */
 class VerificationCodeFactory extends Factory
 {
+    protected $model = VerificationCode::class;
+
     /** @return array<string, mixed> */
     public function definition(): array
     {
         return [
-            'phone' => '+7'.fake()->unique()->numerify('9#########'),
-            'code' => (string) fake()->numberBetween(1000, 9999),
-            'expires_at' => now()->addMinutes(5),
+            'phone' => '7'.$this->faker->numerify('#########'),
+            'code' => (string) $this->faker->numberBetween(1000, 9999),
+            'expires_at' => now()->addMinutes(VerificationCode::EXPIRATION_MINUTES),
             'attempts' => 0,
             'verified_at' => null,
         ];
@@ -37,7 +39,7 @@ class VerificationCodeFactory extends Factory
     public function maxAttempts(): static
     {
         return $this->state(fn () => [
-            'attempts' => 3,
+            'attempts' => VerificationCode::MAX_ATTEMPTS,
         ]);
     }
 }

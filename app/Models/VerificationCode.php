@@ -9,13 +9,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
+ * @property string $phone
+ * @property string $code
  * @property Carbon $expires_at
+ * @property int $attempts
  * @property ?Carbon $verified_at
  */
 class VerificationCode extends Model
 {
     /** @use HasFactory<VerificationCodeFactory> */
     use HasFactory;
+
+    public const MAX_ATTEMPTS = 3;
+
+    public const EXPIRATION_MINUTES = 5;
+
+    public const RESEND_COOLDOWN_SECONDS = 60;
 
     protected $fillable = [
         'phone',
@@ -39,7 +48,13 @@ class VerificationCode extends Model
     {
         $query->whereNull('verified_at')
             ->where('expires_at', '>', now())
-            ->where('attempts', '<', 3);
+            ->where('attempts', '<', self::MAX_ATTEMPTS);
+    }
+
+    /** @param Builder<self> $query */
+    public function scopeForPhone(Builder $query, string $phone): void
+    {
+        $query->where('phone', $phone);
     }
 
     public function isExpired(): bool
@@ -49,13 +64,21 @@ class VerificationCode extends Model
 
     public function hasExceededAttempts(): bool
     {
-        return $this->attempts >= 3;
+        return $this->attempts >= self::MAX_ATTEMPTS;
     }
 
-    public function isUsable(): bool
+    public function isVerified(): bool
     {
-        return ! $this->isExpired()
-            && ! $this->hasExceededAttempts()
-            && $this->verified_at === null;
+        return $this->verified_at !== null;
+    }
+
+    public function incrementAttempts(): void
+    {
+        $this->increment('attempts');
+    }
+
+    public function markAsVerified(): void
+    {
+        $this->update(['verified_at' => now()]);
     }
 }
