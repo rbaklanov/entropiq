@@ -15,6 +15,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property SubscriptionPlan $subscription_plan
+ * @property ?Carbon $phone_verified_at
  * @property ?Carbon $onboarding_completed_at
  */
 class User extends Authenticatable
@@ -28,6 +29,7 @@ class User extends Authenticatable
         'locale',
         'currency_code',
         'subscription_plan',
+        'phone_verified_at',
         'onboarding_completed_at',
     ];
 
@@ -37,6 +39,7 @@ class User extends Authenticatable
         return [
             'locale' => Locale::class,
             'subscription_plan' => SubscriptionPlan::class,
+            'phone_verified_at' => 'datetime',
             'onboarding_completed_at' => 'datetime',
         ];
     }
