@@ -53,7 +53,7 @@ return [
     'preset_months' => ':count mo.',
 
     'no_goals' => 'Set a financial goal',
-    'no_goals_description' => "We'll help you reach it! We'll calculate how much to save, adjusted for inflation.",
+    'no_goals_description' => 'We\'ll help you reach it! We\'ll calculate how much to save, adjusted for inflation.',
     'limit_reached' => 'Upgrade to Premium to create more goals.',
 
     'saved' => 'Goal saved.',

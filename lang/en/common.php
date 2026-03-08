@@ -45,9 +45,9 @@ return [
     'landing_cta' => 'Get started for free',
 
     'onboarding_welcome_title' => 'Welcome to Entropiq!',
-    'onboarding_welcome_text' => "We'll help you manage finances with inflation in mind",
+    'onboarding_welcome_text' => 'We\'ll help you manage finances with inflation in mind',
     'onboarding_goal_title' => 'Create your first goal',
-    'onboarding_goal_text' => "We'll calculate how much to save, adjusted for rising prices",
+    'onboarding_goal_text' => 'We\'ll calculate how much to save, adjusted for rising prices',
     'onboarding_transaction_title' => 'Add your first transaction',
-    'onboarding_transaction_text' => "It takes 3 seconds. Start tracking your finances now",
+    'onboarding_transaction_text' => 'It takes 3 seconds. Start tracking your finances now',
 ];
