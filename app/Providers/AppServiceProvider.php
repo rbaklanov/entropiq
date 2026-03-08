@@ -2,21 +2,37 @@
 
 namespace App\Providers;
 
+use App\Contracts\AiAdviceServiceInterface;
+use App\Contracts\ExportServiceInterface;
+use App\Contracts\GoalCalculationServiceInterface;
+use App\Contracts\InflationServiceInterface;
+use App\Contracts\SmsServiceInterface;
+use App\Contracts\SubscriptionServiceInterface;
+use App\Services\AiAdviceService;
+use App\Services\ExportService;
+use App\Services\GoalCalculationService;
+use App\Services\InflationService;
+use App\Services\LogSmsService;
+use App\Services\SubscriptionService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+    /** @var array<class-string, class-string> */
+    public array $bindings = [
+        SmsServiceInterface::class => LogSmsService::class,
+        InflationServiceInterface::class => InflationService::class,
+        GoalCalculationServiceInterface::class => GoalCalculationService::class,
+        AiAdviceServiceInterface::class => AiAdviceService::class,
+        SubscriptionServiceInterface::class => SubscriptionService::class,
+        ExportServiceInterface::class => ExportService::class,
+    ];
+
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         //
