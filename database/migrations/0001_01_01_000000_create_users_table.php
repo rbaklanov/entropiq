@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('locale', 5)->default('ru');
             $table->string('currency_code', 3)->default('RUB');
             $table->string('subscription_plan', 20)->default('free');
+            $table->timestamp('phone_verified_at')->nullable();
             $table->timestamp('onboarding_completed_at')->nullable();
             $table->timestamps();
         });
