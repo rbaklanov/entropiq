@@ -12,7 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->redirectGuestsTo('/login');
+
+        $middleware->alias([
+            'verified.phone' => \App\Http\Middleware\EnsurePhoneVerified::class,
+            'subscription' => \App\Http\Middleware\EnsurePremiumSubscription::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
