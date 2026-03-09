@@ -20,6 +20,9 @@
             this.$refs['digit' + (index - 1)].focus();
         }
     },
+    syncHidden() {
+        this.$refs.codeHidden.value = this.digits.join('');
+    },
     onInput(index, e) {
         let val = e.target.value.replace(/\D/g, '');
 
@@ -30,11 +33,13 @@
             }
             let nextIdx = Math.min(index + chars.length, {{ $length }} - 1);
             this.$refs['digit' + nextIdx].focus();
+            this.syncHidden();
             return;
         }
 
         this.digits[index] = val;
         if (val) this.focusNext(index);
+        this.syncHidden();
     },
     onKeydown(index, e) {
         if (e.key === 'Backspace' && !this.digits[index]) {
@@ -49,6 +54,7 @@
         }
         let focusIdx = Math.min(pasted.length, {{ $length }} - 1);
         this.$refs['digit' + focusIdx].focus();
+        this.syncHidden();
     }
 }" class="w-full">
     <label class="mb-1 block text-sm font-medium text-gray-700">
@@ -78,7 +84,7 @@
         @endfor
     </div>
 
-    <input type="hidden" name="{{ $name }}" :value="code" />
+    <input type="hidden" name="{{ $name }}" x-ref="codeHidden" />
 
     @if($error)
         <p class="mt-2 text-center text-sm text-danger-500">{{ $error }}</p>
