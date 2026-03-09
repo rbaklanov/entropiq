@@ -1,26 +1,27 @@
 <x-layouts.guest>
     <div class="mx-auto max-w-md px-4 py-20">
         <div class="rounded-2xl bg-white p-8 shadow-sm">
-            <h1 class="text-center text-h2">{{ __('Вход в Entropiq') }}</h1>
+            <h1 class="text-center text-h2">{{ __('auth.login_title') }}</h1>
             <p class="mt-2 text-center text-caption text-gray-500">
-                {{ __('Введите номер телефона для входа или регистрации') }}
+                {{ __('auth.login_subtitle') }}
             </p>
 
-            <div class="mt-8">
-                <x-phone-input />
-            </div>
+            <form method="POST" action="{{ route('auth.sendCode') }}" class="mt-8">
+                @csrf
 
-            <button
-                type="button"
-                disabled
-                class="mt-6 w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white opacity-50"
-            >
-                {{ __('Получить код') }}
-            </button>
+                <x-phone-input :error="$errors->first('phone')" />
+
+                <button
+                    type="submit"
+                    class="mt-6 w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-primary-700"
+                >
+                    {{ __('auth.send_code') }}
+                </button>
+            </form>
 
             <p class="mt-4 text-center text-small text-gray-400">
-                {{ __('Нажимая «Получить код», вы соглашаетесь с') }}
-                <a href="#" class="underline">{{ __('условиями использования') }}</a>
+                {{ __('auth.terms_agreement') }}
+                <a href="#" class="underline">{{ __('auth.terms_link') }}</a>
             </p>
         </div>
     </div>
