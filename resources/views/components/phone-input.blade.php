@@ -19,9 +19,10 @@
     onInput(e) {
         let digits = e.target.value.replace(/\D/g, '');
         this.raw = digits.substring(0, 10);
+        this.$refs.phoneHidden.value = this.raw.length === 10 ? '7' + this.raw : '';
     },
-    get fullNumber() {
-        return this.raw.length === 10 ? '7' + this.raw : '';
+    init() {
+        this.$refs.phoneHidden.value = this.raw.length === 10 ? '7' + this.raw : '';
     }
 }" class="w-full">
     <label for="{{ $name }}" class="mb-1 block text-sm font-medium text-gray-700">
@@ -49,7 +50,7 @@
         />
     </div>
 
-    <input type="hidden" name="{{ $name }}" :value="fullNumber" />
+    <input type="hidden" name="{{ $name }}" x-ref="phoneHidden" />
 
     @if($error)
         <p class="mt-1 text-sm text-danger-500">{{ $error }}</p>

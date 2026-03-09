@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -10,12 +11,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.v1.')->group(function () {
 
-    Route::post('/auth/send-code', fn () => null)->name('auth.sendCode');
-    Route::post('/auth/verify-code', fn () => null)->name('auth.verifyCode');
+    Route::post('/auth/send-code', [AuthController::class, 'sendCode'])->name('auth.sendCode');
+    Route::post('/auth/verify-code', [AuthController::class, 'verifyCode'])->name('auth.verifyCode');
 
     Route::middleware(['auth:sanctum', 'verified.phone'])->group(function () {
 
-        Route::post('/auth/logout', fn () => null)->name('auth.logout');
+        Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
         Route::get('/user', fn () => null)->name('user.show');
 
         Route::apiResource('transactions', \stdClass::class)->only(['index', 'store', 'show', 'destroy']);
