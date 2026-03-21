@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TransactionsController;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\Auth\VerifyPage;
 use Illuminate\Support\Facades\Route;
@@ -36,8 +37,12 @@ Route::middleware(['auth', 'verified.phone'])->group(function () {
 
     Route::get('/dashboard', fn () => view('pages.app.dashboard'))->name('dashboard');
 
-    Route::get('/transactions', fn () => view('pages.app.transactions.index'))->name('transactions.index');
+    Route::get('/transactions', [TransactionsController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/create', fn () => view('pages.app.transactions.create'))->name('transactions.create');
+    Route::post('/transactions', [TransactionsController::class, 'store'])->name('transactions.store');
+    Route::get('/transactions/{transaction}', [TransactionsController::class, 'show'])->name('transactions.show');
+    Route::put('/transactions/{transaction}', [TransactionsController::class, 'update'])->name('transactions.update');
+    Route::delete('/transactions/{transaction}', [TransactionsController::class, 'destroy'])->name('transactions.destroy');
 
     Route::get('/goals', fn () => view('pages.app.goals.index'))->name('goals.index');
     Route::get('/goals/create', fn () => view('pages.app.goals.create'))->name('goals.create');
