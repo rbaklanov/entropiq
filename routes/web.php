@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransactionsController;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\Auth\VerifyPage;
+use App\Livewire\Transactions\TransactionsList;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,7 +38,7 @@ Route::middleware(['auth', 'verified.phone'])->group(function () {
 
     Route::get('/dashboard', fn () => view('pages.app.dashboard'))->name('dashboard');
 
-    Route::get('/transactions', [TransactionsController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions', TransactionsList::class)->name('transactions.index');
     Route::get('/transactions/create', fn () => view('pages.app.transactions.create'))->name('transactions.create');
     Route::post('/transactions', [TransactionsController::class, 'store'])->name('transactions.store');
     Route::get('/transactions/{transaction}', [TransactionsController::class, 'show'])->name('transactions.show');
