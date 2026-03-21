@@ -6,21 +6,11 @@
 ])
 
 <div x-data="{
-    digits: Array({{ $length }}).fill(''),
-    get code() {
-        return this.digits.join('');
-    },
-    focusNext(index) {
-        if (index < {{ $length }} - 1) {
-            this.$refs['digit' + (index + 1)].focus();
+    digits: ['', '', '', ''],
+    syncAll() {
+        for (let i = 0; i < {{ $length }}; i++) {
+            this.$refs['digit' + i].value = this.digits[i];
         }
-    },
-    focusPrev(index) {
-        if (index > 0) {
-            this.$refs['digit' + (index - 1)].focus();
-        }
-    },
-    syncHidden() {
         this.$refs.codeHidden.value = this.digits.join('');
     },
     onInput(index, e) {
@@ -32,18 +22,25 @@
                 this.digits[index + i] = chars[i];
             }
             let nextIdx = Math.min(index + chars.length, {{ $length }} - 1);
-            this.$refs['digit' + nextIdx].focus();
-            this.syncHidden();
+            this.syncAll();
+            this.$nextTick(() => this.$refs['digit' + nextIdx].focus());
             return;
         }
 
         this.digits[index] = val;
-        if (val) this.focusNext(index);
-        this.syncHidden();
+        e.target.value = val;
+        this.$refs.codeHidden.value = this.digits.join('');
+
+        if (val && index < {{ $length }} - 1) {
+            this.$nextTick(() => this.$refs['digit' + (index + 1)].focus());
+        }
     },
     onKeydown(index, e) {
-        if (e.key === 'Backspace' && !this.digits[index]) {
-            this.focusPrev(index);
+        if (e.key === 'Backspace' && !this.digits[index] && index > 0) {
+            this.digits[index - 1] = '';
+            this.$refs['digit' + (index - 1)].value = '';
+            this.$refs.codeHidden.value = this.digits.join('');
+            this.$nextTick(() => this.$refs['digit' + (index - 1)].focus());
         }
     },
     onPaste(e) {
@@ -52,9 +49,9 @@
         for (let i = 0; i < {{ $length }}; i++) {
             this.digits[i] = pasted[i] || '';
         }
+        this.syncAll();
         let focusIdx = Math.min(pasted.length, {{ $length }} - 1);
-        this.$refs['digit' + focusIdx].focus();
-        this.syncHidden();
+        this.$nextTick(() => this.$refs['digit' + focusIdx].focus());
     }
 }" class="w-full">
     <label class="mb-1 block text-sm font-medium text-gray-700">
@@ -66,18 +63,17 @@
             <input
                 type="text"
                 inputmode="numeric"
-                maxlength="1"
+                maxlength="{{ $i === 0 ? 4 : 1 }}"
                 x-ref="digit{{ $i }}"
-                :value="digits[{{ $i }}]"
                 @input="onInput({{ $i }}, $event)"
                 @keydown="onKeydown({{ $i }}, $event)"
                 @paste="onPaste($event)"
                 @if($disabled) disabled @endif
                 @if($i === 0) autofocus @endif
                 @class([
-                    'h-14 w-14 rounded-lg border text-center text-xl font-semibold transition',
-                    'border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500' => !$error,
-                    'border-danger-500 focus:border-danger-500 focus:ring-1 focus:ring-danger-500' => $error,
+                    'h-14 w-14 rounded-xl border-2 text-center text-xl font-semibold outline-none transition-all duration-200',
+                    'border-gray-200 bg-gray-50 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md' => !$error,
+                    'border-danger-400 bg-danger-50 focus:border-danger-500 focus:ring-2 focus:ring-danger-500/20' => $error,
                     'opacity-50' => $disabled,
                 ])
             />

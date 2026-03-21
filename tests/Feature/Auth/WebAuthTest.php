@@ -1,9 +1,11 @@
 <?php
 
+use App\Livewire\Auth\LoginPage;
 use App\Models\User;
 use App\Models\VerificationCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
+use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
@@ -28,9 +30,11 @@ describe('GET /login', function () {
     });
 });
 
-describe('POST /login (send code)', function () {
+describe('Livewire LoginPage (send code)', function () {
     it('sends verification code for valid phone', function () {
-        $this->post('/login', ['phone' => '79001234567'])
+        Livewire::test(LoginPage::class)
+            ->set('phone', '79001234567')
+            ->call('sendCode')
             ->assertRedirect(route('auth.verify'));
 
         $this->assertDatabaseHas('verification_codes', [
@@ -40,21 +44,28 @@ describe('POST /login (send code)', function () {
     });
 
     it('rejects invalid phone format', function () {
-        $this->post('/login', ['phone' => '12345'])
-            ->assertSessionHasErrors('phone');
+        Livewire::test(LoginPage::class)
+            ->set('phone', '12345')
+            ->call('sendCode')
+            ->assertHasErrors(['phone']);
     });
 
     it('rejects empty phone', function () {
-        $this->post('/login', ['phone' => ''])
-            ->assertSessionHasErrors('phone');
+        Livewire::test(LoginPage::class)
+            ->call('sendCode')
+            ->assertHasErrors(['phone']);
     });
 
     it('rate limits code sending', function () {
-        $this->post('/login', ['phone' => '79001234567'])
+        Livewire::test(LoginPage::class)
+            ->set('phone', '79001234567')
+            ->call('sendCode')
             ->assertRedirect(route('auth.verify'));
 
-        $this->post('/login', ['phone' => '79001234567'])
-            ->assertSessionHasErrors('phone');
+        Livewire::test(LoginPage::class)
+            ->set('phone', '79001234567')
+            ->call('sendCode')
+            ->assertHasErrors(['phone']);
     });
 
     it('deletes previous active codes on resend', function () {
@@ -62,7 +73,9 @@ describe('POST /login (send code)', function () {
 
         RateLimiter::clear('sms:79001234567');
 
-        $this->post('/login', ['phone' => '79001234567']);
+        Livewire::test(LoginPage::class)
+            ->set('phone', '79001234567')
+            ->call('sendCode');
 
         expect(VerificationCode::where('phone', '79001234567')->count())->toBe(1);
     });
