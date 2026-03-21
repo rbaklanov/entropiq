@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\RecurringRulesController;
 use App\Http\Controllers\Api\V1\TransactionsController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         Route::get('/transactions/summary', [TransactionsController::class, 'summary'])->name('transactions.summary');
         Route::apiResource('transactions', TransactionsController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+        Route::apiResource('recurring-rules', RecurringRulesController::class);
         Route::apiResource('goals', \stdClass::class)->only(['index', 'store', 'show', 'update', 'destroy']);
         Route::apiResource('goals.contributions', \stdClass::class)->only(['store', 'destroy']);
         Route::get('/categories', fn () => null)->name('categories.index');
