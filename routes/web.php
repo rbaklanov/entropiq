@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Livewire\Auth\LoginPage;
+use App\Livewire\Auth\VerifyPage;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,8 +21,7 @@ Route::get('/', fn () => view('pages.guest.landing'))->name('landing');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', LoginPage::class)->name('auth.login');
-    Route::get('/verify', fn () => view('pages.auth.verify'))->name('auth.verify');
-    Route::post('/verify', [AuthController::class, 'verifyCode'])->name('auth.verifyCode');
+    Route::get('/verify', VerifyPage::class)->name('auth.verify');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
