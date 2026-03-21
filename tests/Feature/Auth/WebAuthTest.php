@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Auth\LoginPage;
+use App\Livewire\Auth\VerifyPage;
 use App\Models\User;
 use App\Models\VerificationCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -81,14 +82,23 @@ describe('Livewire LoginPage (send code)', function () {
     });
 });
 
-describe('POST /verify (verify code)', function () {
+describe('Livewire VerifyPage', function () {
+    it('redirects to login if no phone in session', function () {
+        Livewire::test(VerifyPage::class)
+            ->assertRedirect(route('auth.login'));
+    });
+
     it('verifies correct code and authenticates user', function () {
         $vc = VerificationCode::factory()->create([
             'phone' => '79001234567',
             'code' => '1234',
         ]);
 
-        $this->post('/verify', ['phone' => '79001234567', 'code' => '1234'])
+        session()->put('phone', '79001234567');
+
+        Livewire::test(VerifyPage::class)
+            ->set('code', '1234')
+            ->call('verify')
             ->assertRedirect(route('dashboard'));
 
         $this->assertAuthenticated();
@@ -104,7 +114,11 @@ describe('POST /verify (verify code)', function () {
             'code' => '5678',
         ]);
 
-        $this->post('/verify', ['phone' => '79009999999', 'code' => '5678']);
+        session()->put('phone', '79009999999');
+
+        Livewire::test(VerifyPage::class)
+            ->set('code', '5678')
+            ->call('verify');
 
         $user = User::where('phone', '79009999999')->first();
 
@@ -120,7 +134,11 @@ describe('POST /verify (verify code)', function () {
             'code' => '1234',
         ]);
 
-        $this->post('/verify', ['phone' => '79001234567', 'code' => '1234']);
+        session()->put('phone', '79001234567');
+
+        Livewire::test(VerifyPage::class)
+            ->set('code', '1234')
+            ->call('verify');
 
         $this->assertAuthenticatedAs($user);
     });
@@ -131,8 +149,12 @@ describe('POST /verify (verify code)', function () {
             'code' => '1234',
         ]);
 
-        $this->post('/verify', ['phone' => '79001234567', 'code' => '9999'])
-            ->assertSessionHasErrors('code');
+        session()->put('phone', '79001234567');
+
+        Livewire::test(VerifyPage::class)
+            ->set('code', '9999')
+            ->call('verify')
+            ->assertHasErrors(['code']);
 
         $this->assertGuest();
     });
@@ -143,8 +165,12 @@ describe('POST /verify (verify code)', function () {
             'code' => '1234',
         ]);
 
-        $this->post('/verify', ['phone' => '79001234567', 'code' => '1234'])
-            ->assertSessionHasErrors('code');
+        session()->put('phone', '79001234567');
+
+        Livewire::test(VerifyPage::class)
+            ->set('code', '1234')
+            ->call('verify')
+            ->assertHasErrors(['code']);
 
         $this->assertGuest();
     });
@@ -155,8 +181,12 @@ describe('POST /verify (verify code)', function () {
             'code' => '1234',
         ]);
 
-        $this->post('/verify', ['phone' => '79001234567', 'code' => '1234'])
-            ->assertSessionHasErrors('code');
+        session()->put('phone', '79001234567');
+
+        Livewire::test(VerifyPage::class)
+            ->set('code', '1234')
+            ->call('verify')
+            ->assertHasErrors(['code']);
 
         $this->assertGuest();
     });
@@ -168,19 +198,35 @@ describe('POST /verify (verify code)', function () {
             'attempts' => 0,
         ]);
 
-        $this->post('/verify', ['phone' => '79001234567', 'code' => '0000']);
+        session()->put('phone', '79001234567');
+
+        Livewire::test(VerifyPage::class)
+            ->set('code', '0000')
+            ->call('verify');
 
         expect($vc->fresh()->attempts)->toBe(1);
     });
 
-    it('rejects missing code field', function () {
-        $this->post('/verify', ['phone' => '79001234567'])
-            ->assertSessionHasErrors('code');
+    it('rejects empty code', function () {
+        session()->put('phone', '79001234567');
+
+        Livewire::test(VerifyPage::class)
+            ->call('verify')
+            ->assertHasErrors(['code']);
     });
 
-    it('rejects missing phone field', function () {
-        $this->post('/verify', ['code' => '1234'])
-            ->assertSessionHasErrors('phone');
+    it('allows resending code after cooldown', function () {
+        VerificationCode::factory()->create(['phone' => '79001234567']);
+
+        RateLimiter::clear('sms:79001234567');
+
+        session()->put('phone', '79001234567');
+
+        Livewire::test(VerifyPage::class)
+            ->call('resendCode')
+            ->assertDispatched('timer-reset');
+
+        expect(VerificationCode::where('phone', '79001234567')->count())->toBe(1);
     });
 });
 
