@@ -14,6 +14,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
     @fluxAppearance
+    @fluxScripts
 </head>
 <body class="min-h-screen bg-white font-sans text-gray-900 antialiased">
 
