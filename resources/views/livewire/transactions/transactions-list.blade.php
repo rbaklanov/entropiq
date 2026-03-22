@@ -64,7 +64,8 @@
             >
                 <option value="week">{{ __('transactions.filter_week') }}</option>
                 <option value="month">{{ __('transactions.filter_month') }}</option>
-                <option value="year">{{ __('transactions.filter_period') }}</option>
+                <option value="year">{{ __('transactions.filter_year') }}</option>
+                <option value="custom">{{ __('transactions.filter_custom') }}</option>
             </select>
 
             <select
@@ -89,6 +90,114 @@
                 </svg>
             </div>
         </div>
+
+        {{-- Period navigation (week / month / year) --}}
+        @if(in_array($period, ['week', 'month', 'year']))
+            <div class="flex items-center justify-center gap-4">
+                <button
+                    wire:click="prevPeriod"
+                    class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <span class="min-w-[160px] text-center text-sm font-semibold text-gray-700 capitalize">
+                    {{ $periodLabel }}
+                </span>
+                <button
+                    wire:click="nextPeriod"
+                    class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        @endif
+
+        {{-- Custom date range --}}
+        @if($period === 'custom')
+            <div
+                wire:ignore
+                x-data="{
+                    fpFrom: null,
+                    fpTo: null,
+                    init() {
+                        const inputClass = 'w-full cursor-pointer rounded-xl border-2 border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md';
+
+                        this.fpFrom = flatpickr(this.$refs.customFrom, {
+                            dateFormat: 'd-m-Y',
+                            defaultDate: $wire.get('customFrom') || undefined,
+                            locale: 'ru',
+                            disableMobile: true,
+                            parseDate(datestr) {
+                                if (/^\d{4}-\d{2}-\d{2}$/.test(datestr)) return new Date(datestr + 'T00:00:00');
+                                const [d, m, y] = datestr.split('-');
+                                return new Date(y + '-' + m + '-' + d + 'T00:00:00');
+                            },
+                            onChange: (sel) => {
+                                if (sel.length) {
+                                    const d = sel[0];
+                                    const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                                    $wire.set('customFrom', iso);
+                                }
+                            },
+                        });
+
+                        this.fpTo = flatpickr(this.$refs.customTo, {
+                            dateFormat: 'd-m-Y',
+                            defaultDate: $wire.get('customTo') || undefined,
+                            locale: 'ru',
+                            disableMobile: true,
+                            parseDate(datestr) {
+                                if (/^\d{4}-\d{2}-\d{2}$/.test(datestr)) return new Date(datestr + 'T00:00:00');
+                                const [d, m, y] = datestr.split('-');
+                                return new Date(y + '-' + m + '-' + d + 'T00:00:00');
+                            },
+                            onChange: (sel) => {
+                                if (sel.length) {
+                                    const d = sel[0];
+                                    const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                                    $wire.set('customTo', iso);
+                                }
+                            },
+                        });
+                    },
+                    destroy() {
+                        this.fpFrom?.destroy();
+                        this.fpTo?.destroy();
+                    },
+                }"
+                class="flex items-center gap-2"
+            >
+                <div class="relative flex-1">
+                    <input
+                        type="text"
+                        x-ref="customFrom"
+                        readonly
+                        placeholder="{{ __('transactions.filter_from') }}"
+                        class="w-full cursor-pointer rounded-xl border-2 border-gray-200 bg-gray-50 px-3 py-2 pl-9 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                    />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <span class="text-sm text-gray-400">—</span>
+                <div class="relative flex-1">
+                    <input
+                        type="text"
+                        x-ref="customTo"
+                        readonly
+                        placeholder="{{ __('transactions.filter_to') }}"
+                        class="w-full cursor-pointer rounded-xl border-2 border-gray-200 bg-gray-50 px-3 py-2 pl-9 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                    />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- Transactions list grouped by date --}}

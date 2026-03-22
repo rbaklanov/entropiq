@@ -12,8 +12,9 @@
     x-on:click.away="showActions = false"
     class="relative overflow-hidden"
 >
-    <div
-        class="flex items-center gap-3 rounded-xl bg-white px-4 py-3 transition-transform duration-200"
+    <a
+        href="{{ route('transactions.edit', $transaction) }}"
+        class="flex items-center gap-3 rounded-xl bg-white px-4 py-3 transition-transform duration-200 hover:bg-gray-50"
         :class="showActions ? '-translate-x-20' : 'translate-x-0'"
     >
         <x-category-icon
@@ -42,7 +43,7 @@
                 {{ $transaction->date->translatedFormat('d.m') }}
             </p>
         </div>
-    </div>
+    </a>
 
     {{-- Swipe-to-delete action --}}
     <button

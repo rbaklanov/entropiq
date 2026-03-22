@@ -27,6 +27,14 @@ class TransactionsList extends Component
     #[Url]
     public string $search = '';
 
+    #[Url]
+    public string $customFrom = '';
+
+    #[Url]
+    public string $customTo = '';
+
+    public int $periodOffset = 0;
+
     public int $perPage = 20;
 
     public function loadMore(): void
@@ -43,6 +51,26 @@ class TransactionsList extends Component
     public function setPeriod(string $period): void
     {
         $this->period = $period;
+        $this->periodOffset = 0;
+        $this->perPage = 20;
+    }
+
+    public function prevPeriod(): void
+    {
+        $this->periodOffset--;
+        $this->perPage = 20;
+    }
+
+    public function nextPeriod(): void
+    {
+        $this->periodOffset++;
+        $this->perPage = 20;
+    }
+
+    public function setCustomRange(string $from, string $to): void
+    {
+        $this->customFrom = $from;
+        $this->customTo = $to;
         $this->perPage = 20;
     }
 
@@ -59,22 +87,53 @@ class TransactionsList extends Component
         $this->dispatch('transaction-deleted');
     }
 
+    private function getAnchorDate(): Carbon
+    {
+        return Carbon::now()->addWeeks(
+            $this->period === 'week' ? $this->periodOffset : 0,
+        )->addMonths(
+            $this->period === 'month' ? $this->periodOffset : 0,
+        )->addYears(
+            $this->period === 'year' ? $this->periodOffset : 0,
+        );
+    }
+
     /** @return array{from: string, to: string} */
     private function getPeriodDates(): array
     {
+        $anchor = $this->getAnchorDate();
+
         return match ($this->period) {
             'week' => [
-                'from' => now()->startOfWeek()->toDateString(),
-                'to' => now()->endOfWeek()->toDateString(),
+                'from' => $anchor->copy()->startOfWeek()->toDateString(),
+                'to' => $anchor->copy()->endOfWeek()->toDateString(),
             ],
             'year' => [
-                'from' => now()->startOfYear()->toDateString(),
-                'to' => now()->endOfYear()->toDateString(),
+                'from' => $anchor->copy()->startOfYear()->toDateString(),
+                'to' => $anchor->copy()->endOfYear()->toDateString(),
+            ],
+            'custom' => [
+                'from' => $this->customFrom ?: now()->startOfMonth()->toDateString(),
+                'to' => $this->customTo ?: now()->endOfMonth()->toDateString(),
             ],
             default => [
-                'from' => now()->startOfMonth()->toDateString(),
-                'to' => now()->endOfMonth()->toDateString(),
+                'from' => $anchor->copy()->startOfMonth()->toDateString(),
+                'to' => $anchor->copy()->endOfMonth()->toDateString(),
             ],
+        };
+    }
+
+    public function getPeriodLabel(): string
+    {
+        $anchor = $this->getAnchorDate();
+
+        return match ($this->period) {
+            'week' => $anchor->copy()->startOfWeek()->translatedFormat('d.m')
+                .' — '
+                .$anchor->copy()->endOfWeek()->translatedFormat('d.m.Y'),
+            'year' => (string) $anchor->year,
+            'month' => $anchor->translatedFormat('F Y'),
+            default => '',
         };
     }
 
@@ -139,6 +198,7 @@ class TransactionsList extends Component
             'categories' => $categories,
             'hasMore' => $paginator->hasMorePages(),
             'total' => $paginator->total(),
+            'periodLabel' => $this->getPeriodLabel(),
         ]);
     }
 }
