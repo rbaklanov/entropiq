@@ -7,11 +7,14 @@
 ])
 
 @php
-    $formatted = number_format(abs($amount) / 100, 0, ',', ' ');
+    $rubles = abs($amount) / 100;
+    $decimals = abs($amount) % 100 !== 0 ? 2 : 0;
+    $formatted = number_format($rubles, $decimals, '.', ' ');
 
     $sign = '';
-    if ($showSign && $amount > 0) $sign = '+';
-    if ($showSign && $amount < 0) $sign = '−';
+    if ($showSign) {
+        $sign = $type === 'expense' ? '−' : '+';
+    }
 
     $colorClass = match($type) {
         'income' => 'text-income',

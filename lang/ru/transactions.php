@@ -31,7 +31,10 @@ return [
     'filter_period' => 'Период',
     'filter_week' => 'Неделя',
     'filter_month' => 'Месяц',
+    'filter_year' => 'Год',
     'filter_custom' => 'Произвольный',
+    'filter_from' => 'С даты',
+    'filter_to' => 'По дату',
     'search_placeholder' => 'Поиск по комментариям',
 
     'summary_income' => 'Доходы',
@@ -45,6 +48,16 @@ return [
 
     'limit_warning' => 'Осталось :count операций в этом месяце.',
     'limit_upgrade' => 'Перейдите на Premium для безлимита.',
+
+    'income_genitive' => 'дохода',
+    'expense_genitive' => 'расхода',
+
+    'validation' => [
+        'type_required' => 'Выберите тип операции.',
+        'amount_required' => 'Введите сумму.',
+        'category_required' => 'Не выбрана категория :type.',
+        'date_required' => 'Укажите дату.',
+    ],
 
     'created' => 'Операция создана.',
     'updated' => 'Операция обновлена.',
