@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransactionsController;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\Auth\VerifyPage;
+use App\Livewire\Dashboard;
 use App\Livewire\Transactions\TransactionForm;
 use App\Livewire\Transactions\TransactionsList;
 use Illuminate\Support\Facades\Route;
@@ -37,7 +38,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 Route::middleware(['auth', 'verified.phone'])->group(function () {
 
-    Route::get('/dashboard', fn () => view('pages.app.dashboard'))->name('dashboard');
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
     Route::get('/transactions', TransactionsList::class)->name('transactions.index');
     Route::get('/transactions/create', TransactionForm::class)->name('transactions.create');
