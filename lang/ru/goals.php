@@ -49,8 +49,33 @@ return [
     'scenario_pessimistic' => 'Пессимистичный',
     'what_if' => 'Что если?',
     'what_if_hint' => 'Если откладывать на :amount больше',
+    'what_if_extra' => 'Если откладывать дополнительно',
+    'what_if_result_months' => 'Вы достигнете цели быстрее на :months мес.',
+    'what_if_result_days' => 'Вы достигнете цели быстрее на :days дн.',
+    'what_if_new_date' => 'Новая дата достижения',
+    'cancel' => 'Отмена',
 
     'preset_months' => ':count мес.',
+
+    'total_saved' => 'Общие накопления',
+    'filter_active' => 'Активные',
+    'filter_achieved' => 'Достигнутые',
+    'filter_all' => 'Все',
+
+    'step_type' => 'Выберите тип цели',
+    'step_name' => 'Как назовём цель?',
+    'step_amount' => 'Какая сумма нужна?',
+    'step_deadline' => 'К какому сроку?',
+    'name_placeholder' => 'Например, Отпуск в Турции',
+    'date_placeholder' => 'Выберите дату',
+    'next' => 'Далее',
+    'per_month' => 'мес',
+
+    'validation' => [
+        'type_required' => 'Выберите тип цели.',
+        'name_required' => 'Укажите название цели.',
+        'amount_required' => 'Укажите целевую сумму.',
+    ],
 
     'no_goals' => 'Поставьте финансовую цель',
     'no_goals_description' => 'Мы поможем её достичь! Рассчитаем, сколько откладывать с учётом инфляции.',
@@ -61,4 +86,6 @@ return [
     'achieved' => 'Цель достигнута! Поздравляем! 🎉',
     'already_achieved' => 'Цель уже достигнута.',
     'contribution_added' => 'Взнос внесён.',
+    'contribution_comment' => 'Взнос в цель «:goal»',
+    'create_transaction' => 'Создать расходную операцию',
 ];

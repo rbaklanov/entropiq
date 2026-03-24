@@ -358,7 +358,7 @@ describe('GET /api/v1/goals/{id}/what-if', function () {
                 'new_monthly',
                 'current_completion',
                 'new_completion',
-                'months_saved',
+                'days_saved',
             ]);
     });
 

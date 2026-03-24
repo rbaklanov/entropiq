@@ -5,6 +5,9 @@ use App\Http\Controllers\TransactionsController;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\Auth\VerifyPage;
 use App\Livewire\Dashboard;
+use App\Livewire\Goals\GoalDetail;
+use App\Livewire\Goals\GoalForm;
+use App\Livewire\Goals\GoalsList;
 use App\Livewire\Transactions\TransactionForm;
 use App\Livewire\Transactions\TransactionsList;
 use Illuminate\Support\Facades\Route;
@@ -45,9 +48,9 @@ Route::middleware(['auth', 'verified.phone'])->group(function () {
     Route::get('/transactions/{transaction}/edit', TransactionForm::class)->name('transactions.edit');
     Route::delete('/transactions/{transaction}', [TransactionsController::class, 'destroy'])->name('transactions.destroy');
 
-    Route::get('/goals', fn () => view('pages.app.goals.index'))->name('goals.index');
-    Route::get('/goals/create', fn () => view('pages.app.goals.create'))->name('goals.create');
-    Route::get('/goals/{goal}', fn () => view('pages.app.goals.show'))->name('goals.show');
+    Route::get('/goals', GoalsList::class)->name('goals.index');
+    Route::get('/goals/create', GoalForm::class)->name('goals.create');
+    Route::get('/goals/{goal}', GoalDetail::class)->name('goals.show');
 
     Route::get('/analytics', fn () => view('pages.app.analytics'))->name('analytics');
 

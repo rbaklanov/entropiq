@@ -27,7 +27,8 @@ class CategorySeeder extends Seeder
             ['name' => ['ru' => 'Путешествия', 'en' => 'Travel'], 'type' => TransactionType::Expense, 'icon' => '✈️', 'color' => '#0284C7', 'sort_order' => 13],
             ['name' => ['ru' => 'Домашние животные', 'en' => 'Pets'], 'type' => TransactionType::Expense, 'icon' => '🐾', 'color' => '#D97706', 'sort_order' => 14],
             ['name' => ['ru' => 'Связь и интернет', 'en' => 'Phone & Internet'], 'type' => TransactionType::Expense, 'icon' => '📶', 'color' => '#7C3AED', 'sort_order' => 15],
-            ['name' => ['ru' => 'Прочие расходы', 'en' => 'Other expenses'], 'type' => TransactionType::Expense, 'icon' => '📦', 'color' => '#6B7280', 'sort_order' => 16],
+            ['name' => ['ru' => 'Накопления', 'en' => 'Savings'], 'type' => TransactionType::Expense, 'icon' => '🎯', 'color' => '#6366F1', 'sort_order' => 16],
+            ['name' => ['ru' => 'Прочие расходы', 'en' => 'Other expenses'], 'type' => TransactionType::Expense, 'icon' => '📦', 'color' => '#6B7280', 'sort_order' => 17],
 
             // Income categories (4)
             ['name' => ['ru' => 'Зарплата', 'en' => 'Salary'], 'type' => TransactionType::Income, 'icon' => '💰', 'color' => '#22C55E', 'sort_order' => 1],
