@@ -33,27 +33,17 @@
 
         {{-- Type tabs --}}
         <div class="flex gap-2">
-            <button
-                wire:click="setType('')"
-                class="rounded-lg px-4 py-2 text-sm font-medium transition
-                    {{ $type === '' ? 'bg-primary-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-100' }}"
-            >
-                {{ __('transactions.filter_all') }}
-            </button>
-            <button
-                wire:click="setType('income')"
-                class="rounded-lg px-4 py-2 text-sm font-medium transition
-                    {{ $type === 'income' ? 'bg-success-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-100' }}"
-            >
-                {{ __('transactions.filter_income') }}
-            </button>
-            <button
-                wire:click="setType('expense')"
-                class="rounded-lg px-4 py-2 text-sm font-medium transition
-                    {{ $type === 'expense' ? 'bg-danger-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-100' }}"
-            >
-                {{ __('transactions.filter_expense') }}
-            </button>
+            @foreach(['' => __('transactions.filter_all'), 'income' => __('transactions.filter_income'), 'expense' => __('transactions.filter_expense')] as $key => $label)
+                <button
+                    wire:click="setType('{{ $key }}')"
+                    class="rounded-full px-4 py-1.5 text-sm font-medium transition
+                        {{ $type === $key
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+                >
+                    {{ $label }}
+                </button>
+            @endforeach
         </div>
 
         {{-- Period + Category + Search --}}

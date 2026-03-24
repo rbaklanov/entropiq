@@ -52,6 +52,11 @@ return [
 
     'preset_months' => ':count мес.',
 
+    'total_saved' => 'Общие накопления',
+    'filter_active' => 'Активные',
+    'filter_achieved' => 'Достигнутые',
+    'filter_all' => 'Все',
+
     'no_goals' => 'Поставьте финансовую цель',
     'no_goals_description' => 'Мы поможем её достичь! Рассчитаем, сколько откладывать с учётом инфляции.',
     'limit_reached' => 'Для создания дополнительных целей перейдите на Premium.',
