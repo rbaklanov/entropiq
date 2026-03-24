@@ -203,9 +203,9 @@
 
             {{-- Monthly payment preview --}}
             @if($monthlyPayment > 0)
-                <div class="rounded-xl border border-primary-200 bg-primary-50 p-4">
+                <div class="rounded-xl p-4" style="margin-top: 1.25rem; border: 1px solid #C7D2FE; background-color: #EEF2FF">
                     <p class="text-sm text-gray-600">{{ __('goals.monthly_contribution') }}</p>
-                    <p class="mt-1 text-xl font-bold text-primary-700">
+                    <p class="mt-1 text-xl font-bold" style="color: #6366F1">
                         {{ number_format($monthlyPayment / 100, 0, '.', ' ') }} ₽/{{ __('goals.per_month') }}
                     </p>
                 </div>

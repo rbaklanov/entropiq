@@ -156,37 +156,44 @@ class GoalCalculationService
      *     new_monthly: int,
      *     current_completion: ?string,
      *     new_completion: ?string,
-     *     months_saved: int,
+     *     days_saved: int,
      * }
      */
     public function whatIf(Goal $goal, int $additionalMonthly): array
     {
-        $currentPayment = $this->estimateCurrentMonthlyPayment($goal);
+        $monthsLeft = $this->getMonthsLeft($goal);
+        $currentPayment = $this->requiredMonthlyPayment(
+            $goal->target_amount,
+            $goal->current_amount,
+            $monthsLeft,
+        );
         $newPayment = $currentPayment + $additionalMonthly;
+        $remaining = $goal->target_amount - $goal->current_amount;
+        $currentCompletion = $goal->target_date?->toDateString();
 
-        $currentMonths = $this->predictCompletionMonths(
-            $goal->target_amount,
-            $goal->current_amount,
-            $currentPayment,
-        );
-
-        $newMonths = $this->predictCompletionMonths(
-            $goal->target_amount,
-            $goal->current_amount,
-            $newPayment,
-        );
-
-        $monthsSaved = 0;
-        if ($currentMonths !== null && $newMonths !== null) {
-            $monthsSaved = $currentMonths - $newMonths;
+        if ($remaining <= 0 || $newPayment <= 0) {
+            return [
+                'current_monthly' => $currentPayment,
+                'new_monthly' => $newPayment,
+                'current_completion' => $currentCompletion,
+                'new_completion' => $currentCompletion,
+                'days_saved' => 0,
+            ];
         }
+
+        $exactNewMonths = $remaining / $newPayment;
+        $daysSaved = max(0, (int) round(($monthsLeft - $exactNewMonths) * 30.44));
+
+        $newCompletion = $goal->target_date
+            ? $goal->target_date->copy()->subDays($daysSaved)->toDateString()
+            : Carbon::now()->addDays((int) round($exactNewMonths * 30.44))->toDateString();
 
         return [
             'current_monthly' => $currentPayment,
             'new_monthly' => $newPayment,
-            'current_completion' => $currentMonths !== null ? Carbon::now()->addMonths($currentMonths)->toDateString() : null,
-            'new_completion' => $newMonths !== null ? Carbon::now()->addMonths($newMonths)->toDateString() : null,
-            'months_saved' => $monthsSaved,
+            'current_completion' => $currentCompletion,
+            'new_completion' => $newCompletion,
+            'days_saved' => $daysSaved,
         ];
     }
 
