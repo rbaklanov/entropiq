@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function authenticatedUser(): array
+function authenticatedGoalUser(): array
 {
     $user = User::factory()->create(['phone_verified_at' => now()]);
     $token = $user->createToken('test')->plainTextToken;
@@ -15,7 +15,7 @@ function authenticatedUser(): array
     return [$user, $token];
 }
 
-function authHeaders(string $token): array
+function goalAuthHeaders(string $token): array
 {
     return [
         'Authorization' => "Bearer {$token}",
@@ -25,11 +25,11 @@ function authHeaders(string $token): array
 
 describe('GET /api/v1/goals', function () {
     it('returns goals for authenticated user', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
 
         Goal::factory()->count(3)->for($user)->create();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->getJson('/api/v1/goals')
             ->assertOk()
             ->assertJsonCount(3, 'data')
@@ -43,12 +43,12 @@ describe('GET /api/v1/goals', function () {
     });
 
     it('does not return other users goals', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $otherUser = User::factory()->create(['phone_verified_at' => now()]);
 
         Goal::factory()->for($otherUser)->create();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->getJson('/api/v1/goals')
             ->assertOk()
             ->assertJsonCount(0, 'data');
@@ -62,9 +62,9 @@ describe('GET /api/v1/goals', function () {
 
 describe('POST /api/v1/goals', function () {
     it('creates a goal with initial amount', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson('/api/v1/goals', [
                 'name' => 'Отпуск',
                 'type' => 'travel',
@@ -92,9 +92,9 @@ describe('POST /api/v1/goals', function () {
     });
 
     it('creates a goal without initial amount', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson('/api/v1/goals', [
                 'name' => 'Подушка безопасности',
                 'type' => 'safety_net',
@@ -107,18 +107,18 @@ describe('POST /api/v1/goals', function () {
     });
 
     it('validates required fields', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson('/api/v1/goals', [])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['name', 'type', 'target_amount']);
     });
 
     it('validates type enum', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson('/api/v1/goals', [
                 'name' => 'Тест',
                 'type' => 'invalid_type',
@@ -129,9 +129,9 @@ describe('POST /api/v1/goals', function () {
     });
 
     it('validates target_date is after today', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson('/api/v1/goals', [
                 'name' => 'Тест',
                 'type' => 'travel',
@@ -145,14 +145,14 @@ describe('POST /api/v1/goals', function () {
 
 describe('GET /api/v1/goals/{id}', function () {
     it('returns goal with contributions', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create();
         $goal->contributions()->create([
             'amount' => 10000,
             'date' => now()->toDateString(),
         ]);
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->getJson("/api/v1/goals/{$goal->id}")
             ->assertOk()
             ->assertJsonPath('data.id', $goal->id)
@@ -160,11 +160,11 @@ describe('GET /api/v1/goals/{id}', function () {
     });
 
     it('forbids accessing other users goal', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $otherUser = User::factory()->create(['phone_verified_at' => now()]);
         $goal = Goal::factory()->for($otherUser)->create();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->getJson("/api/v1/goals/{$goal->id}")
             ->assertForbidden();
     });
@@ -172,10 +172,10 @@ describe('GET /api/v1/goals/{id}', function () {
 
 describe('PUT /api/v1/goals/{id}', function () {
     it('updates a goal', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create(['name' => 'Старое название']);
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->putJson("/api/v1/goals/{$goal->id}", [
                 'name' => 'Новое название',
                 'target_amount' => 50000000,
@@ -186,11 +186,11 @@ describe('PUT /api/v1/goals/{id}', function () {
     });
 
     it('forbids updating other users goal', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $otherUser = User::factory()->create(['phone_verified_at' => now()]);
         $goal = Goal::factory()->for($otherUser)->create();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->putJson("/api/v1/goals/{$goal->id}", ['name' => 'Hack'])
             ->assertForbidden();
     });
@@ -198,10 +198,10 @@ describe('PUT /api/v1/goals/{id}', function () {
 
 describe('DELETE /api/v1/goals/{id}', function () {
     it('deletes a goal', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->deleteJson("/api/v1/goals/{$goal->id}")
             ->assertOk()
             ->assertJsonPath('message', __('goals.deleted'));
@@ -210,11 +210,11 @@ describe('DELETE /api/v1/goals/{id}', function () {
     });
 
     it('forbids deleting other users goal', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $otherUser = User::factory()->create(['phone_verified_at' => now()]);
         $goal = Goal::factory()->for($otherUser)->create();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->deleteJson("/api/v1/goals/{$goal->id}")
             ->assertForbidden();
     });
@@ -222,13 +222,13 @@ describe('DELETE /api/v1/goals/{id}', function () {
 
 describe('POST /api/v1/goals/{id}/contribute', function () {
     it('adds a contribution and updates current amount', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create([
             'target_amount' => 1000000,
             'current_amount' => 0,
         ]);
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson("/api/v1/goals/{$goal->id}/contribute", [
                 'amount' => 50000,
             ])
@@ -241,13 +241,13 @@ describe('POST /api/v1/goals/{id}/contribute', function () {
     });
 
     it('achieves goal when target reached', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create([
             'target_amount' => 100000,
             'current_amount' => 90000,
         ]);
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson("/api/v1/goals/{$goal->id}/contribute", [
                 'amount' => 10000,
             ])
@@ -259,13 +259,13 @@ describe('POST /api/v1/goals/{id}/contribute', function () {
     });
 
     it('achieves goal when target exceeded', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create([
             'target_amount' => 100000,
             'current_amount' => 95000,
         ]);
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson("/api/v1/goals/{$goal->id}/contribute", [
                 'amount' => 10000,
             ])
@@ -277,10 +277,10 @@ describe('POST /api/v1/goals/{id}/contribute', function () {
     });
 
     it('rejects contribution to achieved goal', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->achieved()->for($user)->create();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson("/api/v1/goals/{$goal->id}/contribute", [
                 'amount' => 10000,
             ])
@@ -288,15 +288,15 @@ describe('POST /api/v1/goals/{id}/contribute', function () {
     });
 
     it('validates amount is required and positive', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create();
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson("/api/v1/goals/{$goal->id}/contribute", [])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('amount');
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->postJson("/api/v1/goals/{$goal->id}/contribute", ['amount' => 0])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('amount');
@@ -305,14 +305,14 @@ describe('POST /api/v1/goals/{id}/contribute', function () {
 
 describe('GET /api/v1/goals/{id}/scenarios', function () {
     it('returns three scenarios', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create([
             'target_amount' => 5000000,
             'current_amount' => 1000000,
             'target_date' => now()->addMonths(12),
         ]);
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->getJson("/api/v1/goals/{$goal->id}/scenarios")
             ->assertOk()
             ->assertJsonStructure([
@@ -323,14 +323,14 @@ describe('GET /api/v1/goals/{id}/scenarios', function () {
     });
 
     it('pessimistic payment is highest', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create([
             'target_amount' => 5000000,
             'current_amount' => 0,
             'target_date' => now()->addMonths(12),
         ]);
 
-        $response = $this->withHeaders(authHeaders($token))
+        $response = $this->withHeaders(goalAuthHeaders($token))
             ->getJson("/api/v1/goals/{$goal->id}/scenarios")
             ->assertOk()
             ->json();
@@ -342,7 +342,7 @@ describe('GET /api/v1/goals/{id}/scenarios', function () {
 
 describe('GET /api/v1/goals/{id}/what-if', function () {
     it('returns what-if calculation', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create([
             'target_amount' => 5000000,
             'current_amount' => 1000000,
@@ -350,7 +350,7 @@ describe('GET /api/v1/goals/{id}/what-if', function () {
             'target_date' => now()->addMonths(12),
         ]);
 
-        $this->withHeaders(authHeaders($token))
+        $this->withHeaders(goalAuthHeaders($token))
             ->getJson("/api/v1/goals/{$goal->id}/what-if?additional_monthly=50000")
             ->assertOk()
             ->assertJsonStructure([
@@ -363,7 +363,7 @@ describe('GET /api/v1/goals/{id}/what-if', function () {
     });
 
     it('new monthly is higher than current', function () {
-        [$user, $token] = authenticatedUser();
+        [$user, $token] = authenticatedGoalUser();
         $goal = Goal::factory()->for($user)->create([
             'target_amount' => 5000000,
             'current_amount' => 1000000,
@@ -371,7 +371,7 @@ describe('GET /api/v1/goals/{id}/what-if', function () {
             'target_date' => now()->addMonths(12),
         ]);
 
-        $response = $this->withHeaders(authHeaders($token))
+        $response = $this->withHeaders(goalAuthHeaders($token))
             ->getJson("/api/v1/goals/{$goal->id}/what-if?additional_monthly=50000")
             ->assertOk()
             ->json();
