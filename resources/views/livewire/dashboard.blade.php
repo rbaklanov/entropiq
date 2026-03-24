@@ -46,6 +46,40 @@
         </div>
     </div>
 
+    {{-- Goals ribbon --}}
+    @if($goalData->isNotEmpty())
+        <div>
+            <div class="mb-3 flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-gray-900">{{ __('dashboard.goals') }}</h2>
+                <a href="{{ route('goals.index') }}" class="text-sm text-primary-600 hover:text-primary-700">
+                    {{ __('dashboard.view_all') }}
+                </a>
+            </div>
+            <div class="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 scrollbar-hide">
+                @foreach($goalData as $item)
+                    <x-goal-card
+                        :goal="$item['goal']"
+                        :monthlyPayment="$item['monthly_payment']"
+                        :completionDate="$item['completion_date']"
+                        class="min-w-[260px] max-w-[300px] flex-shrink-0"
+                    />
+                @endforeach
+            </div>
+        </div>
+    @else
+        <div class="rounded-2xl border-2 border-dashed border-gray-200 p-6 text-center">
+            <p class="text-2xl">🎯</p>
+            <p class="mt-2 text-sm font-medium text-gray-900">{{ __('dashboard.goals_empty') }}</p>
+            <p class="mt-1 text-xs text-gray-500">{{ __('dashboard.goals_empty_cta') }}</p>
+            <a
+                href="{{ route('goals.create') }}"
+                class="mt-3 inline-block rounded-full bg-primary-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
+            >
+                {{ __('dashboard.goals_create') }}
+            </a>
+        </div>
+    @endif
+
     {{-- Top expense categories --}}
     @if($topCategories->isNotEmpty())
         <div class="rounded-xl bg-white p-5 shadow-sm">

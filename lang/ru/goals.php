@@ -86,4 +86,6 @@ return [
     'achieved' => 'Цель достигнута! Поздравляем! 🎉',
     'already_achieved' => 'Цель уже достигнута.',
     'contribution_added' => 'Взнос внесён.',
+    'contribution_comment' => 'Взнос в цель «:goal»',
+    'create_transaction' => 'Создать расходную операцию',
 ];

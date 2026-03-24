@@ -3,7 +3,9 @@
 namespace App\Livewire;
 
 use App\Enums\TransactionType;
+use App\Models\Goal;
 use App\Models\Transaction;
+use App\Services\GoalCalculationService;
 use App\Services\TransactionService;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -54,12 +56,33 @@ class Dashboard extends Component
             ? round(($monthlySummary['income'] - $monthlySummary['expense']) / $monthlySummary['income'] * 100)
             : 0;
 
+        $calc = app(GoalCalculationService::class);
+        $goals = Goal::where('user_id', $userId)
+            ->active()
+            ->orderByDesc('created_at')
+            ->get();
+
+        $goalData = $goals->map(function (Goal $goal) use ($calc) {
+            $monthsLeft = $calc->getMonthsLeft($goal);
+
+            return [
+                'goal' => $goal,
+                'monthly_payment' => $calc->requiredMonthlyPayment(
+                    $goal->target_amount,
+                    $goal->current_amount,
+                    $monthsLeft,
+                ),
+                'completion_date' => $goal->target_date?->toDateString(),
+            ];
+        });
+
         return view('livewire.dashboard', [
             'monthlySummary' => $monthlySummary,
             'recentTransactions' => $recentTransactions,
             'topCategories' => $topCategories,
             'totalExpense' => $totalExpense,
             'savingsRate' => $savingsRate,
+            'goalData' => $goalData,
         ]);
     }
 }

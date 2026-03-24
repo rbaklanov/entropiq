@@ -116,6 +116,14 @@
                 @error('contributeAmount')
                     <p class="text-sm text-red-500">{{ $message }}</p>
                 @enderror
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        wire:model="createTransaction"
+                        class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span class="text-sm text-gray-600">{{ __('goals.create_transaction') }}</span>
+                </label>
                 <div class="flex gap-3">
                     <button
                         wire:click="contribute"
