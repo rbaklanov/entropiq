@@ -57,6 +57,21 @@ return [
     'filter_achieved' => 'Достигнутые',
     'filter_all' => 'Все',
 
+    'step_type' => 'Выберите тип цели',
+    'step_name' => 'Как назовём цель?',
+    'step_amount' => 'Какая сумма нужна?',
+    'step_deadline' => 'К какому сроку?',
+    'name_placeholder' => 'Например, Отпуск в Турции',
+    'date_placeholder' => 'Выберите дату',
+    'next' => 'Далее',
+    'per_month' => 'мес',
+
+    'validation' => [
+        'type_required' => 'Выберите тип цели.',
+        'name_required' => 'Укажите название цели.',
+        'amount_required' => 'Укажите целевую сумму.',
+    ],
+
     'no_goals' => 'Поставьте финансовую цель',
     'no_goals_description' => 'Мы поможем её достичь! Рассчитаем, сколько откладывать с учётом инфляции.',
     'limit_reached' => 'Для создания дополнительных целей перейдите на Premium.',
