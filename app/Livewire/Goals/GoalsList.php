@@ -49,12 +49,6 @@ class GoalsList extends Component
 
         $goalData = $goals->map(function (Goal $goal) use ($calc) {
             $monthsLeft = $calc->getMonthsLeft($goal);
-            $currentPayment = $calc->estimateCurrentMonthlyPayment($goal);
-            $completionDate = $calc->predictCompletionDate(
-                $goal->target_amount,
-                $goal->current_amount,
-                $currentPayment,
-            );
 
             return [
                 'goal' => $goal,
@@ -63,7 +57,7 @@ class GoalsList extends Component
                     $goal->current_amount,
                     $monthsLeft,
                 ),
-                'completion_date' => $completionDate?->toDateString(),
+                'completion_date' => $goal->target_date?->toDateString(),
             ];
         });
 
