@@ -3,7 +3,10 @@
 namespace App\Livewire\Goals;
 
 use App\Enums\GoalStatus;
+use App\Enums\TransactionType;
+use App\Models\Category;
 use App\Models\Goal;
+use App\Models\Transaction;
 use App\Services\GoalCalculationService;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -25,6 +28,8 @@ class GoalDetail extends Component
     public int $contributeAmount = 0;
 
     public string $contributeAmountDisplay = '';
+
+    public bool $createTransaction = true;
 
     public function mount(Goal $goal): void
     {
@@ -97,9 +102,30 @@ class GoalDetail extends Component
             return;
         }
 
+        $transactionId = null;
+
+        if ($this->createTransaction) {
+            $savingsCategory = Category::where('name->ru', 'Накопления')
+                ->where('type', TransactionType::Expense)
+                ->first();
+
+            $transaction = Transaction::create([
+                'user_id' => auth()->id(),
+                'category_id' => $savingsCategory?->id,
+                'type' => TransactionType::Expense,
+                'amount' => $this->contributeAmount,
+                'currency_code' => $this->goal->currency_code ?? 'RUB',
+                'date' => now()->toDateString(),
+                'comment' => __('goals.contribution_comment', ['goal' => $this->goal->name]),
+            ]);
+
+            $transactionId = $transaction->id;
+        }
+
         $this->goal->contributions()->create([
             'amount' => $this->contributeAmount,
             'date' => now()->toDateString(),
+            'transaction_id' => $transactionId,
         ]);
 
         $this->goal->increment('current_amount', $this->contributeAmount);
