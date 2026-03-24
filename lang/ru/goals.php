@@ -49,6 +49,11 @@ return [
     'scenario_pessimistic' => 'Пессимистичный',
     'what_if' => 'Что если?',
     'what_if_hint' => 'Если откладывать на :amount больше',
+    'what_if_extra' => 'Если откладывать дополнительно',
+    'what_if_result_months' => 'Вы достигнете цели быстрее на :months мес.',
+    'what_if_result_days' => 'Вы достигнете цели быстрее на :days дн.',
+    'what_if_new_date' => 'Новая дата достижения',
+    'cancel' => 'Отмена',
 
     'preset_months' => ':count мес.',
 

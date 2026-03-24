@@ -200,7 +200,7 @@ describe('whatIf', function () {
         expect($result)->toHaveKeys([
             'current_monthly', 'new_monthly',
             'current_completion', 'new_completion',
-            'months_saved',
+            'days_saved',
         ]);
     });
 
@@ -217,7 +217,7 @@ describe('whatIf', function () {
         expect($result['new_monthly'])->toBe($result['current_monthly'] + 50000);
     });
 
-    it('months saved is positive with additional payment', function () {
+    it('days saved is positive with additional payment', function () {
         $goal = Goal::factory()->for($this->user)->create([
             'target_amount' => 3000000,
             'current_amount' => 1500000,
@@ -227,7 +227,7 @@ describe('whatIf', function () {
 
         $result = $this->service->whatIf($goal, 500000);
 
-        expect($result['months_saved'])->toBeGreaterThan(0);
+        expect($result['days_saved'])->toBeGreaterThan(0);
     });
 
     it('new completion is earlier than current', function () {
