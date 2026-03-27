@@ -7,13 +7,26 @@ use Illuminate\Support\Carbon;
 
 class GoalCalculationService
 {
-    private const DEFAULT_ANNUAL_INFLATION = 0.095;
+    private const SCENARIO_OPTIMISTIC_SPREAD = -0.04;
 
-    private const SCENARIO_OPTIMISTIC_INFLATION = 0.05;
-
-    private const SCENARIO_PESSIMISTIC_INFLATION = 0.15;
+    private const SCENARIO_PESSIMISTIC_SPREAD = 0.05;
 
     private const MONTHS_HARD_LIMIT = 1200;
+
+    private ?float $cachedCurrentCpi = null;
+
+    public function __construct(
+        private readonly InflationService $inflationService,
+    ) {}
+
+    public function getCurrentAnnualInflation(): float
+    {
+        if ($this->cachedCurrentCpi === null) {
+            $this->cachedCurrentCpi = $this->inflationService->getCurrentCpi();
+        }
+
+        return $this->cachedCurrentCpi;
+    }
 
     /**
      * Required monthly payment without inflation.
@@ -41,8 +54,9 @@ class GoalCalculationService
         int $targetAmount,
         int $currentAmount,
         int $monthsLeft,
-        float $annualInflation = self::DEFAULT_ANNUAL_INFLATION,
+        ?float $annualInflation = null,
     ): int {
+        $annualInflation ??= $this->getCurrentAnnualInflation();
         $remaining = $targetAmount - $currentAmount;
 
         if ($remaining <= 0 || $monthsLeft <= 0) {
@@ -64,8 +78,9 @@ class GoalCalculationService
         int $targetAmount,
         int $currentAmount,
         int $monthlyPayment,
-        float $annualInflation = self::DEFAULT_ANNUAL_INFLATION,
+        ?float $annualInflation = null,
     ): ?Carbon {
+        $annualInflation ??= $this->getCurrentAnnualInflation();
         $months = $this->predictCompletionMonths($targetAmount, $currentAmount, $monthlyPayment, $annualInflation);
 
         if ($months === null) {
@@ -82,8 +97,9 @@ class GoalCalculationService
         int $targetAmount,
         int $currentAmount,
         int $monthlyPayment,
-        float $annualInflation = self::DEFAULT_ANNUAL_INFLATION,
+        ?float $annualInflation = null,
     ): ?int {
+        $annualInflation ??= $this->getCurrentAnnualInflation();
         if ($monthlyPayment <= 0) {
             return null;
         }
@@ -125,26 +141,14 @@ class GoalCalculationService
     {
         $monthsLeft = $this->getMonthsLeft($goal);
         $currentPayment = $this->estimateCurrentMonthlyPayment($goal);
+        $baseline = $this->getCurrentAnnualInflation();
+        $optimistic = max(0.01, $baseline + self::SCENARIO_OPTIMISTIC_SPREAD);
+        $pessimistic = $baseline + self::SCENARIO_PESSIMISTIC_SPREAD;
 
         return [
-            'optimistic' => $this->buildScenario(
-                $goal,
-                self::SCENARIO_OPTIMISTIC_INFLATION,
-                $monthsLeft,
-                $currentPayment,
-            ),
-            'baseline' => $this->buildScenario(
-                $goal,
-                self::DEFAULT_ANNUAL_INFLATION,
-                $monthsLeft,
-                $currentPayment,
-            ),
-            'pessimistic' => $this->buildScenario(
-                $goal,
-                self::SCENARIO_PESSIMISTIC_INFLATION,
-                $monthsLeft,
-                $currentPayment,
-            ),
+            'optimistic' => $this->buildScenario($goal, $optimistic, $monthsLeft, $currentPayment),
+            'baseline' => $this->buildScenario($goal, $baseline, $monthsLeft, $currentPayment),
+            'pessimistic' => $this->buildScenario($goal, $pessimistic, $monthsLeft, $currentPayment),
         ];
     }
 
