@@ -1,0 +1,110 @@
+[
+    {
+        "code": "TOTAL",
+        "name": "Все товары и услуги",
+        "parent_code": null,
+        "app_category_ru": null
+    },
+    {
+        "code": "FOOD",
+        "name": "Продовольственные товары",
+        "parent_code": "TOTAL",
+        "app_category_ru": "Продукты"
+    },
+    {
+        "code": "FOOD_MEAT",
+        "name": "Мясо и птица",
+        "parent_code": "FOOD",
+        "app_category_ru": "Продукты"
+    },
+    {
+        "code": "FOOD_DAIRY",
+        "name": "Молоко и молочная продукция",
+        "parent_code": "FOOD",
+        "app_category_ru": "Продукты"
+    },
+    {
+        "code": "FOOD_BREAD",
+        "name": "Хлеб и хлебобулочные изделия",
+        "parent_code": "FOOD",
+        "app_category_ru": "Продукты"
+    },
+    {
+        "code": "FOOD_FRUIT",
+        "name": "Плодоовощная продукция",
+        "parent_code": "FOOD",
+        "app_category_ru": "Продукты"
+    },
+    {
+        "code": "NON_FOOD",
+        "name": "Непродовольственные товары",
+        "parent_code": "TOTAL",
+        "app_category_ru": null
+    },
+    {
+        "code": "NON_FOOD_CLOTHING",
+        "name": "Одежда и обувь",
+        "parent_code": "NON_FOOD",
+        "app_category_ru": "Одежда"
+    },
+    {
+        "code": "NON_FOOD_MEDICINE",
+        "name": "Медикаменты",
+        "parent_code": "NON_FOOD",
+        "app_category_ru": "Здоровье"
+    },
+    {
+        "code": "NON_FOOD_ELECTRONICS",
+        "name": "Электротовары и бытовая техника",
+        "parent_code": "NON_FOOD",
+        "app_category_ru": null
+    },
+    {
+        "code": "SERVICES",
+        "name": "Услуги",
+        "parent_code": "TOTAL",
+        "app_category_ru": null
+    },
+    {
+        "code": "SERVICES_HOUSING",
+        "name": "Жилищно-коммунальные услуги",
+        "parent_code": "SERVICES",
+        "app_category_ru": "Коммунальные"
+    },
+    {
+        "code": "SERVICES_TRANSPORT",
+        "name": "Услуги пассажирского транспорта",
+        "parent_code": "SERVICES",
+        "app_category_ru": "Транспорт"
+    },
+    {
+        "code": "SERVICES_TELECOM",
+        "name": "Услуги связи",
+        "parent_code": "SERVICES",
+        "app_category_ru": "Связь и интернет"
+    },
+    {
+        "code": "SERVICES_EDUCATION",
+        "name": "Услуги образования",
+        "parent_code": "SERVICES",
+        "app_category_ru": "Образование"
+    },
+    {
+        "code": "SERVICES_HEALTH",
+        "name": "Медицинские услуги",
+        "parent_code": "SERVICES",
+        "app_category_ru": "Здоровье"
+    },
+    {
+        "code": "SERVICES_RECREATION",
+        "name": "Услуги организаций культуры и отдыха",
+        "parent_code": "SERVICES",
+        "app_category_ru": "Развлечения"
+    },
+    {
+        "code": "SERVICES_CATERING",
+        "name": "Услуги общественного питания",
+        "parent_code": "SERVICES",
+        "app_category_ru": "Кафе и рестораны"
+    }
+]
