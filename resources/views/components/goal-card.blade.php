@@ -1,4 +1,4 @@
-@props(['goal', 'monthlyPayment' => 0, 'completionDate' => null])
+@props(['goal', 'monthlyPayment' => 0, 'completionDate' => null, 'realProgress' => null])
 
 @php
     $progress = $goal->progressPercent();
@@ -57,7 +57,7 @@
             </span>
         </div>
 
-        <x-dual-progress-bar :nominal="$progress" height="h-2.5" />
+        <x-dual-progress-bar :nominal="$progress" :real="$realProgress" height="h-2.5" />
     </div>
 
     <div class="mt-3 flex items-center justify-between text-xs text-gray-500">

@@ -6,6 +6,7 @@ use App\Enums\TransactionType;
 use App\Models\Goal;
 use App\Models\Transaction;
 use App\Services\GoalCalculationService;
+use App\Services\InflationService;
 use App\Services\TransactionService;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -22,10 +23,13 @@ class Dashboard extends Component
     public function render(): View
     {
         $service = app(TransactionService::class);
+        $inflation = app(InflationService::class);
+        $calc = app(GoalCalculationService::class);
         $userId = auth()->id();
 
         $monthStart = Carbon::now()->startOfMonth();
         $monthEnd = Carbon::now()->endOfMonth();
+        $yearStart = Carbon::now()->startOfYear();
 
         $monthlySummary = $service->getSummary($userId, $monthStart, $monthEnd);
         $topExpenses = $service->getByCategory($userId, $monthStart, $monthEnd, TransactionType::Expense);
@@ -56,14 +60,29 @@ class Dashboard extends Component
             ? round(($monthlySummary['income'] - $monthlySummary['expense']) / $monthlySummary['income'] * 100)
             : 0;
 
-        $calc = app(GoalCalculationService::class);
+        $nominalBalance = $monthlySummary['balance'];
+        $nationalInflation = $inflation->getCurrentCpi();
+        $personalInflation = $inflation->calculatePersonalInflation($userId, $yearStart->copy(), Carbon::now());
+
+        $monthlyInflation = $nationalInflation / 12;
+        $realBalance = (int) round($nominalBalance / (1 + $monthlyInflation));
+        $inflationLoss = $nominalBalance - $realBalance;
+
         $goals = Goal::where('user_id', $userId)
             ->active()
             ->orderByDesc('created_at')
             ->get();
 
-        $goalData = $goals->map(function (Goal $goal) use ($calc) {
+        $currentInflation = $calc->getCurrentAnnualInflation();
+
+        $goalData = $goals->map(function (Goal $goal) use ($calc, $currentInflation) {
             $monthsLeft = $calc->getMonthsLeft($goal);
+            $nominalProgress = $goal->progressPercent();
+            $yearsLeft = $monthsLeft / 12;
+            $inflatedTarget = $goal->target_amount * pow(1 + $currentInflation, $yearsLeft);
+            $realProgress = $inflatedTarget > 0
+                ? min(100, (int) round($goal->current_amount / $inflatedTarget * 100))
+                : $nominalProgress;
 
             return [
                 'goal' => $goal,
@@ -73,6 +92,7 @@ class Dashboard extends Component
                     $monthsLeft,
                 ),
                 'completion_date' => $goal->target_date?->toDateString(),
+                'real_progress' => $realProgress,
             ];
         });
 
@@ -82,6 +102,11 @@ class Dashboard extends Component
             'topCategories' => $topCategories,
             'totalExpense' => $totalExpense,
             'savingsRate' => $savingsRate,
+            'nominalBalance' => $nominalBalance,
+            'realBalance' => $realBalance,
+            'inflationLoss' => $inflationLoss,
+            'nationalInflation' => $nationalInflation,
+            'personalInflation' => $personalInflation,
             'goalData' => $goalData,
         ]);
     }

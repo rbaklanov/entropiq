@@ -27,4 +27,5 @@ return [
     'national_avg' => 'средняя по РФ',
     'inflation_above_national' => 'Ваша инфляция выше средней по стране',
     'inflation_below_national' => 'Ваша инфляция ниже средней по стране',
+    'inflation_equal_national' => 'Ваша инфляция на уровне средней по стране',
 ];
