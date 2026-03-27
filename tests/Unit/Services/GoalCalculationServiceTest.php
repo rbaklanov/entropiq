@@ -142,7 +142,7 @@ describe('predictCompletionDate', function () {
 });
 
 describe('buildScenarios', function () {
-    it('returns three scenarios with correct inflation values', function () {
+    it('returns three scenarios with correct inflation values relative to current CPI', function () {
         $goal = Goal::factory()->for($this->user)->create([
             'target_amount' => 5000000,
             'current_amount' => 0,
@@ -150,11 +150,12 @@ describe('buildScenarios', function () {
         ]);
 
         $result = $this->service->buildScenarios($goal);
+        $baseline = $this->service->getCurrentAnnualInflation();
 
         expect($result)->toHaveKeys(['optimistic', 'baseline', 'pessimistic']);
-        expect($result['optimistic']['inflation'])->toBe(0.05);
-        expect($result['baseline']['inflation'])->toBe(0.095);
-        expect($result['pessimistic']['inflation'])->toBe(0.15);
+        expect($result['baseline']['inflation'])->toBe($baseline);
+        expect($result['optimistic']['inflation'])->toBe(max(0.01, $baseline - 0.04));
+        expect($result['pessimistic']['inflation'])->toBe($baseline + 0.05);
     });
 
     it('pessimistic requires higher monthly payment', function () {
