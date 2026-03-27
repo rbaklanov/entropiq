@@ -6,7 +6,9 @@
 @php
     $personalFormatted = number_format($personalInflation * 100, 1, ',', '');
     $nationalFormatted = number_format($nationalInflation * 100, 1, ',', '');
-    $isAboveNational = $personalInflation > $nationalInflation;
+    $diff = abs($personalInflation - $nationalInflation);
+    $isEqual = $diff < 0.001;
+    $isAboveNational = !$isEqual && $personalInflation > $nationalInflation;
 @endphp
 
 <div {{ $attributes->merge(['class' => 'rounded-xl bg-white p-4 shadow-sm']) }}>
@@ -38,7 +40,7 @@
     </div>
 
     <div class="mt-3 flex items-baseline gap-1.5">
-        <span class="text-number-md {{ $isAboveNational ? 'text-warning-600' : 'text-success-600' }}">
+        <span class="text-number-md {{ $isAboveNational ? 'text-warning-600' : ($isEqual ? 'text-gray-700' : 'text-success-600') }}">
             {{ $personalFormatted }}%
         </span>
         <span class="text-sm text-gray-400">
@@ -46,7 +48,11 @@
         </span>
     </div>
 
-    @if($isAboveNational)
+    @if($isEqual)
+        <p class="mt-2 text-xs text-gray-500">
+            {{ __('dashboard.inflation_equal_national') }}
+        </p>
+    @elseif($isAboveNational)
         <p class="mt-2 text-xs text-warning-600">
             {{ __('dashboard.inflation_above_national') }}
         </p>
