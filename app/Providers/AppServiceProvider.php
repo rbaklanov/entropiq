@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Contracts\AiAdviceServiceInterface;
+use App\Contracts\AnalyticsServiceInterface;
 use App\Contracts\ExportServiceInterface;
 use App\Contracts\GoalCalculationServiceInterface;
 use App\Contracts\InflationServiceInterface;
 use App\Contracts\SmsServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
 use App\Services\AiAdviceService;
+use App\Services\AnalyticsService;
 use App\Services\ExportService;
 use App\Services\GoalCalculationService;
 use App\Services\InflationService;
@@ -28,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
         AiAdviceServiceInterface::class => AiAdviceService::class,
         SubscriptionServiceInterface::class => SubscriptionService::class,
         ExportServiceInterface::class => ExportService::class,
+        AnalyticsServiceInterface::class => AnalyticsService::class,
     ];
 
     public function register(): void

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AnalyticsController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\GoalsController;
 use App\Http\Controllers\Api\V1\RecurringRulesController;
@@ -31,7 +32,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/goals/{goal}/what-if', [GoalsController::class, 'whatIf'])->name('goals.whatIf');
         Route::get('/categories', fn () => null)->name('categories.index');
 
-        Route::get('/analytics/summary', fn () => null)->name('analytics.summary');
+        Route::get('/analytics/summary', [AnalyticsController::class, 'summary'])->name('analytics.summary');
+        Route::get('/analytics/expenses-by-category', [AnalyticsController::class, 'expensesByCategory'])->name('analytics.expensesByCategory');
+        Route::get('/analytics/balance-dynamics', [AnalyticsController::class, 'balanceDynamics'])->name('analytics.balanceDynamics');
+        Route::get('/analytics/personal-inflation', [AnalyticsController::class, 'personalInflation'])->name('analytics.personalInflation');
+        Route::get('/analytics/trends', [AnalyticsController::class, 'trends'])->name('analytics.trends');
+
         Route::get('/advice', fn () => null)->name('advice.index');
 
         Route::middleware('subscription')->group(function () {

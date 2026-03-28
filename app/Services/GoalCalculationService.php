@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\InflationServiceInterface;
 use App\Models\Goal;
 use Illuminate\Support\Carbon;
 
@@ -16,7 +17,7 @@ class GoalCalculationService
     private ?float $cachedCurrentCpi = null;
 
     public function __construct(
-        private readonly InflationService $inflationService,
+        private readonly InflationServiceInterface $inflationService,
     ) {}
 
     public function getCurrentAnnualInflation(): float
