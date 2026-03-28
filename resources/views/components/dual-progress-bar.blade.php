@@ -10,17 +10,22 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'space-y-1.5']) }}>
-    <div class="relative {{ $height }} overflow-hidden rounded-full bg-gray-100">
-        @if($realPercent !== null)
+    <div class="space-y-1">
+        <div class="relative {{ $height }} overflow-hidden rounded-full bg-gray-100">
             <div
-                class="{{ $height }} absolute inset-y-0 left-0 rounded-full bg-orange-400/50 transition-all duration-700"
-                style="width: {{ $realPercent }}%"
+                class="{{ $height }} absolute inset-y-0 left-0 rounded-full bg-primary-500 transition-all duration-700"
+                style="width: {{ $nominalPercent }}%"
             ></div>
+        </div>
+
+        @if($realPercent !== null)
+            <div class="relative {{ $height }} overflow-hidden rounded-full bg-gray-100">
+                <div
+                    class="{{ $height }} absolute inset-y-0 left-0 rounded-full bg-orange-400 transition-all duration-700"
+                    style="width: {{ $realPercent }}%"
+                ></div>
+            </div>
         @endif
-        <div
-            class="{{ $height }} absolute inset-y-0 left-0 rounded-full bg-primary-500 transition-all duration-700"
-            style="width: {{ $nominalPercent }}%"
-        ></div>
     </div>
 
     <div class="flex items-center gap-3 text-xs text-gray-500">

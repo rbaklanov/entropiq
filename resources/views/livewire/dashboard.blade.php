@@ -13,20 +13,11 @@
     </div>
 
     {{-- Balance card --}}
-    <div class="rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 p-6 text-white shadow-lg">
-        <p class="text-sm font-medium text-primary-100">{{ __('dashboard.balance') }}</p>
-        <p class="mt-2 text-3xl font-bold tracking-tight">
-            @php
-                $balance = $monthlySummary['balance'];
-                $rubles = abs($balance) / 100;
-                $decimals = abs($balance) % 100 !== 0 ? 2 : 0;
-                $formatted = number_format($rubles, $decimals, '.', ' ');
-                $sign = $balance < 0 ? '−' : ($balance > 0 ? '+' : '');
-            @endphp
-            {{ $sign }}{{ $formatted }} ₽
-        </p>
-        <p class="mt-1 text-sm text-primary-200">{{ __('dashboard.balance_period') }}</p>
-    </div>
+    <x-balance-card
+        :nominalBalance="$nominalBalance"
+        :realBalance="$realBalance"
+        :inflationLoss="$inflationLoss"
+    />
 
     {{-- Monthly metrics --}}
     <div class="grid grid-cols-3 gap-3">
@@ -46,6 +37,12 @@
         </div>
     </div>
 
+    {{-- Inflation widget --}}
+    <x-inflation-widget
+        :personalInflation="$personalInflation"
+        :nationalInflation="$nationalInflation"
+    />
+
     {{-- Goals ribbon --}}
     @if($goalData->isNotEmpty())
         <div>
@@ -61,6 +58,7 @@
                         :goal="$item['goal']"
                         :monthlyPayment="$item['monthly_payment']"
                         :completionDate="$item['completion_date']"
+                        :realProgress="$item['real_progress']"
                         class="min-w-[260px] max-w-[300px] flex-shrink-0"
                     />
                 @endforeach
