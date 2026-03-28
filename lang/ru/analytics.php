@@ -31,6 +31,11 @@ return [
     'inflation_cpi' => 'ИПЦ категории',
     'inflation_contribution' => 'Вклад',
 
+    'total' => 'Итого',
+
+    'no_data' => 'Нет данных за выбранный период',
+    'no_data_hint' => 'Добавьте операции или выберите другой период',
+
     'export' => 'Экспорт',
     'export_pdf' => 'Скачать PDF',
     'export_excel' => 'Скачать Excel',
