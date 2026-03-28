@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\AnalyticsServiceInterface;
+use App\Contracts\InflationServiceInterface;
 use App\Enums\TransactionType;
 use App\Models\Category;
 use App\Models\CpiCategory;
@@ -13,7 +14,7 @@ use Illuminate\Support\Collection;
 readonly class AnalyticsService implements AnalyticsServiceInterface
 {
     public function __construct(
-        private InflationService $inflationService,
+        private InflationServiceInterface $inflationService,
     ) {}
 
     /** {@inheritDoc} */

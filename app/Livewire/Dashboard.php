@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Contracts\InflationServiceInterface;
 use App\Enums\TransactionType;
 use App\Models\Goal;
 use App\Models\Transaction;
 use App\Services\GoalCalculationService;
-use App\Services\InflationService;
 use App\Services\TransactionService;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -23,7 +23,7 @@ class Dashboard extends Component
     public function render(): View
     {
         $service = app(TransactionService::class);
-        $inflation = app(InflationService::class);
+        $inflation = app(InflationServiceInterface::class);
         $calc = app(GoalCalculationService::class);
         $userId = auth()->id();
 

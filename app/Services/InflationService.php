@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\InflationServiceInterface;
 use App\Enums\TransactionType;
 use App\Models\CpiCategory;
 use App\Models\CpiValue;
@@ -9,7 +10,7 @@ use App\Models\Transaction;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-class InflationService
+class InflationService implements InflationServiceInterface
 {
     private const TOTAL_CATEGORY_CODE = 'TOTAL';
 
