@@ -31,6 +31,8 @@ return [
     'inflation_cpi' => 'Category CPI',
     'inflation_contribution' => 'Contribution',
 
+    'total' => 'Total',
+
     'export' => 'Export',
     'export_pdf' => 'Download PDF',
     'export_excel' => 'Download Excel',
