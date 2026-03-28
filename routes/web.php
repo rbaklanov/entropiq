@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransactionsController;
+use App\Livewire\Analytics;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\Auth\VerifyPage;
 use App\Livewire\Dashboard;
@@ -52,7 +53,7 @@ Route::middleware(['auth', 'verified.phone'])->group(function () {
     Route::get('/goals/create', GoalForm::class)->name('goals.create');
     Route::get('/goals/{goal}', GoalDetail::class)->name('goals.show');
 
-    Route::get('/analytics', fn () => view('pages.app.analytics'))->name('analytics');
+    Route::get('/analytics', Analytics::class)->name('analytics');
 
     Route::get('/advice', fn () => view('pages.app.advice.index'))->name('advice.index');
 

@@ -33,6 +33,9 @@ return [
 
     'total' => 'Total',
 
+    'no_data' => 'No data for the selected period',
+    'no_data_hint' => 'Add transactions or select a different period',
+
     'export' => 'Export',
     'export_pdf' => 'Download PDF',
     'export_excel' => 'Download Excel',
