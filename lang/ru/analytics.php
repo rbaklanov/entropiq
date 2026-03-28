@@ -31,6 +31,8 @@ return [
     'inflation_cpi' => 'ИПЦ категории',
     'inflation_contribution' => 'Вклад',
 
+    'total' => 'Итого',
+
     'export' => 'Экспорт',
     'export_pdf' => 'Скачать PDF',
     'export_excel' => 'Скачать Excel',
