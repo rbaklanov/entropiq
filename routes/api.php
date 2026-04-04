@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AiAdviceController;
 use App\Http\Controllers\Api\V1\AnalyticsController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\GoalsController;
@@ -38,7 +39,9 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/analytics/personal-inflation', [AnalyticsController::class, 'personalInflation'])->name('analytics.personalInflation');
         Route::get('/analytics/trends', [AnalyticsController::class, 'trends'])->name('analytics.trends');
 
-        Route::get('/advice', fn () => null)->name('advice.index');
+        Route::get('/advice', [AiAdviceController::class, 'index'])->name('advice.index');
+        Route::get('/advice/{advice}', [AiAdviceController::class, 'show'])->name('advice.show');
+        Route::post('/advice/{advice}/rate', [AiAdviceController::class, 'rate'])->name('advice.rate');
 
         Route::middleware('subscription')->group(function () {
             Route::get('/analytics/export', fn () => null)->name('analytics.export');
