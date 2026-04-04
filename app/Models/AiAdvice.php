@@ -18,6 +18,8 @@ class AiAdvice extends Model
     /** @use HasFactory<AiAdviceFactory> */
     use HasFactory;
 
+    protected $table = 'ai_advices';
+
     protected $fillable = [
         'user_id',
         'title',
