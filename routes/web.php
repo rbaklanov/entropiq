@@ -3,6 +3,8 @@
 use App\Http\Controllers\AiAdviceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransactionsController;
+use App\Livewire\Advice\AdviceDetail;
+use App\Livewire\Advice\AdviceList;
 use App\Livewire\Analytics;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\Auth\VerifyPage;
@@ -56,8 +58,8 @@ Route::middleware(['auth', 'verified.phone'])->group(function () {
 
     Route::get('/analytics', Analytics::class)->name('analytics');
 
-    Route::get('/advice', fn () => view('pages.app.advice.index'))->name('advice.index');
-    Route::get('/advice/{advice}', [AiAdviceController::class, 'show'])->name('advice.show');
+    Route::get('/advice', AdviceList::class)->name('advice.index');
+    Route::get('/advice/{advice}', AdviceDetail::class)->name('advice.detail');
     Route::post('/advice/{advice}/rate', [AiAdviceController::class, 'rate'])->name('advice.rate');
 
     Route::prefix('settings')->name('settings.')->group(function () {
