@@ -43,6 +43,11 @@
         :nationalInflation="$nationalInflation"
     />
 
+    {{-- Daily advice --}}
+    @if($dailyAdvice)
+        <x-ai-advice-card :advice="$dailyAdvice" />
+    @endif
+
     {{-- Goals ribbon --}}
     @if($goalData->isNotEmpty())
         <div>

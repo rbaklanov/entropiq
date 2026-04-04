@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Contracts\InflationServiceInterface;
 use App\Enums\TransactionType;
+use App\Models\AiAdvice;
 use App\Models\Goal;
 use App\Models\Transaction;
 use App\Services\GoalCalculationService;
@@ -96,6 +97,11 @@ class Dashboard extends Component
             ];
         });
 
+        $dailyAdvice = AiAdvice::where('user_id', $userId)
+            ->unread()
+            ->orderByDesc('generated_at')
+            ->first();
+
         return view('livewire.dashboard', [
             'monthlySummary' => $monthlySummary,
             'recentTransactions' => $recentTransactions,
@@ -108,6 +114,7 @@ class Dashboard extends Component
             'nationalInflation' => $nationalInflation,
             'personalInflation' => $personalInflation,
             'goalData' => $goalData,
+            'dailyAdvice' => $dailyAdvice,
         ]);
     }
 }
