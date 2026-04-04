@@ -6,6 +6,7 @@ return [
     'read_more' => 'Read more',
     'basis' => 'What this advice is based on',
     'rate_helpful' => 'Was this helpful?',
+    'back_to_list' => 'Back to advice list',
 
     'free_limit' => 'Get daily advice with Premium',
     'free_weekly' => '1 tip per week',
