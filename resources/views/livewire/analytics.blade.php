@@ -27,6 +27,15 @@
         @endforeach
     </div>
 
+    @if($periodLocked)
+        <x-premium-lock>
+            <div class="rounded-xl bg-white p-8 text-center">
+                <p class="text-2xl">📊</p>
+                <p class="mt-2 text-sm font-medium text-gray-900">{{ __('subscription.period_limit') }}</p>
+            </div>
+        </x-premium-lock>
+    @else
+
     {{-- Content --}}
     <div class="relative min-h-[200px]" wire:loading.class="opacity-50 pointer-events-none">
 
@@ -190,5 +199,7 @@
         @endif
 
     </div>
+
+    @endif
 
 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Transactions;
 
+use App\Contracts\SubscriptionServiceInterface;
 use App\Enums\RecurringInterval;
 use App\Models\Category;
 use App\Models\Transaction;
@@ -147,6 +148,17 @@ class TransactionForm extends Component
             'date' => $this->date,
             'comment' => $this->comment ?: null,
         ];
+
+        if (! $this->transactionId) {
+            $subscriptionService = app(SubscriptionServiceInterface::class);
+
+            if (! $subscriptionService->canAddTransaction(auth()->user())) {
+                session()->flash('error', __('subscription.premium_required'));
+                $this->redirectRoute('transactions.index');
+
+                return;
+            }
+        }
 
         if ($this->transactionId) {
             $transaction = Transaction::findOrFail($this->transactionId);

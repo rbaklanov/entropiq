@@ -11,7 +11,7 @@ uses(RefreshDatabase::class);
 
 function analyticsUser(): array
 {
-    $user = User::factory()->create(['phone_verified_at' => now()]);
+    $user = User::factory()->premium()->create(['phone_verified_at' => now()]);
     $token = $user->createToken('test')->plainTextToken;
 
     return [$user, $token];

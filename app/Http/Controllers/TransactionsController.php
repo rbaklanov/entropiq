@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\SubscriptionServiceInterface;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Models\Transaction;
@@ -15,6 +16,7 @@ class TransactionsController extends Controller
 {
     public function __construct(
         private readonly TransactionService $transactionService,
+        private readonly SubscriptionServiceInterface $subscriptionService,
     ) {}
 
     public function index(Request $request): View
@@ -45,6 +47,12 @@ class TransactionsController extends Controller
 
     public function store(StoreTransactionRequest $request): RedirectResponse
     {
+        if (! $this->subscriptionService->canAddTransaction($request->user())) {
+            return redirect()
+                ->route('transactions.index')
+                ->with('error', __('subscription.premium_required'));
+        }
+
         $request->user()->transactions()->create($request->validated());
 
         return redirect()

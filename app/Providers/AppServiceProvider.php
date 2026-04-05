@@ -8,12 +8,14 @@ use App\Contracts\ExportServiceInterface;
 use App\Contracts\GoalCalculationServiceInterface;
 use App\Contracts\InflationServiceInterface;
 use App\Contracts\LlmServiceInterface;
+use App\Contracts\PaymentServiceInterface;
 use App\Contracts\SmsServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
 use App\Services\AiAdviceService;
 use App\Services\AnalyticsService;
 use App\Services\ExportService;
 use App\Services\FakeLlmService;
+use App\Services\FakePaymentService;
 use App\Services\GoalCalculationService;
 use App\Services\InflationService;
 use App\Services\LogSmsService;
@@ -31,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
         GoalCalculationServiceInterface::class => GoalCalculationService::class,
         AiAdviceServiceInterface::class => AiAdviceService::class,
         LlmServiceInterface::class => FakeLlmService::class,
+        PaymentServiceInterface::class => FakePaymentService::class,
         SubscriptionServiceInterface::class => SubscriptionService::class,
         ExportServiceInterface::class => ExportService::class,
         AnalyticsServiceInterface::class => AnalyticsService::class,
