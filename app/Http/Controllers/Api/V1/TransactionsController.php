@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Contracts\SubscriptionServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
@@ -17,6 +18,7 @@ class TransactionsController extends Controller
 {
     public function __construct(
         private readonly TransactionService $transactionService,
+        private readonly SubscriptionServiceInterface $subscriptionService,
     ) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -35,8 +37,15 @@ class TransactionsController extends Controller
         return TransactionResource::collection($transactions);
     }
 
-    public function store(StoreTransactionRequest $request): TransactionResource
+    public function store(StoreTransactionRequest $request): TransactionResource|JsonResponse
     {
+        if (! $this->subscriptionService->canAddTransaction($request->user())) {
+            return response()->json([
+                'message' => __('subscription.premium_required'),
+                'upgrade_url' => route('settings.subscription'),
+            ], 403);
+        }
+
         $transaction = $request->user()
             ->transactions()
             ->create($request->validated());

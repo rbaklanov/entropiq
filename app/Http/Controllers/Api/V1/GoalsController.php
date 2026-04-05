@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Contracts\SubscriptionServiceInterface;
 use App\Enums\GoalStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ContributeRequest;
@@ -19,6 +20,7 @@ class GoalsController extends Controller
 {
     public function __construct(
         private readonly GoalCalculationService $calculationService,
+        private readonly SubscriptionServiceInterface $subscriptionService,
     ) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -31,8 +33,15 @@ class GoalsController extends Controller
         return GoalResource::collection($goals);
     }
 
-    public function store(StoreGoalRequest $request): GoalResource
+    public function store(StoreGoalRequest $request): GoalResource|JsonResponse
     {
+        if (! $this->subscriptionService->canCreateGoal($request->user())) {
+            return response()->json([
+                'message' => __('goals.limit_reached'),
+                'upgrade_url' => route('settings.subscription'),
+            ], 403);
+        }
+
         $data = $request->safe()->except('initial_amount');
         $data['started_at'] = now()->toDateString();
         $data['status'] = GoalStatus::Active;
