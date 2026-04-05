@@ -37,6 +37,9 @@ return [
     'feature_priority_support' => 'Priority support',
     'feature_no_ads' => 'No ads',
 
+    'advice_limit' => 'Free plan includes 1 advice per week. Upgrade to Premium for full access.',
+    'period_limit' => 'Free plan analytics is limited to the last month.',
+
     'upgraded' => 'Subscription activated! Welcome to Premium.',
     'cancelled' => 'Subscription cancelled.',
 ];

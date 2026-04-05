@@ -2,18 +2,22 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\SubscriptionPlan;
+use App\Contracts\SubscriptionServiceInterface;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsurePremiumSubscription
 {
+    public function __construct(
+        private readonly SubscriptionServiceInterface $subscriptionService,
+    ) {}
+
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
 
-        if (! $user || $user->subscription_plan === SubscriptionPlan::Free) {
+        if (! $user || ! $this->subscriptionService->isPremium($user)) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => __('subscription.premium_required'),
