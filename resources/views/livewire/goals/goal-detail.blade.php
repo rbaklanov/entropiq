@@ -151,86 +151,24 @@
 
     {{-- Scenarios --}}
     @if(!$goal->isAchieved())
-        <div class="space-y-3">
-            <h2 class="text-base font-semibold text-gray-900">{{ __('goals.scenarios') }}</h2>
-            <div class="grid grid-cols-3 gap-3">
-                @php
-                    $scenarioConfig = [
-                        'optimistic' => ['label' => __('goals.scenario_optimistic'), 'border' => '#BBF7D0', 'bg' => '#F0FDF4', 'text' => '#15803D'],
-                        'baseline' => ['label' => __('goals.scenario_base'), 'border' => '#BFDBFE', 'bg' => '#EFF6FF', 'text' => '#1D4ED8'],
-                        'pessimistic' => ['label' => __('goals.scenario_pessimistic'), 'border' => '#FED7AA', 'bg' => '#FFF7ED', 'text' => '#C2410C'],
-                    ];
-                @endphp
-
-                @foreach($scenarios as $key => $scenario)
-                    @php $cfg = $scenarioConfig[$key]; @endphp
-                    <div class="rounded-xl p-3 text-center" style="border: 1px solid {{ $cfg['border'] }}; background-color: {{ $cfg['bg'] }}">
-                        <p class="text-xs font-medium" style="color: {{ $cfg['text'] }}">{{ $cfg['label'] }}</p>
-                        <p class="mt-2 text-sm font-bold text-gray-900">
-                            {{ number_format($scenario['monthly_payment'] / 100, 0, '.', ' ') }} ₽
-                        </p>
-                        <p class="text-xs text-gray-500">/ {{ __('goals.per_month') }}</p>
-                        @if($scenario['completion_date'])
-                            <p class="mt-1 text-xs text-gray-500">
-                                {{ \Illuminate\Support\Carbon::parse($scenario['completion_date'])->translatedFormat('M Y') }}
-                            </p>
-                        @endif
-                        <p class="mt-1 text-xs text-gray-400">
-                            {{ number_format($scenario['inflation'] * 100, 1) }}%
-                        </p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
+        @if($premiumLocked)
+            <x-premium-lock :message="__('subscription.feature_scenarios')">
+                @include('livewire.goals.partials.scenarios', ['scenarios' => $scenarios])
+            </x-premium-lock>
+        @else
+            @include('livewire.goals.partials.scenarios', ['scenarios' => $scenarios])
+        @endif
     @endif
 
     {{-- What-if slider --}}
     @if(!$goal->isAchieved())
-        <div class="rounded-2xl bg-white p-5 shadow-sm space-y-4">
-            <h2 class="text-base font-semibold text-gray-900">{{ __('goals.what_if') }}</h2>
-
-            <div>
-                <p class="text-sm text-gray-600">
-                    {{ __('goals.what_if_extra') }}
-                    <span class="font-bold" style="color: #6366F1">
-                        {{ number_format($whatIfAmount / 100, 0, '.', ' ') }} ₽
-                    </span>
-                </p>
-                <input
-                    type="range"
-                    wire:model.live.debounce.300ms="whatIfAmount"
-                    min="100000"
-                    max="5000000"
-                    step="50000"
-                    class="mt-3 w-full"
-                    style="accent-color: #6366F1; outline: none;"
-                />
-                <div class="flex justify-between text-xs text-gray-400">
-                    <span>1 000 ₽</span>
-                    <span>50 000 ₽</span>
-                </div>
-            </div>
-
-            @if($whatIf['days_saved'] > 0)
-                <div class="rounded-xl p-3" style="border: 1px solid #C7D2FE; background-color: #EEF2FF">
-                    @php
-                        $days = $whatIf['days_saved'];
-                        if ($days >= 30) {
-                            $savedText = __('goals.what_if_result_months', ['months' => intdiv($days, 30)]);
-                        } else {
-                            $savedText = __('goals.what_if_result_days', ['days' => $days]);
-                        }
-                    @endphp
-                    <p class="text-sm text-gray-700">{{ $savedText }}</p>
-                    @if($whatIf['new_completion'])
-                        <p class="mt-1 text-xs text-gray-500">
-                            {{ __('goals.what_if_new_date') }}:
-                            {{ \Illuminate\Support\Carbon::parse($whatIf['new_completion'])->translatedFormat('d M Y') }}
-                        </p>
-                    @endif
-                </div>
-            @endif
-        </div>
+        @if($premiumLocked)
+            <x-premium-lock :message="__('goals.what_if')">
+                @include('livewire.goals.partials.what-if', ['whatIfAmount' => $whatIfAmount, 'whatIf' => $whatIf])
+            </x-premium-lock>
+        @else
+            @include('livewire.goals.partials.what-if', ['whatIfAmount' => $whatIfAmount, 'whatIf' => $whatIf])
+        @endif
     @endif
 
     {{-- Contributions list --}}

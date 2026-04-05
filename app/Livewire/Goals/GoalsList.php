@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Goals;
 
+use App\Contracts\SubscriptionServiceInterface;
 use App\Enums\GoalStatus;
 use App\Models\Goal;
 use App\Services\GoalCalculationService;
@@ -68,12 +69,16 @@ class GoalsList extends Component
             ? round($totalCurrent / $totalTarget * 100, 1)
             : 0;
 
+        $subscriptionService = app(SubscriptionServiceInterface::class);
+        $canCreateGoal = $subscriptionService->canCreateGoal(auth()->user());
+
         return view('livewire.goals.goals-list', [
             'goalData' => $goalData,
             'totalTarget' => $totalTarget,
             'totalCurrent' => $totalCurrent,
             'overallProgress' => $overallProgress,
             'hasGoals' => $allGoals->isNotEmpty(),
+            'canCreateGoal' => $canCreateGoal,
         ]);
     }
 }

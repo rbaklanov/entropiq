@@ -39,6 +39,14 @@
         </div>
     @endif
 
+    {{-- Upsell: goal limit --}}
+    @if(!$canCreateGoal)
+        <x-upsell-banner
+            :message="__('goals.limit_upsell')"
+            icon="🎯"
+        />
+    @endif
+
     {{-- Filter tabs --}}
     <div class="flex gap-2">
         @foreach(['active' => __('goals.filter_active'), 'achieved' => __('goals.filter_achieved'), 'all' => __('goals.filter_all')] as $key => $label)
