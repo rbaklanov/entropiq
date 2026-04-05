@@ -55,6 +55,7 @@ return [
     'no_goals' => 'Set a financial goal',
     'no_goals_description' => 'We\'ll help you reach it! We\'ll calculate how much to save, adjusted for inflation.',
     'limit_reached' => 'Upgrade to Premium to create more goals.',
+    'limit_upsell' => 'With Premium you can set up to 10 goals at once',
 
     'saved' => 'Goal saved.',
     'deleted' => 'Goal deleted.',

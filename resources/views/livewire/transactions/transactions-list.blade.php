@@ -28,6 +28,14 @@
         </div>
     </div>
 
+    {{-- Upsell: transaction limit warning --}}
+    @if($transactionsRemaining !== null && $transactionsRemaining <= 10)
+        <x-upsell-banner
+            :message="__('transactions.limit_warning', ['count' => $transactionsRemaining]) . ' ' . __('transactions.limit_upgrade')"
+            icon="📊"
+        />
+    @endif
+
     {{-- Filters --}}
     <div class="space-y-3">
 

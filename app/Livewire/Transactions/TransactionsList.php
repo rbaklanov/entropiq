@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Transactions;
 
+use App\Contracts\SubscriptionServiceInterface;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Services\TransactionService;
@@ -192,6 +193,10 @@ class TransactionsList extends Component
             ->orderBy('sort_order')
             ->get();
 
+        $subscriptionService = app(SubscriptionServiceInterface::class);
+        $user = auth()->user();
+        $transactionsRemaining = $subscriptionService->transactionsRemaining($user);
+
         return view('livewire.transactions.transactions-list', [
             'grouped' => $this->groupByDate($paginator->getCollection()),
             'summary' => $summary,
@@ -199,6 +204,7 @@ class TransactionsList extends Component
             'hasMore' => $paginator->hasMorePages(),
             'total' => $paginator->total(),
             'periodLabel' => $this->getPeriodLabel(),
+            'transactionsRemaining' => $transactionsRemaining,
         ]);
     }
 }

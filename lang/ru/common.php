@@ -29,6 +29,9 @@ return [
     'loading' => 'Загрузка...',
     'no_data' => 'Нет данных',
 
+    'month_short' => 'мес',
+    'week_short' => 'нед',
+
     'settings_title' => 'Настройки',
     'settings_profile' => 'Профиль',
     'settings_subscription' => 'Подписка',
