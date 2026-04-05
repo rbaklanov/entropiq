@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Contracts\AnalyticsServiceInterface;
+use App\Contracts\SubscriptionServiceInterface;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ class AnalyticsController extends Controller
 {
     public function __construct(
         private readonly AnalyticsServiceInterface $analyticsService,
+        private readonly SubscriptionServiceInterface $subscriptionService,
     ) {}
 
     public function expensesByCategory(Request $request): JsonResponse
@@ -122,6 +124,10 @@ class AnalyticsController extends Controller
     {
         $from = Carbon::parse($request->input('from', now()->startOfMonth()->toDateString()));
         $to = Carbon::parse($request->input('to', now()->endOfMonth()->toDateString()));
+
+        if (! $this->subscriptionService->canViewPeriod($request->user(), $from)) {
+            abort(403, __('subscription.period_limit'));
+        }
 
         return [$from, $to];
     }

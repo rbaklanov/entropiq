@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Contracts\AnalyticsServiceInterface;
+use App\Contracts\SubscriptionServiceInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -65,11 +66,21 @@ class Analytics extends Component
     public function render(): View
     {
         $analytics = app(AnalyticsServiceInterface::class);
+        $subscriptionService = app(SubscriptionServiceInterface::class);
         $userId = auth()->id();
         $period = $this->resolvePeriod();
         $from = $period['from'];
         $to = $period['to'];
         $locale = app()->getLocale();
+
+        $periodLocked = ! $subscriptionService->canViewPeriod(auth()->user(), $from);
+
+        if ($periodLocked) {
+            return view('livewire.analytics', [
+                'periodLocked' => true,
+                'locale' => $locale,
+            ]);
+        }
 
         $data = [];
 
@@ -82,6 +93,7 @@ class Analytics extends Component
         }
 
         return view('livewire.analytics', array_merge($data, [
+            'periodLocked' => false,
             'locale' => $locale,
         ]));
     }

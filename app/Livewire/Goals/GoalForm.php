@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Goals;
 
+use App\Contracts\SubscriptionServiceInterface;
 use App\Enums\GoalStatus;
 use App\Enums\GoalType;
 use App\Services\GoalCalculationService;
@@ -113,6 +114,15 @@ class GoalForm extends Component
     public function save(): void
     {
         $this->validateStep();
+
+        $subscriptionService = app(SubscriptionServiceInterface::class);
+
+        if (! $subscriptionService->canCreateGoal(auth()->user())) {
+            session()->flash('error', __('goals.limit_reached'));
+            $this->redirectRoute('goals.index');
+
+            return;
+        }
 
         $goal = auth()->user()->goals()->create([
             'name' => $this->name,

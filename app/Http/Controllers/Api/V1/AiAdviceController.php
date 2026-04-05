@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Contracts\SubscriptionServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AiAdviceResource;
 use App\Models\AiAdvice;
@@ -11,6 +12,10 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class AiAdviceController extends Controller
 {
+    public function __construct(
+        private readonly SubscriptionServiceInterface $subscriptionService,
+    ) {}
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $advices = AiAdvice::where('user_id', $request->user()->id)
@@ -20,9 +25,16 @@ class AiAdviceController extends Controller
         return AiAdviceResource::collection($advices);
     }
 
-    public function show(Request $request, AiAdvice $advice): AiAdviceResource
+    public function show(Request $request, AiAdvice $advice): AiAdviceResource|JsonResponse
     {
         abort_unless($advice->user_id === $request->user()->id, 403);
+
+        if (! $this->subscriptionService->canViewAdvice($request->user(), $advice)) {
+            return response()->json([
+                'message' => __('subscription.advice_limit'),
+                'upgrade_url' => route('settings.subscription'),
+            ], 403);
+        }
 
         $advice->markAsRead();
 
