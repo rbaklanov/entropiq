@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Goals;
 
+use App\Contracts\SubscriptionServiceInterface;
 use App\Enums\GoalStatus;
 use App\Enums\TransactionType;
 use App\Models\Category;
@@ -166,6 +167,9 @@ class GoalDetail extends Component
 
         $paceStatus = $this->calculatePaceStatus($calc);
 
+        $subscriptionService = app(SubscriptionServiceInterface::class);
+        $premiumLocked = ! $subscriptionService->isPremium(auth()->user());
+
         return view('livewire.goals.goal-detail', [
             'progress' => $this->goal->progressPercent(),
             'remaining' => $this->goal->remainingAmount(),
@@ -174,6 +178,7 @@ class GoalDetail extends Component
             'whatIf' => $whatIf,
             'contributions' => $contributions,
             'paceStatus' => $paceStatus,
+            'premiumLocked' => $premiumLocked,
         ]);
     }
 

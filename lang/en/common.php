@@ -29,6 +29,9 @@ return [
     'loading' => 'Loading...',
     'no_data' => 'No data',
 
+    'month_short' => 'mo',
+    'week_short' => 'wk',
+
     'settings_title' => 'Settings',
     'settings_profile' => 'Profile',
     'settings_subscription' => 'Subscription',
