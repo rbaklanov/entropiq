@@ -34,7 +34,7 @@ return [
     'calculator_result_now' => 'Now equivalent to',
     'calculator_result_lost' => 'Inflation eroded',
     'calculator_cta' => 'Want to protect your savings? Create a plan in Entropiq',
-    'calculator_coming_soon' => 'Interactive calculator coming in the next update',
+    'calculator_bar_kept' => 'Purchasing power',
 
     'features_title' => 'Features',
     'features_subtitle' => 'Everything you need for mindful money management',
