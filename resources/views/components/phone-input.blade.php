@@ -26,7 +26,7 @@
     }
 }" class="w-full">
     <label for="{{ $name }}" class="mb-1 block text-sm font-medium text-gray-700">
-        {{ __('Номер телефона') }}
+        {{ __('auth.phone_label') }}
     </label>
 
     <div @class([

@@ -49,8 +49,33 @@ return [
     'scenario_pessimistic' => 'Pessimistic',
     'what_if' => 'What if?',
     'what_if_hint' => 'If you save :amount more',
+    'what_if_extra' => 'If you save additionally',
+    'what_if_result_months' => 'You\'ll reach your goal :months mo. faster.',
+    'what_if_result_days' => 'You\'ll reach your goal :days days faster.',
+    'what_if_new_date' => 'New target date',
+    'cancel' => 'Cancel',
 
     'preset_months' => ':count mo.',
+
+    'total_saved' => 'Total saved',
+    'filter_active' => 'Active',
+    'filter_achieved' => 'Achieved',
+    'filter_all' => 'All',
+
+    'step_type' => 'Choose goal type',
+    'step_name' => 'Name your goal',
+    'step_amount' => 'How much do you need?',
+    'step_deadline' => 'By when?',
+    'name_placeholder' => 'e.g., Vacation in Italy',
+    'date_placeholder' => 'Pick a date',
+    'next' => 'Next',
+    'per_month' => 'mo',
+
+    'validation' => [
+        'type_required' => 'Please select a goal type.',
+        'name_required' => 'Please enter a goal name.',
+        'amount_required' => 'Please enter a target amount.',
+    ],
 
     'no_goals' => 'Set a financial goal',
     'no_goals_description' => 'We\'ll help you reach it! We\'ll calculate how much to save, adjusted for inflation.',
@@ -60,4 +85,8 @@ return [
     'saved' => 'Goal saved.',
     'deleted' => 'Goal deleted.',
     'achieved' => 'Goal achieved! Congratulations! 🎉',
+    'already_achieved' => 'Goal already achieved.',
+    'contribution_added' => 'Contribution added.',
+    'contribution_comment' => 'Contribution to ":goal"',
+    'create_transaction' => 'Create expense transaction',
 ];

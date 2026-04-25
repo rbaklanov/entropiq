@@ -55,7 +55,7 @@
     }
 }" class="w-full">
     <label class="mb-1 block text-sm font-medium text-gray-700">
-        {{ __('Код из SMS') }}
+        {{ __('auth.sms_code') }}
     </label>
 
     <div class="flex justify-center gap-3">
