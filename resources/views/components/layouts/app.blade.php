@@ -32,28 +32,28 @@
 
             <nav class="flex-1 space-y-1 px-3 py-4">
                 <x-layouts.app.nav-link href="/dashboard" icon="home" :active="request()->is('dashboard')">
-                    {{ __('Дашборд') }}
+                    {{ __('common.nav_dashboard') }}
                 </x-layouts.app.nav-link>
                 <x-layouts.app.nav-link href="/transactions" icon="list" :active="request()->is('transactions*')">
-                    {{ __('Операции') }}
+                    {{ __('common.nav_transactions') }}
                 </x-layouts.app.nav-link>
                 <x-layouts.app.nav-link href="/transactions/create" icon="plus-circle" :active="request()->is('transactions/create')">
-                    {{ __('Добавить') }}
+                    {{ __('common.nav_add') }}
                 </x-layouts.app.nav-link>
                 <x-layouts.app.nav-link href="/goals" icon="target" :active="request()->is('goals*')">
-                    {{ __('Цели') }}
+                    {{ __('common.nav_goals') }}
                 </x-layouts.app.nav-link>
                 <x-layouts.app.nav-link href="/analytics" icon="bar-chart" :active="request()->is('analytics*')">
-                    {{ __('Аналитика') }}
+                    {{ __('common.nav_analytics') }}
                 </x-layouts.app.nav-link>
                 <x-layouts.app.nav-link href="/advice" icon="lightbulb" :active="request()->is('advice*')">
-                    {{ __('Советы') }}
+                    {{ __('common.nav_advice') }}
                 </x-layouts.app.nav-link>
             </nav>
 
             <div class="border-t border-gray-200 p-3">
                 <x-layouts.app.nav-link href="/settings" icon="settings" :active="request()->is('settings*')">
-                    {{ __('Настройки') }}
+                    {{ __('common.nav_settings') }}
                 </x-layouts.app.nav-link>
             </div>
         </aside>
@@ -79,19 +79,19 @@
     <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-gray-200 bg-white lg:hidden">
         <div class="flex h-16 items-center justify-around">
             <x-layouts.app.bottom-nav-item href="/dashboard" icon="home" :active="request()->is('dashboard')">
-                {{ __('Главная') }}
+                {{ __('common.nav_dashboard') }}
             </x-layouts.app.bottom-nav-item>
             <x-layouts.app.bottom-nav-item href="/transactions" icon="list" :active="request()->is('transactions') || request()->is('transactions/list*')">
-                {{ __('Операции') }}
+                {{ __('common.nav_transactions') }}
             </x-layouts.app.bottom-nav-item>
             <x-layouts.app.bottom-nav-item href="/transactions/create" icon="plus-circle" :active="request()->is('transactions/create')" accent>
-                {{ __('Добавить') }}
+                {{ __('common.nav_add') }}
             </x-layouts.app.bottom-nav-item>
             <x-layouts.app.bottom-nav-item href="/goals" icon="target" :active="request()->is('goals*')">
-                {{ __('Цели') }}
+                {{ __('common.nav_goals') }}
             </x-layouts.app.bottom-nav-item>
             <x-layouts.app.bottom-nav-item href="/settings" icon="menu" :active="request()->is('settings*') || request()->is('analytics*') || request()->is('advice*')">
-                {{ __('Ещё') }}
+                {{ __('common.nav_more') }}
             </x-layouts.app.bottom-nav-item>
         </div>
     </nav>

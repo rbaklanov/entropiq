@@ -16,6 +16,10 @@ return [
     'terms_link' => 'условиями использования',
     'privacy_link' => 'политикой конфиденциальности',
 
+    'sms_code' => 'Код из SMS',
+    'resend_timer_prefix' => 'Повторная отправка через',
+    'resend_timer_suffix' => 'сек',
+
     'phone_not_verified' => 'Номер телефона не подтверждён.',
     'invalid_code' => 'Неверный код. Попробуйте ещё раз.',
     'code_expired' => 'Код истёк. Запросите новый.',

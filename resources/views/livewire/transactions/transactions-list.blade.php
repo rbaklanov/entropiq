@@ -72,7 +72,7 @@
             >
                 <option value="0">{{ __('transactions.category') }}</option>
                 @foreach($categories as $cat)
-                    <option value="{{ $cat->id }}">{{ $cat->icon }} {{ $cat->name['ru'] ?? $cat->name }}</option>
+                    <option value="{{ $cat->id }}">{{ $cat->icon }} {{ $cat->localizedName() }}</option>
                 @endforeach
             </select>
 

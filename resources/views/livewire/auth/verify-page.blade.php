@@ -62,7 +62,7 @@
                 }
             }" class="w-full">
                 <label class="mb-1 block text-sm font-medium text-gray-700">
-                    {{ __('Код из SMS') }}
+                    {{ __('auth.sms_code') }}
                 </label>
 
                 <div class="flex justify-center gap-3">
@@ -125,7 +125,7 @@
         >
             <template x-if="seconds > 0">
                 <p class="text-caption text-gray-400">
-                    {{ __('Повторная отправка через') }} <span x-text="seconds"></span> {{ __('сек') }}
+                    {{ __('auth.resend_timer_prefix') }} <span x-text="seconds"></span> {{ __('auth.resend_timer_suffix') }}
                 </p>
             </template>
 

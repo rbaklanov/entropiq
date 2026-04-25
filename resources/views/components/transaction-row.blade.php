@@ -25,7 +25,7 @@
 
         <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-medium text-gray-900">
-                {{ $transaction->category?->name['ru'] ?? __('transactions.category') }}
+                {{ $transaction->category?->localizedName() ?? __('transactions.category') }}
             </p>
             @if($transaction->comment)
                 <p class="truncate text-small text-gray-500">{{ $transaction->comment }}</p>
