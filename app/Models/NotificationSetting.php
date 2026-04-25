@@ -19,6 +19,16 @@ class NotificationSetting extends Model
         'push_ai_advice',
     ];
 
+    /** @return array{email_weekly: bool, push_goals: bool, push_ai_advice: bool} */
+    public static function defaultValues(): array
+    {
+        return [
+            'email_weekly' => true,
+            'push_goals' => true,
+            'push_ai_advice' => true,
+        ];
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
