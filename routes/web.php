@@ -26,6 +26,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => view('pages.guest.landing'))->name('landing');
 
+Route::get('/locale/{locale}', function (string $locale) {
+    if (in_array($locale, ['ru', 'en'], true)) {
+        session(['locale' => $locale]);
+    }
+
+    return redirect()->back();
+})->name('locale.switch');
+
 /*
 |--------------------------------------------------------------------------
 | Auth routes (login / verify / logout)
