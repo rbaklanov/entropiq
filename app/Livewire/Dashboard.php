@@ -48,7 +48,7 @@ class Dashboard extends Component
                 $category = \App\Models\Category::find($item['category_id']);
 
                 return [
-                    'name' => $category ? ($category->name['ru'] ?? '—') : '—',
+                    'name' => $category ? $category->localizedName() : '—',
                     'icon' => $category ? $category->icon : '📦',
                     'color' => $category ? $category->color : '#6366F1',
                     'total' => $item['total'],

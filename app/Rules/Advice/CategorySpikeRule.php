@@ -55,7 +55,7 @@ class CategorySpikeRule implements AdviceRuleInterface
         }
 
         $category = \App\Models\Category::find($biggestSpike['category_id']);
-        $categoryName = $category ? ($category->name['ru'] ?? $category->name['en'] ?? '—') : '—';
+        $categoryName = $category ? $category->localizedName() : '—';
 
         return new AdvicePayload(
             ruleKey: 'category_spike',

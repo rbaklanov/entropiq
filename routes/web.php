@@ -13,6 +13,8 @@ use App\Livewire\Dashboard;
 use App\Livewire\Goals\GoalDetail;
 use App\Livewire\Goals\GoalForm;
 use App\Livewire\Goals\GoalsList;
+use App\Livewire\Settings\ProfilePage;
+use App\Livewire\Settings\SettingsPage;
 use App\Livewire\Settings\SubscriptionPage;
 use App\Livewire\Transactions\TransactionForm;
 use App\Livewire\Transactions\TransactionsList;
@@ -65,10 +67,9 @@ Route::middleware(['auth', 'verified.phone'])->group(function () {
     Route::post('/advice/{advice}/rate', [AiAdviceController::class, 'rate'])->name('advice.rate');
 
     Route::prefix('settings')->name('settings.')->group(function () {
-        Route::get('/', fn () => view('pages.app.settings.index'))->name('index');
-        Route::get('/profile', fn () => view('pages.app.settings.profile'))->name('profile');
+        Route::get('/', SettingsPage::class)->name('index');
+        Route::get('/profile', ProfilePage::class)->name('profile');
         Route::get('/subscription', SubscriptionPage::class)->name('subscription');
-        Route::get('/notifications', fn () => view('pages.app.settings.notifications'))->name('notifications');
     });
 
     /*

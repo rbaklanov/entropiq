@@ -54,7 +54,7 @@ class WeeklyDigestMail extends Mailable
             ->where('type', \App\Enums\TransactionType::Expense)
             ->groupBy('category_id')
             ->map(fn ($group) => [
-                'name' => $group->first()->category->name[$this->user->locale->value] ?? $group->first()->category->name['ru'] ?? '',
+                'name' => $group->first()->category->localizedName(),
                 'total' => $group->sum('amount'),
             ])
             ->sortByDesc('total')

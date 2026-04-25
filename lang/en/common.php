@@ -43,6 +43,10 @@ return [
     'settings_delete_account' => 'Delete account',
     'settings_about' => 'About',
 
+    'login' => 'Sign in',
+    'privacy_policy' => 'Privacy policy',
+    'terms_of_service' => 'Terms of service',
+
     'landing_hero_title' => 'Manage finances with inflation in mind',
     'landing_hero_subtitle' => 'The only finance assistant that shows the real value of your money',
     'landing_cta' => 'Get started for free',

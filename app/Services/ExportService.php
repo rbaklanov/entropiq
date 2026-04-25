@@ -24,9 +24,8 @@ class ExportService implements ExportServiceInterface
         }
 
         $transactions = $query->get();
-        $locale = $user->locale->value;
 
-        return response()->streamDownload(function () use ($transactions, $locale) {
+        return response()->streamDownload(function () use ($transactions) {
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
 
@@ -40,9 +39,7 @@ class ExportService implements ExportServiceInterface
             ], ';');
 
             foreach ($transactions as $transaction) {
-                $categoryName = $transaction->category->name[$locale]
-                    ?? $transaction->category->name['ru']
-                    ?? '';
+                $categoryName = $transaction->category->localizedName();
 
                 $type = $transaction->type === TransactionType::Income
                     ? __('export.income')
