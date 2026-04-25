@@ -51,6 +51,13 @@ class Category extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    public function localizedName(): string
+    {
+        $locale = app()->getLocale();
+
+        return $this->name[$locale] ?? $this->name['ru'] ?? '';
+    }
+
     /** @param Builder<self> $query */
     public function scopeSystem(Builder $query): void
     {

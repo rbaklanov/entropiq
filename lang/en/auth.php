@@ -16,6 +16,10 @@ return [
     'terms_link' => 'terms of service',
     'privacy_link' => 'privacy policy',
 
+    'sms_code' => 'SMS code',
+    'resend_timer_prefix' => 'Resend in',
+    'resend_timer_suffix' => 'sec',
+
     'phone_not_verified' => 'Phone number is not verified.',
     'invalid_code' => 'Invalid code. Please try again.',
     'code_expired' => 'Code has expired. Request a new one.',

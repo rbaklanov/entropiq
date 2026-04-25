@@ -31,7 +31,10 @@ return [
     'filter_period' => 'Period',
     'filter_week' => 'Week',
     'filter_month' => 'Month',
+    'filter_year' => 'Year',
     'filter_custom' => 'Custom',
+    'filter_from' => 'From',
+    'filter_to' => 'To',
     'search_placeholder' => 'Search by comments',
 
     'summary_income' => 'Income',
@@ -46,6 +49,17 @@ return [
     'limit_warning' => ':count transactions left this month.',
     'limit_upgrade' => 'Upgrade to Premium for unlimited.',
 
-    'saved' => 'Transaction saved.',
+    'income_genitive' => 'income',
+    'expense_genitive' => 'expense',
+
+    'validation' => [
+        'type_required' => 'Please select a transaction type.',
+        'amount_required' => 'Please enter an amount.',
+        'category_required' => 'No :type category selected.',
+        'date_required' => 'Please select a date.',
+    ],
+
+    'created' => 'Transaction created.',
+    'updated' => 'Transaction updated.',
     'deleted' => 'Transaction deleted.',
 ];

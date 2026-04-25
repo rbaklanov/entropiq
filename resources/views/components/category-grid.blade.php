@@ -16,7 +16,7 @@
         >
             <x-category-icon :icon="$category->icon" :color="$category->color" size="md" />
             <span class="text-center text-small leading-tight text-gray-700">
-                {{ $category->name['ru'] ?? $category->name }}
+                {{ $category->localizedName() }}
             </span>
         </button>
     @endforeach

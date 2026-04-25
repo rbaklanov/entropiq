@@ -75,7 +75,7 @@ class UnusualTransactionRule implements AdviceRuleInterface
         }
 
         $category = Category::find($biggestAnomaly->category_id);
-        $categoryName = $category ? ($category->name['ru'] ?? $category->name['en'] ?? '—') : '—';
+        $categoryName = $category ? $category->localizedName() : '—';
         $multiplierRounded = round($biggestMultiplier, 1);
 
         return new AdvicePayload(

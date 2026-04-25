@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo('/login');
 
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
+
         $middleware->alias([
             'verified.phone' => \App\Http\Middleware\EnsurePhoneVerified::class,
             'subscription' => \App\Http\Middleware\EnsurePremiumSubscription::class,
