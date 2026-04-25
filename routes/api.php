@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\V1\AiAdviceController;
 use App\Http\Controllers\Api\V1\AnalyticsController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\GoalsController;
+use App\Http\Controllers\Api\V1\NotificationSettingsController;
+use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RecurringRulesController;
 use App\Http\Controllers\Api\V1\TransactionsController;
 use Illuminate\Support\Facades\Route;
@@ -22,7 +24,13 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::middleware(['auth:sanctum', 'verified.phone'])->group(function () {
 
         Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
-        Route::get('/user', fn () => null)->name('user.show');
+
+        Route::get('/user', [ProfileController::class, 'show'])->name('user.show');
+        Route::put('/user', [ProfileController::class, 'update'])->name('user.update');
+        Route::delete('/user', [ProfileController::class, 'destroy'])->name('user.destroy');
+
+        Route::get('/user/notification-settings', [NotificationSettingsController::class, 'show'])->name('user.notificationSettings.show');
+        Route::put('/user/notification-settings', [NotificationSettingsController::class, 'update'])->name('user.notificationSettings.update');
 
         Route::get('/transactions/summary', [TransactionsController::class, 'summary'])->name('transactions.summary');
         Route::apiResource('transactions', TransactionsController::class)->only(['index', 'store', 'show', 'update', 'destroy']);

@@ -23,33 +23,39 @@
 
 ### 1.1. Локальная машина разработчика
 
-| Инструмент | Минимальная версия | Проверка |
-|-----------|-------------------|----------|
-| Docker Desktop | 24.x | `docker --version` |
-| Docker Compose | 2.x (v2 plugin) | `docker compose version` |
-| Git | 2.30+ | `git --version` |
-| curl | любая | `curl --version` |
+
+| Инструмент     | Минимальная версия | Проверка                 |
+| -------------- | ------------------ | ------------------------ |
+| Docker Desktop | 24.x               | `docker --version`       |
+| Docker Compose | 2.x (v2 plugin)    | `docker compose version` |
+| Git            | 2.30+              | `git --version`          |
+| curl           | любая              | `curl --version`         |
+
 
 > **Важно:** PHP, Composer, Node.js и npm **не нужны** на хост-машине — всё выполняется внутри Sail-контейнера. Однако при желании запускать Composer/Artisan/npm локально потребуются актуальные версии (PHP 8.3, Node 20+).
 
 ### 1.2. Рекомендуемые инструменты
 
-| Инструмент | Назначение | Установка (macOS) |
-|-----------|-----------|-------------------|
-| GitHub CLI (`gh`) | Работа с GitHub из терминала | `brew install gh` |
-| NVM | Управление версиями Node.js | `brew install nvm` |
+
+| Инструмент        | Назначение                   | Установка (macOS)  |
+| ----------------- | ---------------------------- | ------------------ |
+| GitHub CLI (`gh`) | Работа с GitHub из терминала | `brew install gh`  |
+| NVM               | Управление версиями Node.js  | `brew install nvm` |
+
 
 ### 1.3. Stage/Production сервер
 
-| Компонент | Требования |
-|-----------|-----------|
-| ОС | Ubuntu 22.04 / 24.04 LTS |
-| Docker | 24.x+ |
-| Docker Compose | 2.x+ (v2 plugin) |
-| RAM | 2 ГБ минимум (Timeweb VPS-2) |
-| Disk | 20 ГБ SSD минимум |
-| Git | 2.30+ |
-| Certbot | Для SSL (Let's Encrypt) |
+
+| Компонент      | Требования                   |
+| -------------- | ---------------------------- |
+| ОС             | Ubuntu 22.04 / 24.04 LTS     |
+| Docker         | 24.x+                        |
+| Docker Compose | 2.x+ (v2 plugin)             |
+| RAM            | 2 ГБ минимум (Timeweb VPS-2) |
+| Disk           | 20 ГБ SSD минимум            |
+| Git            | 2.30+                        |
+| Certbot        | Для SSL (Let's Encrypt)      |
+
 
 ---
 
@@ -255,15 +261,17 @@ parameters:
 
 ### 2.8. Доступные URL (локальное окружение)
 
-| Сервис | URL |
-|--------|-----|
-| Приложение | http://localhost |
-| Mailpit (UI) | http://localhost:8025 |
-| Horizon | http://localhost/horizon |
-| Telescope | http://localhost/telescope |
-| Pulse | http://localhost/pulse |
-| PostgreSQL | localhost:5432 |
-| Redis | localhost:6379 |
+
+| Сервис       | URL                                                      |
+| ------------ | -------------------------------------------------------- |
+| Приложение   | [http://localhost](http://localhost)                     |
+| Mailpit (UI) | [http://localhost:8025](http://localhost:8025)           |
+| Horizon      | [http://localhost/horizon](http://localhost/horizon)     |
+| Telescope    | [http://localhost/telescope](http://localhost/telescope) |
+| Pulse        | [http://localhost/pulse](http://localhost/pulse)         |
+| PostgreSQL   | localhost:5432                                           |
+| Redis        | localhost:6379                                           |
+
 
 ### 2.9. Повседневная работа
 
@@ -761,17 +769,19 @@ docker compose -f docker-compose.stage.yml exec app php artisan view:cache
 
 ### 4.1. Отличия от Stage
 
-| Параметр | Stage | Production |
-|----------|-------|-----------|
-| APP_ENV | staging | production |
-| APP_DEBUG | true | **false** |
-| Telescope | включён | **отключён** |
-| Xdebug | отключён | отключён |
-| Opcache validation | выключена | выключена |
-| Логирование | debug | error |
-| Порт Docker | 8080 | 80 |
-| VPS | общий | **выделенный** |
-| SSL | Let's Encrypt | Let's Encrypt |
+
+| Параметр           | Stage         | Production     |
+| ------------------ | ------------- | -------------- |
+| APP_ENV            | staging       | production     |
+| APP_DEBUG          | true          | **false**      |
+| Telescope          | включён       | **отключён**   |
+| Xdebug             | отключён      | отключён       |
+| Opcache validation | выключена     | выключена      |
+| Логирование        | debug         | error          |
+| Порт Docker        | 8080          | 80             |
+| VPS                | общий         | **выделенный** |
+| SSL                | Let's Encrypt | Let's Encrypt  |
+
 
 ### 4.2. `docker-compose.prod.yml`
 
@@ -1168,11 +1178,13 @@ jobs:
 
 **Необходимые GitHub Secrets** (Settings → Secrets and variables → Actions):
 
-| Secret | Описание |
-|--------|----------|
-| `STAGE_HOST` | IP-адрес VPS |
-| `STAGE_USER` | SSH-пользователь |
+
+| Secret          | Описание                             |
+| --------------- | ------------------------------------ |
+| `STAGE_HOST`    | IP-адрес VPS                         |
+| `STAGE_USER`    | SSH-пользователь                     |
 | `STAGE_SSH_KEY` | Приватный SSH-ключ для доступа к VPS |
+
 
 ---
 
@@ -1375,3 +1387,4 @@ gh pr create --base stage --title "feat: add transaction CRUD" --body "Descripti
 # После ревью и мержа в stage — создать PR stage → main для релиза
 gh pr create --base main --head stage --title "release: v0.1.0" --body "Release notes..."
 ```
+
