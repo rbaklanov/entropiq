@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AiAdviceController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\TransactionsController;
 use App\Livewire\Advice\AdviceDetail;
 use App\Livewire\Advice\AdviceList;
@@ -77,7 +78,7 @@ Route::middleware(['auth', 'verified.phone'])->group(function () {
     */
 
     Route::middleware('subscription')->group(function () {
-        Route::get('/analytics/export', fn () => null)->name('analytics.export');
+        Route::get('/analytics/export', [ExportController::class, 'transactions'])->name('analytics.export');
         Route::get('/advice/scenarios', fn () => view('pages.app.advice.scenarios'))->name('advice.scenarios');
     });
 });

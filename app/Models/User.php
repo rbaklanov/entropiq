@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
+ * @property Locale $locale
  * @property SubscriptionPlan $subscription_plan
  * @property ?Carbon $phone_verified_at
  * @property ?Carbon $onboarding_completed_at
