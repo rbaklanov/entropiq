@@ -21,7 +21,9 @@
 
             <p class="mt-4 text-center text-small text-gray-400">
                 {{ __('auth.terms_agreement') }}
-                <a href="#" class="underline">{{ __('auth.terms_link') }}</a>
+                <a href="{{ route('terms') }}" class="underline" target="_blank">{{ __('auth.terms_link') }}</a>
+                {{ __('auth.and') }}
+                <a href="{{ route('privacy') }}" class="underline" target="_blank">{{ __('auth.privacy_link') }}</a>
             </p>
         </div>
     </div>
