@@ -112,7 +112,7 @@
         </div>
     </section>
 
-    {{-- Inflation Calculator (placeholder for ENQ-100) --}}
+    {{-- Inflation Calculator (ENQ-100) --}}
     <section class="bg-gradient-to-b from-white to-primary-50/30 py-20 sm:py-24">
         <div class="mx-auto max-w-3xl px-4 text-center sm:px-6">
             <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
@@ -123,50 +123,7 @@
             </p>
 
             <div class="mt-10 rounded-2xl border border-gray-200 bg-white p-8 shadow-xl shadow-gray-900/5 sm:p-10">
-                <div class="space-y-6">
-                    <div>
-                        <label class="mb-2 block text-left text-sm font-medium text-gray-700">{{ __('landing.calculator_amount') }}</label>
-                        <input
-                            type="text"
-                            disabled
-                            value="{{ __('landing.calculator_amount_placeholder') }}"
-                            class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3.5 text-lg font-semibold text-gray-400"
-                        />
-                    </div>
-                    <div>
-                        <label class="mb-2 block text-left text-sm font-medium text-gray-700">{{ __('landing.calculator_when') }}</label>
-                        <div class="flex gap-3">
-                            <button disabled class="flex-1 rounded-xl border-2 border-primary-500 bg-primary-50 px-4 py-3 text-sm font-medium text-primary-700">
-                                {{ __('landing.calculator_1y') }}
-                            </button>
-                            <button disabled class="flex-1 rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-500">
-                                {{ __('landing.calculator_2y') }}
-                            </button>
-                            <button disabled class="flex-1 rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-500">
-                                {{ __('landing.calculator_5y') }}
-                            </button>
-                        </div>
-                    </div>
-
-                    {{-- Static result preview --}}
-                    <div class="rounded-xl bg-gradient-to-r from-warning-50 to-danger-50 p-6">
-                        <div class="flex items-center justify-between">
-                            <div class="text-left">
-                                <p class="text-sm text-gray-500">{{ __('landing.calculator_result_now') }}</p>
-                                <p class="text-2xl font-bold text-gray-900">456 621 ₽</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm text-gray-500">{{ __('landing.calculator_result_lost') }}</p>
-                                <p class="text-2xl font-bold text-danger-600">−43 379 ₽</p>
-                            </div>
-                        </div>
-                        <div class="mt-4 h-3 overflow-hidden rounded-full bg-gray-200">
-                            <div class="h-full rounded-full bg-gradient-to-r from-success-500 to-warning-500" style="width: 91.3%"></div>
-                        </div>
-                    </div>
-
-                    <p class="text-sm text-gray-400">{{ __('landing.calculator_coming_soon') }}</p>
-                </div>
+                <livewire:inflation-calculator />
             </div>
 
             <a href="/login" class="mt-8 inline-flex items-center gap-2 text-base font-medium text-primary-600 transition hover:text-primary-700">

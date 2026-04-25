@@ -34,7 +34,7 @@ return [
     'calculator_result_now' => 'Сейчас эквивалентны',
     'calculator_result_lost' => 'Инфляция обесценила',
     'calculator_cta' => 'Хотите защитить накопления? Создайте план в Entropiq',
-    'calculator_coming_soon' => 'Интерактивный калькулятор появится в ближайшем обновлении',
+    'calculator_bar_kept' => 'Покупательная способность',
 
     'features_title' => 'Возможности',
     'features_subtitle' => 'Всё, что нужно для осознанного управления деньгами',
