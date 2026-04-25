@@ -72,8 +72,8 @@
                 <div>
                     <h4 class="text-sm font-semibold text-gray-900">{{ __('landing.footer_terms') }}</h4>
                     <nav class="mt-3 flex flex-col gap-2">
-                        <a href="#" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_privacy') }}</a>
-                        <a href="#" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_terms') }}</a>
+                        <a href="{{ route('privacy') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_privacy') }}</a>
+                        <a href="{{ route('terms') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_terms') }}</a>
                     </nav>
                 </div>
             </div>

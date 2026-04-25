@@ -14,6 +14,7 @@ return [
     'logout' => 'Log out',
     'terms_agreement' => 'By tapping "Get code", you agree to the',
     'terms_link' => 'terms of service',
+    'and' => 'and',
     'privacy_link' => 'privacy policy',
 
     'sms_code' => 'SMS code',

@@ -27,6 +27,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', fn () => view('pages.guest.landing'))->name('landing');
+Route::get('/privacy', fn () => view('pages.guest.privacy'))->name('privacy');
+Route::get('/terms', fn () => view('pages.guest.terms'))->name('terms');
 
 Route::get('/locale/{locale}', function (string $locale) {
     if (in_array($locale, ['ru', 'en'], true)) {
