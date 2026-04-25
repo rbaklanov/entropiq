@@ -10,8 +10,10 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($user = $request->user()) {
-            app()->setLocale($user->locale->value);
+        if ($request->user()) {
+            app()->setLocale($request->user()->locale->value);
+        } elseif ($locale = session('locale')) {
+            app()->setLocale($locale);
         }
 
         return $next($request);
