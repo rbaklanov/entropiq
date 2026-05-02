@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'verified.phone' => \App\Http\Middleware\EnsurePhoneVerified::class,
+            'onboarding' => \App\Http\Middleware\CheckOnboarding::class,
             'subscription' => \App\Http\Middleware\EnsurePremiumSubscription::class,
         ]);
     })

@@ -6,10 +6,12 @@ use App\Actions\SendVerificationCode;
 use App\Actions\VerifyCode;
 use App\Models\VerificationCode;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Random\RandomException;
 
 #[Layout('components.layouts.guest')]
 class VerifyPage extends Component
@@ -34,6 +36,9 @@ class VerifyPage extends Component
         $this->resendCooldown = VerificationCode::RESEND_COOLDOWN_SECONDS;
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function verify(VerifyCode $action): void
     {
         $this->isSubmitting = true;
@@ -47,9 +52,17 @@ class VerifyPage extends Component
         session()->regenerate();
         session()->forget('phone');
 
-        $this->redirect(route('dashboard'));
+        $destination = $user->hasCompletedOnboarding()
+            ? route('dashboard')
+            : route('onboarding.step', 1);
+
+        $this->redirect($destination);
     }
 
+    /**
+     * @throws RandomException
+     * @throws ValidationException
+     */
     public function resendCode(SendVerificationCode $action): void
     {
         $action->execute($this->phone);
