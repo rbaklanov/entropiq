@@ -99,7 +99,7 @@ describe('Livewire VerifyPage', function () {
         Livewire::test(VerifyPage::class)
             ->set('code', '1234')
             ->call('verify')
-            ->assertRedirect(route('dashboard'));
+            ->assertRedirect(route('onboarding.step', 1));
 
         $this->assertAuthenticated();
 
