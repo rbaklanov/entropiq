@@ -3,6 +3,7 @@
 use App\Http\Controllers\AiAdviceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\TransactionsController;
 use App\Livewire\Advice\AdviceDetail;
 use App\Livewire\Advice\AdviceList;
@@ -53,11 +54,25 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated routes
+| Onboarding routes (auth required, no onboarding check)
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth', 'verified.phone'])->group(function () {
+    Route::get('/onboarding/{step}', [OnboardingController::class, 'step'])
+        ->where('step', '[1-3]')
+        ->name('onboarding.step');
+    Route::post('/onboarding/complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
+    Route::post('/onboarding/skip', [OnboardingController::class, 'skip'])->name('onboarding.skip');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'verified.phone', 'onboarding'])->group(function () {
 
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
