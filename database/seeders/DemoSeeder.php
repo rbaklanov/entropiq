@@ -2,12 +2,19 @@
 
 namespace Database\Seeders;
 
+use App\Enums\GoalStatus;
+use App\Enums\GoalType;
 use App\Enums\RecurringInterval;
 use App\Enums\SubscriptionPlan;
+use App\Enums\SubscriptionStatus;
 use App\Enums\TransactionType;
+use App\Models\AiAdvice;
 use App\Models\Category;
+use App\Models\Goal;
+use App\Models\GoalContribution;
 use App\Models\NotificationSetting;
 use App\Models\RecurringRule;
+use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -31,6 +38,9 @@ class DemoSeeder extends Seeder
         $this->command->info("Created {$transactionCount} transactions over 6 months.");
 
         $this->seedRecurringRules($user, $categories);
+        $this->seedGoals($user);
+        $this->seedAiAdvice($user);
+        $this->seedSubscription($user);
         $this->seedNotificationSettings($user);
 
         $this->command->info('DemoSeeder completed.');
@@ -307,6 +317,196 @@ class DemoSeeder extends Seeder
                 'is_active' => true,
             ]);
         }
+    }
+
+    private function seedGoals(User $user): void
+    {
+        $user->goals()->delete();
+
+        $goals = [
+            [
+                'name' => 'Отпуск в Турцию',
+                'type' => GoalType::Travel,
+                'icon' => '✈️',
+                'target_amount' => 200_000_00,
+                'current_amount' => 60_000_00,
+                'started_at' => Carbon::now()->subMonths(4),
+                'target_date' => Carbon::now()->addMonths(4),
+                'contributions_count' => 4,
+            ],
+            [
+                'name' => 'Подушка безопасности',
+                'type' => GoalType::SafetyNet,
+                'icon' => '🛡️',
+                'target_amount' => 300_000_00,
+                'current_amount' => 45_000_00,
+                'started_at' => Carbon::now()->subMonths(5),
+                'target_date' => Carbon::now()->addMonths(7),
+                'contributions_count' => 5,
+            ],
+            [
+                'name' => 'Новый ноутбук',
+                'type' => GoalType::LargePurchase,
+                'icon' => '💻',
+                'target_amount' => 120_000_00,
+                'current_amount' => 72_000_00,
+                'started_at' => Carbon::now()->subMonths(3),
+                'target_date' => Carbon::now()->addMonth(),
+                'contributions_count' => 3,
+            ],
+        ];
+
+        foreach ($goals as $goalData) {
+            $contributionsCount = $goalData['contributions_count'];
+            unset($goalData['contributions_count']);
+
+            $goal = Goal::create([
+                'user_id' => $user->id,
+                'status' => GoalStatus::Active,
+                'currency_code' => 'RUB',
+                ...$goalData,
+            ]);
+
+            $this->seedGoalContributions($goal, $contributionsCount);
+        }
+
+        $this->command->info('Created 3 goals with contributions.');
+    }
+
+    private function seedGoalContributions(Goal $goal, int $count): void
+    {
+        $totalAmount = $goal->current_amount;
+        $remaining = $totalAmount;
+
+        for ($i = 0; $i < $count; $i++) {
+            $isLast = ($i === $count - 1);
+            $amount = $isLast ? $remaining : (int) round($totalAmount / $count * $this->vary(100, 15) / 100);
+            $amount = min($amount, $remaining);
+            $remaining -= $amount;
+
+            $monthsAgo = $count - $i;
+            $date = Carbon::now()->subMonths($monthsAgo)->addDays(fake()->numberBetween(1, 15));
+
+            GoalContribution::create([
+                'goal_id' => $goal->id,
+                'amount' => max(100, $amount),
+                'date' => $date,
+            ]);
+        }
+    }
+
+    private function seedAiAdvice(User $user): void
+    {
+        $user->aiAdvices()->delete();
+
+        $advices = [
+            [
+                'title' => 'Расходы на кафе выросли на 35%',
+                'body' => 'В этом месяце вы потратили на кафе и рестораны значительно больше, чем в прошлом. Средний чек вырос с 1 100 ₽ до 1 500 ₽, а количество визитов увеличилось. Попробуйте установить лимит на эту категорию или чередовать обеды в кафе с домашней едой.',
+                'basis_data' => ['rule' => 'category_spike', 'category' => 'dining', 'growth_percent' => 35],
+                'is_read' => true,
+                'rating' => 4,
+                'days_ago' => 3,
+            ],
+            [
+                'title' => 'Расходы превышают доходы',
+                'body' => 'За последний месяц расходы составили 108% от доходов. Дефицит покрывается из накоплений. Рекомендуем пересмотреть необязательные траты: подписки, развлечения и кафе составляют 28% всех расходов.',
+                'basis_data' => ['rule' => 'overspending', 'expense_ratio' => 1.08],
+                'is_read' => true,
+                'rating' => 5,
+                'days_ago' => 7,
+            ],
+            [
+                'title' => 'Цель "Новый ноутбук" отстаёт от графика',
+                'body' => 'Для достижения цели в срок нужно откладывать 16 000 ₽/мес, но за последний месяц взнос составил 12 000 ₽. Увеличьте ежемесячный взнос на 4 000 ₽ или перенесите дедлайн.',
+                'basis_data' => ['rule' => 'goal_behind_schedule', 'goal' => 'Новый ноутбук', 'gap_percent' => 25],
+                'is_read' => true,
+                'rating' => null,
+                'days_ago' => 10,
+            ],
+            [
+                'title' => 'Крупная покупка в "Одежда"',
+                'body' => 'Транзакция на 8 500 ₽ в категории "Одежда" значительно превышает ваш средний чек 3 200 ₽. Если это разовая покупка, ничего страшного. Если нет, стоит пересмотреть бюджет.',
+                'basis_data' => ['rule' => 'unusual_transaction', 'category' => 'clothing', 'amount' => 850000, 'avg' => 320000],
+                'is_read' => false,
+                'rating' => null,
+                'days_ago' => 5,
+            ],
+            [
+                'title' => 'Можно оптимизировать необязательные траты',
+                'body' => 'Дискреционные расходы (кафе, развлечения, подписки) составляют 22% от общих трат. Сокращение на 10% высвободит около 4 500 ₽/мес, которые можно направить на цель "Подушка безопасности".',
+                'basis_data' => ['rule' => 'savings_optimization', 'discretionary_share' => 0.22],
+                'is_read' => false,
+                'rating' => null,
+                'days_ago' => 2,
+            ],
+            [
+                'title' => 'Транспортные расходы стабильны',
+                'body' => 'Расходы на транспорт за последние 3 месяца держатся в диапазоне 7 000–8 500 ₽. Это хороший показатель контроля. Если перейти на проездной за 2 900 ₽, экономия составит до 5 000 ₽/мес.',
+                'basis_data' => ['rule' => 'savings_optimization', 'category' => 'transport', 'potential_savings' => 500000],
+                'is_read' => true,
+                'rating' => 3,
+                'days_ago' => 14,
+            ],
+            [
+                'title' => 'Продукты подорожали на 12% за год',
+                'body' => 'Ваши расходы на продукты растут быстрее официальной инфляции (9,5%). Это может быть связано как с ростом цен, так и с увеличением объёма покупок. Сравните чеки за разные месяцы.',
+                'basis_data' => ['rule' => 'category_spike', 'category' => 'groceries', 'growth_percent' => 12],
+                'is_read' => false,
+                'rating' => null,
+                'days_ago' => 18,
+            ],
+            [
+                'title' => 'Вы экономите 15% дохода',
+                'body' => 'За последние 3 месяца вы стабильно откладываете около 15% от дохода. Это выше среднего по России (10%). Продолжайте в том же духе! При текущем темпе цель "Подушка безопасности" будет достигнута через 8 месяцев.',
+                'basis_data' => ['rule' => 'savings_optimization', 'savings_rate' => 0.15],
+                'is_read' => true,
+                'rating' => 5,
+                'days_ago' => 21,
+            ],
+            [
+                'title' => 'Подписки: проверьте неиспользуемые',
+                'body' => 'Вы оплачиваете 3 подписки общей стоимостью 1 400 ₽/мес. Проверьте, все ли из них вы активно используете. Отмена одной неиспользуемой подписки за год сэкономит до 6 000 ₽.',
+                'basis_data' => ['rule' => 'savings_optimization', 'category' => 'subscriptions', 'total' => 140000],
+                'is_read' => false,
+                'rating' => null,
+                'days_ago' => 25,
+            ],
+            [
+                'title' => 'Цель "Отпуск в Турцию" на 30% выполнена',
+                'body' => 'Вы накопили 60 000 ₽ из 200 000 ₽. При текущем темпе (15 000 ₽/мес) цель будет достигнута вовремя. Учтите, что с учётом инфляции (~0,8%/мес) реальная стоимость поездки может вырасти на 6–8%.',
+                'basis_data' => ['rule' => 'goal_behind_schedule', 'goal' => 'Отпуск в Турцию', 'progress' => 30],
+                'is_read' => true,
+                'rating' => 4,
+                'days_ago' => 30,
+            ],
+        ];
+
+        foreach ($advices as $advice) {
+            $daysAgo = $advice['days_ago'];
+            unset($advice['days_ago']);
+
+            AiAdvice::create([
+                'user_id' => $user->id,
+                'generated_at' => Carbon::now()->subDays($daysAgo),
+                ...$advice,
+            ]);
+        }
+
+        $this->command->info('Created 10 AI advice records.');
+    }
+
+    private function seedSubscription(User $user): void
+    {
+        $user->subscriptions()->delete();
+
+        Subscription::create([
+            'user_id' => $user->id,
+            'plan' => SubscriptionPlan::Yearly,
+            'status' => SubscriptionStatus::Active,
+            'starts_at' => Carbon::now()->subMonths(3),
+            'ends_at' => Carbon::now()->addMonths(9),
+        ]);
     }
 
     private function seedNotificationSettings(User $user): void
