@@ -28,7 +28,7 @@ function exportHeaders(string $token): array
 
 describe('GET /analytics/export (web)', function () {
     it('requires premium subscription', function () {
-        $user = User::factory()->create(['phone_verified_at' => now()]);
+        $user = User::factory()->onboarded()->create(['phone_verified_at' => now()]);
 
         $this->actingAs($user)
             ->get('/analytics/export')
@@ -36,7 +36,7 @@ describe('GET /analytics/export (web)', function () {
     });
 
     it('downloads CSV for premium user', function () {
-        $user = User::factory()->premium()->create(['phone_verified_at' => now()]);
+        $user = User::factory()->premium()->onboarded()->create(['phone_verified_at' => now()]);
         $category = Category::factory()->expense()->create();
 
         Transaction::factory()->for($user)->expense()->create([
@@ -53,7 +53,7 @@ describe('GET /analytics/export (web)', function () {
     });
 
     it('supports date filters', function () {
-        $user = User::factory()->premium()->create(['phone_verified_at' => now()]);
+        $user = User::factory()->premium()->onboarded()->create(['phone_verified_at' => now()]);
         $category = Category::factory()->expense()->create();
 
         Transaction::factory()->for($user)->expense()->create([

@@ -52,7 +52,7 @@ describe('EnsurePremiumSubscription middleware', function () {
     });
 
     it('redirects free web user to subscription page', function () {
-        $user = User::factory()->create(['phone_verified_at' => now()]);
+        $user = User::factory()->onboarded()->create(['phone_verified_at' => now()]);
 
         $this->actingAs($user)
             ->get('/analytics/export')
