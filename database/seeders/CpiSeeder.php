@@ -14,5 +14,9 @@ class CpiSeeder extends Seeder
         ]);
 
         $this->command->info(Artisan::output());
+
+        Artisan::call('cpi:import');
+
+        $this->command->info(Artisan::output());
     }
 }

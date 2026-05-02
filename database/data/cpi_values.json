@@ -41,6 +41,12 @@
         {"period": "2025-11-01", "category_code": "TOTAL", "value": 100.58},
         {"period": "2025-12-01", "category_code": "TOTAL", "value": 100.65},
 
+        {"period": "2026-01-01", "category_code": "TOTAL", "value": 101.10},
+        {"period": "2026-02-01", "category_code": "TOTAL", "value": 100.72},
+        {"period": "2026-03-01", "category_code": "TOTAL", "value": 100.55},
+        {"period": "2026-04-01", "category_code": "TOTAL", "value": 100.48},
+        {"period": "2026-05-01", "category_code": "TOTAL", "value": 100.35},
+
         {"period": "2023-01-01", "category_code": "FOOD", "value": 100.93},
         {"period": "2023-02-01", "category_code": "FOOD", "value": 100.63},
         {"period": "2023-03-01", "category_code": "FOOD", "value": 100.53},
@@ -79,6 +85,12 @@
         {"period": "2025-10-01", "category_code": "FOOD", "value": 100.85},
         {"period": "2025-11-01", "category_code": "FOOD", "value": 100.73},
         {"period": "2025-12-01", "category_code": "FOOD", "value": 100.82},
+
+        {"period": "2026-01-01", "category_code": "FOOD", "value": 101.15},
+        {"period": "2026-02-01", "category_code": "FOOD", "value": 100.85},
+        {"period": "2026-03-01", "category_code": "FOOD", "value": 100.60},
+        {"period": "2026-04-01", "category_code": "FOOD", "value": 100.55},
+        {"period": "2026-05-01", "category_code": "FOOD", "value": 100.40},
 
         {"period": "2023-01-01", "category_code": "NON_FOOD", "value": 100.40},
         {"period": "2023-02-01", "category_code": "NON_FOOD", "value": 100.22},
@@ -119,6 +131,12 @@
         {"period": "2025-11-01", "category_code": "NON_FOOD", "value": 100.50},
         {"period": "2025-12-01", "category_code": "NON_FOOD", "value": 100.55},
 
+        {"period": "2026-01-01", "category_code": "NON_FOOD", "value": 100.60},
+        {"period": "2026-02-01", "category_code": "NON_FOOD", "value": 100.45},
+        {"period": "2026-03-01", "category_code": "NON_FOOD", "value": 100.38},
+        {"period": "2026-04-01", "category_code": "NON_FOOD", "value": 100.32},
+        {"period": "2026-05-01", "category_code": "NON_FOOD", "value": 100.28},
+
         {"period": "2023-01-01", "category_code": "SERVICES", "value": 101.29},
         {"period": "2023-02-01", "category_code": "SERVICES", "value": 100.56},
         {"period": "2023-03-01", "category_code": "SERVICES", "value": 100.37},
@@ -157,6 +175,12 @@
         {"period": "2025-10-01", "category_code": "SERVICES", "value": 100.62},
         {"period": "2025-11-01", "category_code": "SERVICES", "value": 100.50},
         {"period": "2025-12-01", "category_code": "SERVICES", "value": 100.55},
+
+        {"period": "2026-01-01", "category_code": "SERVICES", "value": 101.50},
+        {"period": "2026-02-01", "category_code": "SERVICES", "value": 100.88},
+        {"period": "2026-03-01", "category_code": "SERVICES", "value": 100.65},
+        {"period": "2026-04-01", "category_code": "SERVICES", "value": 100.55},
+        {"period": "2026-05-01", "category_code": "SERVICES", "value": 100.42},
 
         {"period": "2023-01-01", "category_code": "SERVICES_HOUSING", "value": 109.20},
         {"period": "2023-02-01", "category_code": "SERVICES_HOUSING", "value": 100.04},
@@ -197,6 +221,12 @@
         {"period": "2025-11-01", "category_code": "SERVICES_HOUSING", "value": 100.03},
         {"period": "2025-12-01", "category_code": "SERVICES_HOUSING", "value": 100.45},
 
+        {"period": "2026-01-01", "category_code": "SERVICES_HOUSING", "value": 101.80},
+        {"period": "2026-02-01", "category_code": "SERVICES_HOUSING", "value": 100.52},
+        {"period": "2026-03-01", "category_code": "SERVICES_HOUSING", "value": 100.40},
+        {"period": "2026-04-01", "category_code": "SERVICES_HOUSING", "value": 100.35},
+        {"period": "2026-05-01", "category_code": "SERVICES_HOUSING", "value": 100.30},
+
         {"period": "2023-01-01", "category_code": "SERVICES_TRANSPORT", "value": 100.32},
         {"period": "2023-02-01", "category_code": "SERVICES_TRANSPORT", "value": 100.18},
         {"period": "2023-03-01", "category_code": "SERVICES_TRANSPORT", "value": 100.12},
@@ -234,6 +264,12 @@
         {"period": "2025-09-01", "category_code": "SERVICES_TRANSPORT", "value": 100.35},
         {"period": "2025-10-01", "category_code": "SERVICES_TRANSPORT", "value": 100.38},
         {"period": "2025-11-01", "category_code": "SERVICES_TRANSPORT", "value": 100.45},
-        {"period": "2025-12-01", "category_code": "SERVICES_TRANSPORT", "value": 100.50}
+        {"period": "2025-12-01", "category_code": "SERVICES_TRANSPORT", "value": 100.50},
+
+        {"period": "2026-01-01", "category_code": "SERVICES_TRANSPORT", "value": 100.48},
+        {"period": "2026-02-01", "category_code": "SERVICES_TRANSPORT", "value": 100.28},
+        {"period": "2026-03-01", "category_code": "SERVICES_TRANSPORT", "value": 100.20},
+        {"period": "2026-04-01", "category_code": "SERVICES_TRANSPORT", "value": 100.22},
+        {"period": "2026-05-01", "category_code": "SERVICES_TRANSPORT", "value": 100.30}
     ]
 }
