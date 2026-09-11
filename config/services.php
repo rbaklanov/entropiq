@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'sms' => [
+        'driver' => env('SMS_DRIVER', 'log'),
+    ],
+
+    'sms_aero' => [
+        'email' => env('SMSAERO_EMAIL'),
+        'api_key' => env('SMSAERO_API_KEY'),
+        'sign' => env('SMSAERO_SIGN', 'Entropiq'),
+        'test_mode' => filter_var(env('SMSAERO_TEST_MODE', true), FILTER_VALIDATE_BOOLEAN),
+    ],
+
 ];
