@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Contracts\SmsServiceInterface;
+use App\Exceptions\SmsDeliveryException;
 use App\Models\VerificationCode;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
@@ -32,7 +33,15 @@ readonly class SendVerificationCode
             'expires_at' => now()->addMinutes(VerificationCode::EXPIRATION_MINUTES),
         ]);
 
-        $this->smsService->sendVerificationCode($phone, $code);
+        try {
+            $this->smsService->sendVerificationCode($phone, $code);
+        } catch (SmsDeliveryException) {
+            $verificationCode->delete();
+
+            throw ValidationException::withMessages([
+                'phone' => [__('auth.sms_send_failed')],
+            ]);
+        }
 
         RateLimiter::hit($this->rateLimiterKey($phone), VerificationCode::RESEND_COOLDOWN_SECONDS);
 

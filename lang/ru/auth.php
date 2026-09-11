@@ -26,4 +26,6 @@ return [
     'code_expired' => 'Код истёк. Запросите новый.',
     'too_many_attempts' => 'Слишком много попыток. Попробуйте через :seconds сек.',
     'code_sent' => 'Код отправлен на номер :phone.',
+    'verification_sms' => 'Entropiq: ваш код подтверждения — :code',
+    'sms_send_failed' => 'Не удалось отправить SMS. Попробуйте позже.',
 ];
