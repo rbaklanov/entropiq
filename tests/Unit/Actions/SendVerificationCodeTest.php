@@ -12,6 +12,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     RateLimiter::clear('sms:79001234567');
+    RateLimiter::clear('sms:79990000000');
 });
 
 it('sends a verification code through the SMS contract', function () {
@@ -48,4 +49,19 @@ it('hides provider errors from the user and does not leak the OTP', function () 
     $this->assertDatabaseMissing('verification_codes', [
         'phone' => '79001234567',
     ]);
+});
+
+it('stores a fixed code for the demo phone and does not send SMS', function () {
+    config([
+        'services.sms.demo_phone' => '79990000000',
+        'services.sms.demo_code' => '1111',
+    ]);
+
+    $sms = Mockery::mock(SmsServiceInterface::class);
+    $sms->shouldNotReceive('sendVerificationCode');
+
+    $verificationCode = (new SendVerificationCode($sms))->execute('79990000000');
+
+    expect($verificationCode->phone)->toBe('79990000000')
+        ->and($verificationCode->code)->toBe('1111');
 });
