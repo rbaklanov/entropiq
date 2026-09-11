@@ -657,6 +657,7 @@ MAIL_MAILER=log
 TELESCOPE_ENABLED=true
 
 # SMS Aero (тестовый режим)
+SMS_DRIVER=sms_aero
 SMSAERO_EMAIL=<email>
 SMSAERO_API_KEY=<key>
 SMSAERO_SIGN=Entropiq
@@ -965,6 +966,7 @@ MAIL_FROM_ADDRESS="noreply@entropiq.ru"
 MAIL_FROM_NAME="${APP_NAME}"
 
 # SMS Aero (боевой режим)
+SMS_DRIVER=sms_aero
 SMSAERO_EMAIL=<email>
 SMSAERO_API_KEY=<key>
 SMSAERO_SIGN=Entropiq

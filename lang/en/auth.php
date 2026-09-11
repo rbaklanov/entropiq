@@ -26,4 +26,6 @@ return [
     'code_expired' => 'Code has expired. Request a new one.',
     'too_many_attempts' => 'Too many attempts. Try again in :seconds sec.',
     'code_sent' => 'Code sent to :phone.',
+    'verification_sms' => 'Entropiq: your verification code is :code',
+    'sms_send_failed' => 'Could not send the SMS. Please try again later.',
 ];

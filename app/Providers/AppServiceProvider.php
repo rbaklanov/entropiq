@@ -11,6 +11,7 @@ use App\Contracts\LlmServiceInterface;
 use App\Contracts\PaymentServiceInterface;
 use App\Contracts\SmsServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
+use App\Integrations\SmsAero\SmsAeroConnector;
 use App\Services\AiAdviceService;
 use App\Services\AnalyticsService;
 use App\Services\ExportService;
@@ -19,8 +20,10 @@ use App\Services\FakePaymentService;
 use App\Services\GoalCalculationService;
 use App\Services\InflationService;
 use App\Services\LogSmsService;
+use App\Services\SmsAeroService;
 use App\Services\SubscriptionService;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
@@ -29,7 +32,6 @@ class AppServiceProvider extends ServiceProvider
 {
     /** @var array<class-string, class-string> */
     public array $bindings = [
-        SmsServiceInterface::class => LogSmsService::class,
         InflationServiceInterface::class => InflationService::class,
         GoalCalculationServiceInterface::class => GoalCalculationService::class,
         AiAdviceServiceInterface::class => AiAdviceService::class,
@@ -42,6 +44,36 @@ class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this->app->bind(SmsAeroConnector::class, function (): SmsAeroConnector {
+            $email = config('services.sms_aero.email');
+            $apiKey = config('services.sms_aero.api_key');
+
+            return new SmsAeroConnector(
+                email: is_string($email) ? $email : '',
+                apiKey: is_string($apiKey) ? $apiKey : '',
+            );
+        });
+
+        $this->app->bind(SmsAeroService::class, function (Container $app): SmsAeroService {
+            $sign = config('services.sms_aero.sign');
+
+            return new SmsAeroService(
+                connector: $app->make(SmsAeroConnector::class),
+                sign: is_string($sign) && $sign !== '' ? $sign : 'Entropiq',
+                testMode: config('services.sms_aero.test_mode') === true,
+            );
+        });
+
+        $this->app->bind(SmsServiceInterface::class, function (Container $app): SmsServiceInterface {
+            $driver = config('services.sms.driver');
+
+            if ($driver === 'sms_aero') {
+                return $app->make(SmsAeroService::class);
+            }
+
+            return $app->make(LogSmsService::class);
+        });
+
         if ($this->app->environment('local') && class_exists(TelescopeApplicationServiceProvider::class)) {
             $this->app->register(TelescopeServiceProvider::class);
         }
