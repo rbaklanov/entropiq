@@ -60,7 +60,6 @@ services:
       --appendonly yes
       --maxmemory 128mb
       --maxmemory-policy allkeys-lru
-      --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis-data:/data
     networks:
