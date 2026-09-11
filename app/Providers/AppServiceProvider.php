@@ -23,6 +23,7 @@ use App\Services\SubscriptionService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Telescope\TelescopeApplicationServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,7 +42,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        //
+        if ($this->app->environment('local') && class_exists(TelescopeApplicationServiceProvider::class)) {
+            $this->app->register(TelescopeServiceProvider::class);
+        }
     }
 
     public function boot(): void
