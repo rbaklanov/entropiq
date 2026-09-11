@@ -68,4 +68,6 @@ RUN chmod +x /usr/local/bin/start-container
 
 EXPOSE 80/tcp
 
+RUN mkdir -p /var/log/supervisor
+
 ENTRYPOINT ["start-container"]
