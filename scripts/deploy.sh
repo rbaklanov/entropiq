@@ -13,7 +13,7 @@ echo "[1/6] Pulling latest code..."
 git pull origin main
 
 echo "[2/6] Building Docker image..."
-docker compose -f "$COMPOSE_FILE" build --no-cache app
+docker compose -f "$COMPOSE_FILE" build app
 
 echo "[3/6] Stopping current containers..."
 docker compose -f "$COMPOSE_FILE" down
