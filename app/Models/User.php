@@ -105,4 +105,79 @@ class User extends Authenticatable
     {
         return $this->subscription_plan !== SubscriptionPlan::Free;
     }
+
+    public static function canonicalPhone(string $phone): string
+    {
+        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+
+        if (strlen($digits) === 11 && str_starts_with($digits, '8')) {
+            return '7'.substr($digits, 1);
+        }
+
+        return $digits;
+    }
+
+    /**
+     * @param  array<mixed>|string  $raw
+     * @return array<int, string>
+     */
+    public static function parseAdminPhones(array|string $raw, string $demoPhone = ''): array
+    {
+        $items = is_array($raw) ? $raw : explode(',', $raw);
+        $canonicalDemo = $demoPhone !== '' ? self::canonicalPhone($demoPhone) : '';
+
+        return array_values(array_filter(
+            array_map(
+                static function (mixed $phone) use ($canonicalDemo): string {
+                    if (! is_string($phone) && ! is_numeric($phone)) {
+                        return '';
+                    }
+
+                    $canonical = self::canonicalPhone((string) $phone);
+
+                    if (strlen($canonical) !== 11 || ! str_starts_with($canonical, '7')) {
+                        return '';
+                    }
+
+                    if ($canonicalDemo !== '' && $canonical === $canonicalDemo) {
+                        return '';
+                    }
+
+                    return $canonical;
+                },
+                $items
+            ),
+            static fn (string $phone): bool => $phone !== ''
+        ));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function adminPhones(): array
+    {
+        $adminConfig = config('services.admin.phones', '');
+        $demoPhone = config('services.sms.demo_phone');
+
+        return self::parseAdminPhones(
+            is_array($adminConfig) || is_string($adminConfig) ? $adminConfig : '',
+            is_string($demoPhone) ? $demoPhone : ''
+        );
+    }
+
+    public function isAdmin(): bool
+    {
+        $phone = self::canonicalPhone((string) $this->phone);
+
+        if ($phone === '' || preg_match('/^7\d{10}$/', $phone) !== 1) {
+            return false;
+        }
+
+        $demoPhone = config('services.sms.demo_phone');
+        if (is_string($demoPhone) && $demoPhone !== '' && $phone === self::canonicalPhone($demoPhone)) {
+            return false;
+        }
+
+        return in_array($phone, self::adminPhones(), true);
+    }
 }

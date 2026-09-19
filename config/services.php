@@ -41,6 +41,10 @@ return [
         'demo_code' => env('SMS_DEMO_CODE', '1111'),
     ],
 
+    'admin' => [
+        'phones' => env('ADMIN_PHONES', ''),
+    ],
+
     'sms_aero' => [
         'email' => env('SMSAERO_EMAIL'),
         'api_key' => env('SMSAERO_API_KEY'),
