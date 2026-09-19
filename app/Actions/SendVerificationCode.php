@@ -11,6 +11,8 @@ use Random\RandomException;
 
 readonly class SendVerificationCode
 {
+    public const DEFAULT_OTP_CODE = '1111';
+
     public function __construct(
         private SmsServiceInterface $smsService,
     ) {}
@@ -33,7 +35,7 @@ readonly class SendVerificationCode
             'expires_at' => now()->addMinutes(VerificationCode::EXPIRATION_MINUTES),
         ]);
 
-        if (! $this->isDemoPhone($phone)) {
+        if (! $this->shouldSkipSms($phone)) {
             try {
                 $this->smsService->sendVerificationCode($phone, $code);
             } catch (SmsDeliveryException) {
@@ -66,11 +68,21 @@ readonly class SendVerificationCode
 
     private function codeFor(string $phone): string
     {
-        if ($this->isDemoPhone($phone)) {
-            return $this->demoCode();
+        if ($this->isFixedOtpEnabled() || $this->isDemoPhone($phone)) {
+            return $this->fixedCode();
         }
 
         return str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+    }
+
+    private function shouldSkipSms(string $phone): bool
+    {
+        return $this->isFixedOtpEnabled() || $this->isDemoPhone($phone);
+    }
+
+    private function isFixedOtpEnabled(): bool
+    {
+        return (bool) config('services.sms.fixed_code', true);
     }
 
     private function isDemoPhone(string $phone): bool
@@ -80,7 +92,7 @@ readonly class SendVerificationCode
         return is_string($demoPhone) && $demoPhone !== '' && $demoPhone === $phone;
     }
 
-    private function demoCode(): string
+    private function fixedCode(): string
     {
         $code = config('services.sms.demo_code');
 
@@ -88,7 +100,7 @@ readonly class SendVerificationCode
             return $code;
         }
 
-        return '1111';
+        return self::DEFAULT_OTP_CODE;
     }
 
     private function rateLimiterKey(string $phone): string
