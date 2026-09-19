@@ -46,6 +46,19 @@ return [
         'phones' => env('ADMIN_PHONES', ''),
     ],
 
+    'llm' => [
+        'driver' => env('LLM_DRIVER', 'fake'),
+    ],
+
+    'gigachat' => [
+        'client_id' => env('GIGACHAT_CLIENT_ID', ''),
+        'client_secret' => env('GIGACHAT_CLIENT_SECRET', ''),
+        'scope' => env('GIGACHAT_SCOPE', 'GIGACHAT_API_PERS'),
+        'model' => env('GIGACHAT_MODEL', 'GigaChat'),
+        'verify_ssl' => filter_var(env('GIGACHAT_VERIFY_SSL', false), FILTER_VALIDATE_BOOLEAN),
+        'timeout' => (float) env('GIGACHAT_TIMEOUT', 30.0),
+    ],
+
     'sms_aero' => [
         'email' => env('SMSAERO_EMAIL'),
         'api_key' => env('SMSAERO_API_KEY'),
