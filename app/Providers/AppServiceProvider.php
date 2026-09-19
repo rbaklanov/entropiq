@@ -18,6 +18,7 @@ use App\Services\AnalyticsService;
 use App\Services\ExportService;
 use App\Services\FakeLlmService;
 use App\Services\FakePaymentService;
+use App\Services\GigaChatService;
 use App\Services\GoalCalculationService;
 use App\Services\InflationService;
 use App\Services\LogSmsService;
@@ -38,7 +39,6 @@ class AppServiceProvider extends ServiceProvider
         InflationServiceInterface::class => InflationService::class,
         GoalCalculationServiceInterface::class => GoalCalculationService::class,
         AiAdviceServiceInterface::class => AiAdviceService::class,
-        LlmServiceInterface::class => FakeLlmService::class,
         PaymentServiceInterface::class => FakePaymentService::class,
         SubscriptionServiceInterface::class => SubscriptionService::class,
         ExportServiceInterface::class => ExportService::class,
@@ -47,6 +47,35 @@ class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this->app->bind(GigaChatService::class, function (Container $app): GigaChatService {
+            $config = config('services.gigachat', []);
+            $clientId = is_array($config) && isset($config['client_id']) ? (string) $config['client_id'] : '';
+            $clientSecret = is_array($config) && isset($config['client_secret']) ? (string) $config['client_secret'] : '';
+            $scope = is_array($config) && isset($config['scope']) ? (string) $config['scope'] : 'GIGACHAT_API_PERS';
+            $model = is_array($config) && isset($config['model']) ? (string) $config['model'] : 'GigaChat';
+            $verifySsl = is_array($config) && isset($config['verify_ssl']) ? (bool) $config['verify_ssl'] : false;
+            $timeout = is_array($config) && isset($config['timeout']) ? (float) $config['timeout'] : 30.0;
+
+            return new GigaChatService(
+                fallbackService: $app->make(FakeLlmService::class),
+                clientId: $clientId,
+                clientSecret: $clientSecret,
+                scope: $scope,
+                model: $model,
+                verifySsl: $verifySsl,
+                timeout: $timeout,
+            );
+        });
+
+        $this->app->bind(LlmServiceInterface::class, function (Container $app): LlmServiceInterface {
+            $driver = config('services.llm.driver', 'fake');
+
+            return match ($driver) {
+                'gigachat' => $app->make(GigaChatService::class),
+                default => $app->make(FakeLlmService::class),
+            };
+        });
+
         $this->app->bind(SmsAeroConnector::class, function (): SmsAeroConnector {
             $email = config('services.sms_aero.email');
             $apiKey = config('services.sms_aero.api_key');
