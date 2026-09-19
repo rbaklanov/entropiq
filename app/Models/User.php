@@ -105,4 +105,46 @@ class User extends Authenticatable
     {
         return $this->subscription_plan !== SubscriptionPlan::Free;
     }
+
+    public static function canonicalPhone(string $phone): string
+    {
+        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+
+        if (strlen($digits) === 11 && str_starts_with($digits, '8')) {
+            return '7'.substr($digits, 1);
+        }
+
+        return $digits;
+    }
+
+    public function isAdmin(): bool
+    {
+        $phone = self::canonicalPhone((string) $this->phone);
+
+        if ($phone === '' || preg_match('/^7\d{10}$/', $phone) !== 1) {
+            return false;
+        }
+
+        $demoPhone = config('services.sms.demo_phone');
+        if (is_string($demoPhone) && $demoPhone !== '' && $phone === self::canonicalPhone($demoPhone)) {
+            return false;
+        }
+
+        $adminPhones = config('services.admin.phones');
+        if (! is_array($adminPhones) || $adminPhones === []) {
+            return false;
+        }
+
+        foreach ($adminPhones as $adminPhone) {
+            if (! is_string($adminPhone) || $adminPhone === '') {
+                continue;
+            }
+
+            if ($phone === self::canonicalPhone($adminPhone)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

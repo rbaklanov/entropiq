@@ -29,6 +29,7 @@ docker exec "$APP_CONTAINER" php artisan route:cache
 docker exec "$APP_CONTAINER" php artisan view:cache
 docker exec "$APP_CONTAINER" php artisan event:cache
 docker exec "$APP_CONTAINER" php artisan horizon:terminate
+docker exec "$APP_CONTAINER" php artisan pulse:restart
 
 echo "[6/6] Health check..."
 for i in $(seq 1 10); do

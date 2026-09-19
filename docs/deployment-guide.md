@@ -544,6 +544,14 @@ autostart=true
 autorestart=true
 redirect_stderr=true
 stdout_logfile=/dev/null
+
+[program:pulse-check]
+command=php /var/www/html/artisan pulse:check
+user=www-data
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/www/html/storage/logs/pulse-check.log
 ```
 
 #### 3.4.5. `docker-compose.stage.yml`
@@ -816,7 +824,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 768M
 
   pgsql:
     image: postgres:16-alpine
@@ -952,8 +960,15 @@ QUEUE_CONNECTION=redis
 # Telescope отключён
 TELESCOPE_ENABLED=false
 
-# Sentry
-SENTRY_LARAVEL_DSN=https://<key>@sentry.io/<project_id>
+# Pulse
+PULSE_ENABLED=true
+PULSE_SERVER_NAME=entropiq-prod
+
+# Admin phones for Pulse and Horizon (canonical 11 digits, no plus)
+ADMIN_PHONES=
+
+# Sentry (deferred, see docs/tech-debt.md)
+SENTRY_LARAVEL_DSN=
 
 # Почта (production SMTP)
 MAIL_MAILER=smtp
@@ -979,48 +994,40 @@ GIGACHAT_CLIENT_SECRET=<secret>
 
 ### 4.5. Скрипт бэкапа БД
 
-Создать `/var/www/entropiq-prod/scripts/backup-db.sh`:
+Скрипт лежит в репозитории: `scripts/backup-db.sh`. На VPS он запускается с хоста (не из контейнера) через cron.
+
+Поведение:
+
+* `umask 077`, каталог `/var/backups/entropiq` с правами `0700`, файлы дампа с правами `0600`;
+* формат PostgreSQL custom (`pg_dump -Fc`), имя файла `entropiq_YYYYMMDD_HHMMSS.dump`;
+* данные таблиц `pulse_*` в дамп не входят (схема таблиц сохраняется);
+* запись во временный файл, проверка `pg_restore -l`, затем атомарный `mv`;
+* ретеншн 7 дней для `.dump` и старых `.sql.gz`.
+
+Копировать скрипт на сервер отдельно не нужно, он приезжает с `git pull`. Cron:
 
 ```bash
-#!/bin/bash
+sudo mkdir -p /var/backups/entropiq
+sudo chmod 700 /var/backups/entropiq
 
-set -euo pipefail
-
-BACKUP_DIR="/var/backups/entropiq"
-CONTAINER_NAME="entropiq-prod-pgsql"
-DB_NAME="${DB_DATABASE:-entropiq}"
-DB_USER="${DB_USERNAME:-entropiq}"
-RETENTION_DAYS=7
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="${BACKUP_DIR}/entropiq_${TIMESTAMP}.sql.gz"
-
-mkdir -p "${BACKUP_DIR}"
-
-docker exec "${CONTAINER_NAME}" pg_dump -U "${DB_USER}" "${DB_NAME}" | gzip > "${BACKUP_FILE}"
-
-if [ -f "${BACKUP_FILE}" ] && [ -s "${BACKUP_FILE}" ]; then
-    echo "[$(date)] Backup created: ${BACKUP_FILE} ($(du -h "${BACKUP_FILE}" | cut -f1))"
-else
-    echo "[$(date)] ERROR: Backup failed or empty" >&2
-    exit 1
-fi
-
-find "${BACKUP_DIR}" -name "entropiq_*.sql.gz" -mtime +${RETENTION_DAYS} -delete
-
-echo "[$(date)] Old backups cleaned (retention: ${RETENTION_DAYS} days)"
-```
-
-Добавить в cron:
-
-```bash
-chmod +x /var/www/entropiq-prod/scripts/backup-db.sh
-
-# Открыть crontab
-crontab -e
-
-# Добавить (каждые 6 часов):
+# каждые 6 часов
 0 */6 * * * /var/www/entropiq-prod/scripts/backup-db.sh >> /var/log/entropiq-backup.log 2>&1
 ```
+
+Проверка после первого прогона:
+
+```bash
+DUMP="$(ls -1t /var/backups/entropiq/entropiq_*.dump | head -n 1)"
+docker exec -i entropiq-prod-pgsql pg_restore -l < "${DUMP}" | head
+```
+
+Накатывать дамп на боевую базу для проверки не нужно. Восстановление в отдельную БД:
+
+```bash
+docker exec -i entropiq-prod-pgsql pg_restore -U entropiq -d entropiq_restore --clean --if-exists < "${DUMP}"
+```
+
+Выгрузка копии за пределы VPS в ENQ-122 не входит. См. `docs/tech-debt.md`.
 
 ---
 
@@ -1350,11 +1357,14 @@ sail psql
 # Подключение к БД (stage/prod)
 docker compose -f <compose-file> exec pgsql psql -U entropiq -d entropiq
 
-# Ручной бэкап
-docker compose -f <compose-file> exec pgsql pg_dump -U entropiq entropiq > backup.sql
+# Ручной бэкап (custom format)
+docker exec entropiq-prod-pgsql pg_dump -U entropiq -Fc --exclude-table-data='pulse_*' entropiq > backup.dump
 
-# Восстановление из бэкапа
-cat backup.sql | docker compose -f <compose-file> exec -T pgsql psql -U entropiq -d entropiq
+# Проверка оглавления дампа
+docker exec -i entropiq-prod-pgsql pg_restore -l < backup.dump
+
+# Восстановление из бэкапа в указанную БД
+docker exec -i entropiq-prod-pgsql pg_restore -U entropiq -d entropiq --clean --if-exists < backup.dump
 ```
 
 ### 7.3. Redis
