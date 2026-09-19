@@ -39,6 +39,7 @@ return [
         'driver' => env('SMS_DRIVER', 'log'),
         'demo_phone' => env('SMS_DEMO_PHONE', '79990000000'),
         'demo_code' => env('SMS_DEMO_CODE', '1111'),
+        'fixed_code' => filter_var(env('SMS_FIXED_CODE', true), FILTER_VALIDATE_BOOLEAN),
     ],
 
     'admin' => [

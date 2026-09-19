@@ -1008,6 +1008,7 @@ GIGACHAT_CLIENT_SECRET=<secret>
 
 ```bash
 sudo mkdir -p /var/backups/entropiq
+sudo chown -R $USER:$USER /var/backups/entropiq
 sudo chmod 700 /var/backups/entropiq
 
 # каждые 6 часов
