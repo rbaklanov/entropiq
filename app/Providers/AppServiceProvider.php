@@ -12,6 +12,7 @@ use App\Contracts\PaymentServiceInterface;
 use App\Contracts\SmsServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
 use App\Integrations\SmsAero\SmsAeroConnector;
+use App\Models\User;
 use App\Services\AiAdviceService;
 use App\Services\AnalyticsService;
 use App\Services\ExportService;
@@ -24,8 +25,10 @@ use App\Services\SmsAeroService;
 use App\Services\SubscriptionService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Pulse\Facades\Pulse;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -84,5 +87,12 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('sms', fn () => Limit::perMinute(1)->by(request()->ip()));
 
         RateLimiter::for('verify', fn () => Limit::perMinute(5)->by(request()->ip()));
+
+        Gate::define('viewPulse', fn (?User $user): bool => $user?->isAdmin() === true);
+
+        Pulse::user(fn (User $user): array => [
+            'name' => $user->name ?: $user->phone,
+            'extra' => $user->phone,
+        ]);
     }
 }
