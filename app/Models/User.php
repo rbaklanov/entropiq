@@ -117,6 +117,54 @@ class User extends Authenticatable
         return $digits;
     }
 
+    /**
+     * @param  array<mixed>|string  $raw
+     * @return array<int, string>
+     */
+    public static function parseAdminPhones(array|string $raw, string $demoPhone = ''): array
+    {
+        $items = is_array($raw) ? $raw : explode(',', $raw);
+        $canonicalDemo = $demoPhone !== '' ? self::canonicalPhone($demoPhone) : '';
+
+        return array_values(array_filter(
+            array_map(
+                static function (mixed $phone) use ($canonicalDemo): string {
+                    if (! is_string($phone) && ! is_numeric($phone)) {
+                        return '';
+                    }
+
+                    $canonical = self::canonicalPhone((string) $phone);
+
+                    if (strlen($canonical) !== 11 || ! str_starts_with($canonical, '7')) {
+                        return '';
+                    }
+
+                    if ($canonicalDemo !== '' && $canonical === $canonicalDemo) {
+                        return '';
+                    }
+
+                    return $canonical;
+                },
+                $items
+            ),
+            static fn (string $phone): bool => $phone !== ''
+        ));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function adminPhones(): array
+    {
+        $adminConfig = config('services.admin.phones', '');
+        $demoPhone = config('services.sms.demo_phone');
+
+        return self::parseAdminPhones(
+            is_array($adminConfig) || is_string($adminConfig) ? $adminConfig : '',
+            is_string($demoPhone) ? $demoPhone : ''
+        );
+    }
+
     public function isAdmin(): bool
     {
         $phone = self::canonicalPhone((string) $this->phone);
@@ -130,21 +178,6 @@ class User extends Authenticatable
             return false;
         }
 
-        $adminPhones = config('services.admin.phones');
-        if (! is_array($adminPhones) || $adminPhones === []) {
-            return false;
-        }
-
-        foreach ($adminPhones as $adminPhone) {
-            if (! is_string($adminPhone) || $adminPhone === '') {
-                continue;
-            }
-
-            if ($phone === self::canonicalPhone($adminPhone)) {
-                return true;
-            }
-        }
-
-        return false;
+        return in_array($phone, self::adminPhones(), true);
     }
 }

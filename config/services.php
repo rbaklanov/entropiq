@@ -42,30 +42,7 @@ return [
     ],
 
     'admin' => [
-        'phones' => array_values(array_filter(
-            array_map(
-                static function (string $phone): string {
-                    $digits = preg_replace('/\D+/', '', $phone) ?? '';
-
-                    if (strlen($digits) === 11 && str_starts_with($digits, '8')) {
-                        $digits = '7'.substr($digits, 1);
-                    }
-
-                    if (strlen($digits) !== 11 || ! str_starts_with($digits, '7')) {
-                        return '';
-                    }
-
-                    $demoPhone = preg_replace('/\D+/', '', (string) env('SMS_DEMO_PHONE', '79990000000')) ?? '';
-
-                    if ($demoPhone !== '' && $digits === $demoPhone) {
-                        return '';
-                    }
-
-                    return $digits;
-                },
-                explode(',', (string) env('ADMIN_PHONES', ''))
-            )
-        )),
+        'phones' => env('ADMIN_PHONES', ''),
     ],
 
     'sms_aero' => [

@@ -61,21 +61,24 @@ describe('User::isAdmin', function () {
 
         expect($user->isAdmin())->toBeFalse();
     });
+
+    it('works when admin phones are configured as a comma separated string', function () {
+        config()->set('services.admin.phones', '79610893196, +7 (900) 111-22-33');
+
+        $user = new User(['phone' => '79610893196']);
+
+        expect($user->isAdmin())->toBeTrue();
+    });
 });
 
-describe('services.admin.phones config parsing', function () {
-    afterEach(function () {
-        putenv('ADMIN_PHONES');
-        putenv('SMS_DEMO_PHONE');
-    });
-
+describe('User::parseAdminPhones', function () {
     it('parses formatted comma-separated phones and normalizes 8 to 7', function () {
-        putenv('ADMIN_PHONES=79610893196, +7 (900) 111-22-33, 89112223344');
-        putenv('SMS_DEMO_PHONE=79990000000');
+        $phones = User::parseAdminPhones(
+            '79610893196, +7 (900) 111-22-33, 89112223344',
+            '79990000000'
+        );
 
-        $config = require config_path('services.php');
-
-        expect($config['admin']['phones'])->toBe([
+        expect($phones)->toBe([
             '79610893196',
             '79001112233',
             '79112223344',
@@ -83,21 +86,48 @@ describe('services.admin.phones config parsing', function () {
     });
 
     it('filters out invalid phone lengths, demo phone and empty entries', function () {
-        putenv('ADMIN_PHONES=123, 79990000000, , 89610893196, 712345678901');
-        putenv('SMS_DEMO_PHONE=79990000000');
+        $phones = User::parseAdminPhones(
+            '123, 79990000000, , 89610893196, 712345678901',
+            '79990000000'
+        );
 
-        $config = require config_path('services.php');
-
-        expect($config['admin']['phones'])->toBe([
+        expect($phones)->toBe([
             '79610893196',
         ]);
     });
 
-    it('returns empty array when ADMIN_PHONES is empty', function () {
-        putenv('ADMIN_PHONES=');
+    it('returns empty array when input is empty string or empty array', function () {
+        expect(User::parseAdminPhones('', '79990000000'))->toBe([])
+            ->and(User::parseAdminPhones([], '79990000000'))->toBe([]);
+    });
 
-        $config = require config_path('services.php');
+    it('accepts array of phones as input', function () {
+        $phones = User::parseAdminPhones(['+79610893196', '89001112233']);
 
-        expect($config['admin']['phones'])->toBe([]);
+        expect($phones)->toBe([
+            '79610893196',
+            '79001112233',
+        ]);
+    });
+});
+
+describe('User::adminPhones', function () {
+    it('reads and parses admin phones from string config', function () {
+        config()->set('services.admin.phones', '79610893196, 89001112233');
+        config()->set('services.sms.demo_phone', '79990000000');
+
+        expect(User::adminPhones())->toBe([
+            '79610893196',
+            '79001112233',
+        ]);
+    });
+
+    it('reads and parses admin phones from array config', function () {
+        config()->set('services.admin.phones', ['79610893196']);
+        config()->set('services.sms.demo_phone', '79990000000');
+
+        expect(User::adminPhones())->toBe([
+            '79610893196',
+        ]);
     });
 });
