@@ -967,7 +967,7 @@ PULSE_SERVER_NAME=entropiq-prod
 # Admin phones for Pulse and Horizon (canonical 11 digits, no plus)
 ADMIN_PHONES=
 
-# Sentry (deferred, see docs/tech-debt.md)
+# Sentry (deferred, see docs/ai/tech-debt.md)
 SENTRY_LARAVEL_DSN=
 
 # Почта (production SMTP)
@@ -1028,7 +1028,7 @@ docker exec -i entropiq-prod-pgsql pg_restore -l < "${DUMP}" | head
 docker exec -i entropiq-prod-pgsql pg_restore -U entropiq -d entropiq_restore --clean --if-exists < "${DUMP}"
 ```
 
-Выгрузка копии за пределы VPS в ENQ-122 не входит. См. `docs/tech-debt.md`.
+Выгрузка копии за пределы VPS в ENQ-122 не входит. См. `docs/ai/tech-debt.md`.
 
 ---
 
