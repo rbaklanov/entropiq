@@ -245,5 +245,5 @@
 
 | # | Ключ | Задача | Часы | Статус |
 |---|------|--------|------|--------|
-| | [ENQ-125](https://rbaklanov.atlassian.net/browse/ENQ-125) | Финальный деплой + демо-данные | 4ч | ⬜ |
-| | [ENQ-126](https://rbaklanov.atlassian.net/browse/ENQ-126) | Презентация + сценарий демонстрации + репетиция | 6ч | ⬜ |
+| | [ENQ-125](https://rbaklanov.atlassian.net/browse/ENQ-125) | Финальный деплой + демо-данные | 4ч | ✅ |
+| | [ENQ-126](https://rbaklanov.atlassian.net/browse/ENQ-126) | Презентация + сценарий демонстрации + репетиция | 6ч | ✅ |
