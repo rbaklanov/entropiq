@@ -24,7 +24,7 @@
         </div>
         <div class="rounded-xl bg-white p-4 shadow-sm">
             <p class="text-small text-gray-500">{{ __('transactions.summary_balance') }}</p>
-            <x-money-display :amount="$summary['balance']" size="md" />
+            <x-money-display :amount="$summary['balance']" size="md" :showSign="true" />
         </div>
     </div>
 
