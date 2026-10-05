@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AiAdviceController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\TransactionsController;
@@ -31,6 +32,9 @@ Route::get('/', fn () => view('pages.guest.landing'))->name('landing');
 Route::get('/privacy', fn () => view('pages.guest.privacy'))->name('privacy');
 Route::get('/terms', fn () => view('pages.guest.terms'))->name('terms');
 Route::get('/faq', fn () => view('pages.guest.faq'))->name('faq');
+Route::get('/email/verify/{user}/{hash}', EmailVerificationController::class)
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('email.verify');
 
 Route::get('/locale/{locale}', function (string $locale) {
     if (in_array($locale, ['ru', 'en'], true)) {

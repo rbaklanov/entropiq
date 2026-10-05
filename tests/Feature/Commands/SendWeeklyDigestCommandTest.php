@@ -14,7 +14,7 @@ describe('digest:send command', function () {
     it('sends digest to users with email_weekly enabled', function () {
         Mail::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->withVerifiedEmail()->create();
         NotificationSetting::factory()->for($user)->create(['email_weekly' => true]);
 
         $category = Category::factory()->expense()->create();
@@ -33,7 +33,7 @@ describe('digest:send command', function () {
     it('skips users with email_weekly disabled', function () {
         Mail::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->withVerifiedEmail()->create();
         NotificationSetting::factory()->for($user)->allDisabled()->create();
 
         $this->artisan('digest:send')
@@ -45,7 +45,7 @@ describe('digest:send command', function () {
     it('sends to users without notification settings (defaults are enabled)', function () {
         Mail::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->withVerifiedEmail()->create();
 
         $this->artisan('digest:send')
             ->assertSuccessful()
@@ -57,10 +57,10 @@ describe('digest:send command', function () {
     it('sends only to specific user with --user option', function () {
         Mail::fake();
 
-        $target = User::factory()->create();
+        $target = User::factory()->withVerifiedEmail('target@example.com')->create();
         NotificationSetting::factory()->for($target)->create(['email_weekly' => true]);
 
-        $other = User::factory()->create();
+        $other = User::factory()->withVerifiedEmail('other@example.com')->create();
         NotificationSetting::factory()->for($other)->create(['email_weekly' => true]);
 
         $this->artisan("digest:send --user={$target->id}")
@@ -74,7 +74,7 @@ describe('digest:send command', function () {
     it('includes correct digest data', function () {
         Mail::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->withVerifiedEmail()->create();
         NotificationSetting::factory()->for($user)->create(['email_weekly' => true]);
 
         $incomeCategory = Category::factory()->income()->create();
@@ -102,5 +102,77 @@ describe('digest:send command', function () {
 
             return true;
         });
+    });
+
+    it('sends the digest to the stored email address', function () {
+        Mail::fake();
+
+        $user = User::factory()->withVerifiedEmail('person@example.com')->create();
+
+        $this->artisan('digest:send')->assertSuccessful();
+
+        Mail::assertSent(WeeklyDigestMail::class, fn ($mail) => $mail->hasTo('person@example.com') && $mail->user->id === $user->id);
+    });
+
+    it('skips users without a verified email and reports how many', function () {
+        Mail::fake();
+
+        $withEmail = User::factory()->withVerifiedEmail()->create();
+        User::factory()->create();
+        User::factory()->create();
+
+        $this->artisan('digest:send')
+            ->assertSuccessful()
+            ->expectsOutputToContain('Skipped 2 user(s) without a verified email.')
+            ->expectsOutputToContain('Sending digest to 1 user(s)');
+
+        Mail::assertSent(WeeklyDigestMail::class, 1);
+        Mail::assertSent(WeeklyDigestMail::class, fn ($mail) => $mail->user->id === $withEmail->id);
+    });
+
+    it('sends nothing when no user has an email', function () {
+        Mail::fake();
+
+        User::factory()->count(2)->create();
+
+        $this->artisan('digest:send')
+            ->assertSuccessful()
+            ->expectsOutputToContain('Skipped 2 user(s) without a verified email.');
+
+        Mail::assertNothingSent();
+    });
+
+    it('never sends to placeholder addresses', function () {
+        Mail::fake();
+
+        User::factory()->create();
+
+        $this->artisan('digest:send')->assertSuccessful();
+
+        Mail::assertNothingSent();
+    });
+
+    it('skips a specific user without email', function () {
+        Mail::fake();
+
+        $user = User::factory()->create();
+
+        $this->artisan("digest:send --user={$user->id}")
+            ->assertSuccessful()
+            ->expectsOutputToContain('Skipped 1 user(s) without a verified email.');
+
+        Mail::assertNothingSent();
+    });
+
+    it('skips users whose email is not verified yet', function () {
+        Mail::fake();
+
+        User::factory()->withEmail('pending@example.com')->create();
+
+        $this->artisan('digest:send')
+            ->assertSuccessful()
+            ->expectsOutputToContain('Skipped 1 user(s) without a verified email.');
+
+        Mail::assertNothingSent();
     });
 });
