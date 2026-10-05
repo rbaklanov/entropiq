@@ -168,3 +168,38 @@ describe('cpi:import values', function () {
         unlink($tmpFile);
     });
 });
+
+describe('cpi:import and official data', function () {
+    it('does not overwrite values loaded from EMISS', function () {
+        $this->artisan('cpi:import', ['--categories' => true])->assertSuccessful();
+
+        $record = collect(json_decode(file_get_contents(database_path('data/cpi_values.json')), true)['data'])->first();
+
+        CpiValue::where('period', $record['period'])
+            ->where('category_code', $record['category_code'])
+            ->update(['value' => 123.45, 'source' => 'emiss']);
+
+        $this->artisan('cpi:import')->assertSuccessful();
+
+        $stored = CpiValue::where('period', $record['period'])->where('category_code', $record['category_code'])->first();
+
+        expect((float) $stored->value)->toBe(123.45)
+            ->and($stored->source)->toBe('emiss');
+    });
+
+    it('still overwrites values from other sources', function () {
+        $this->artisan('cpi:import', ['--categories' => true])->assertSuccessful();
+
+        $record = collect(json_decode(file_get_contents(database_path('data/cpi_values.json')), true)['data'])->first();
+
+        CpiValue::where('period', $record['period'])
+            ->where('category_code', $record['category_code'])
+            ->update(['value' => 123.45, 'source' => 'manual']);
+
+        $this->artisan('cpi:import')->assertSuccessful();
+
+        $stored = CpiValue::where('period', $record['period'])->where('category_code', $record['category_code'])->first();
+
+        expect((float) $stored->value)->toBe((float) $record['value']);
+    });
+});
