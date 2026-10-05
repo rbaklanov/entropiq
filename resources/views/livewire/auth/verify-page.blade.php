@@ -2,7 +2,7 @@
     <div class="rounded-2xl bg-white p-8 shadow-sm">
         <h1 class="text-center text-h2">{{ __('auth.verify_title') }}</h1>
         <p class="mt-2 text-center text-caption text-gray-500">
-            {{ __('auth.verify_subtitle', ['phone' => $phone]) }}
+            {{ __('auth.verify_subtitle', ['phone' => $maskedPhone]) }}
         </p>
 
         @if(session('success'))

@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'login_title' => 'Вход в Entropiq',
+    'login_title' => 'Войти или создать аккаунт',
     'login_subtitle' => 'Введите номер телефона для входа или регистрации',
     'phone_label' => 'Номер телефона',
     'send_code' => 'Получить код',
-    'verify_title' => 'Введите код',
+    'verify_title' => 'Введите код из SMS',
     'verify_subtitle' => 'Мы отправили SMS-код на номер :phone',
     'verify_button' => 'Подтвердить',
     'change_number' => 'Изменить номер',

@@ -153,7 +153,7 @@
     @if(!$goal->isAchieved())
         @if($premiumLocked)
             <x-premium-lock :message="__('subscription.feature_scenarios')">
-                @include('livewire.goals.partials.scenarios', ['scenarios' => $scenarios])
+                @include('livewire.goals.partials.scenarios-placeholder')
             </x-premium-lock>
         @else
             @include('livewire.goals.partials.scenarios', ['scenarios' => $scenarios])
@@ -164,7 +164,7 @@
     @if(!$goal->isAchieved())
         @if($premiumLocked)
             <x-premium-lock :message="__('goals.what_if')">
-                @include('livewire.goals.partials.what-if', ['whatIfAmount' => $whatIfAmount, 'whatIf' => $whatIf])
+                @include('livewire.goals.partials.what-if-placeholder')
             </x-premium-lock>
         @else
             @include('livewire.goals.partials.what-if', ['whatIfAmount' => $whatIfAmount, 'whatIf' => $whatIf])
