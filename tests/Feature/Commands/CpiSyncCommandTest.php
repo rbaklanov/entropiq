@@ -2,11 +2,13 @@
 
 use App\Contracts\CpiProviderInterface;
 use App\Dto\CpiRecord;
+use App\Mail\CpiSyncFailedMail;
 use App\Models\CpiCategory;
 use App\Models\CpiValue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
 
@@ -134,5 +136,81 @@ describe('cpi:sync', function () {
         app()->instance(CpiProviderInterface::class, $provider);
 
         $this->artisan('cpi:sync --from=2023-01-01 --to=2023-12-31')->assertSuccessful();
+    });
+});
+
+describe('cpi:sync failure alert', function () {
+    beforeEach(function () {
+        Mail::fake();
+        config(['services.admin.email' => 'admin@example.com']);
+    });
+
+    it('emails the administrator when EMISS is unavailable', function () {
+        fakeCpiProvider(new RuntimeException('connection timed out'));
+
+        $this->artisan('cpi:sync --from=2023-01-01 --to=2023-12-31')->assertFailed();
+
+        Mail::assertSent(CpiSyncFailedMail::class, function (CpiSyncFailedMail $mail) {
+            return $mail->hasTo('admin@example.com')
+                && $mail->reason === 'connection timed out'
+                && $mail->periodFrom->toDateString() === '2023-01-01'
+                && $mail->periodTo->toDateString() === '2023-12-31';
+        });
+    });
+
+    it('emails the administrator when EMISS returns nothing', function () {
+        fakeCpiProvider(collect());
+
+        $this->artisan('cpi:sync')->assertFailed();
+
+        Mail::assertSent(CpiSyncFailedMail::class, fn (CpiSyncFailedMail $mail) => $mail->reason === __('cpi_alert.reason_empty'));
+    });
+
+    it('emails the administrator when no value passes validation', function () {
+        fakeCpiProvider(collect([new CpiRecord(Carbon::create(2026, 8, 1), 'TOTAL', 0.0)]));
+
+        $this->artisan('cpi:sync')->assertFailed();
+
+        Mail::assertSent(CpiSyncFailedMail::class, fn (CpiSyncFailedMail $mail) => $mail->reason === __('cpi_alert.reason_nothing_stored'));
+    });
+
+    it('does not email on success', function () {
+        fakeCpiProvider(collect([new CpiRecord(Carbon::create(2026, 8, 1), 'TOTAL', 100.4)]));
+
+        $this->artisan('cpi:sync')->assertSuccessful();
+
+        Mail::assertNothingSent();
+    });
+
+    it('sends at most one alert per throttle window', function () {
+        fakeCpiProvider(new RuntimeException('connection timed out'));
+
+        $this->artisan('cpi:sync')->assertFailed();
+        $this->artisan('cpi:sync')->assertFailed();
+
+        Mail::assertSentCount(1);
+    });
+
+    it('skips the alert when no administrator email is configured', function () {
+        config(['services.admin.email' => null]);
+        fakeCpiProvider(new RuntimeException('connection timed out'));
+
+        $this->artisan('cpi:sync')->assertFailed();
+
+        Mail::assertNothingSent();
+    });
+
+    it('keeps the failure exit code when the mailer itself fails', function () {
+        Mail::shouldReceive('to')->andThrow(new RuntimeException('smtp down'));
+        fakeCpiProvider(new RuntimeException('connection timed out'));
+
+        $this->artisan('cpi:sync')->assertFailed();
+    });
+
+    it('renders the alert with the reason and the manual command', function () {
+        $mail = new CpiSyncFailedMail('connection timed out', Carbon::create(2026, 7, 1), Carbon::create(2026, 10, 5), Carbon::create(2026, 10, 5, 6));
+
+        $mail->assertSeeInHtml('connection timed out');
+        $mail->assertSeeInHtml('php artisan cpi:sync --from=2026-07-01');
     });
 });

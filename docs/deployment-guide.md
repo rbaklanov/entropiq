@@ -967,6 +967,9 @@ PULSE_SERVER_NAME=entropiq-prod
 # Admin phones for Pulse and Horizon (canonical 11 digits, no plus)
 ADMIN_PHONES=
 
+# Адрес администратора для оповещений о сбоях (сейчас: сбой cpi:sync). Без него письма не уходят
+ADMIN_EMAIL=
+
 # Sentry (deferred, see docs/ai/tech-debt.md)
 SENTRY_LARAVEL_DSN=
 

@@ -124,6 +124,17 @@ class CpiImportCommand extends Command
                 continue;
             }
 
+            $alreadyOfficial = CpiValue::where('period', $period->toDateString())
+                ->where('category_code', $record['category_code'])
+                ->where('source', 'emiss')
+                ->exists();
+
+            if ($alreadyOfficial) {
+                $skipped++;
+
+                continue;
+            }
+
             CpiValue::updateOrCreate(
                 [
                     'period' => $period->toDateString(),
