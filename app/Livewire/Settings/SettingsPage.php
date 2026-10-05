@@ -82,6 +82,8 @@ class SettingsPage extends Component
         $user->update([
             'phone' => "deleted_{$user->id}",
             'name' => null,
+            'email' => null,
+            'email_verified_at' => null,
         ]);
 
         $user->delete();

@@ -48,6 +48,34 @@
                 @enderror
             </div>
 
+            {{-- Email --}}
+            <div>
+                <label for="email" class="mb-1 block text-sm font-medium text-gray-700">{{ __('settings.email') }}</label>
+                <input
+                    id="email"
+                    type="email"
+                    wire:model="email"
+                    class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                    placeholder="{{ __('settings.email_placeholder') }}"
+                >
+                @error('email')
+                    <p class="mt-1 text-xs text-danger-500">{{ $message }}</p>
+                @enderror
+
+                @if(filled($user->email))
+                    @if($user->hasVerifiedEmail())
+                        <p class="mt-1 text-xs text-success-700" data-testid="email-status">{{ __('settings.email_verified') }}</p>
+                    @else
+                        <p class="mt-1 text-xs text-warning-700" data-testid="email-status">
+                            {{ __('settings.email_unverified') }}
+                            <button type="button" wire:click="resendVerification" class="font-medium text-primary-600 hover:text-primary-700">
+                                {{ __('settings.email_resend') }}
+                            </button>
+                        </p>
+                    @endif
+                @endif
+            </div>
+
             {{-- Phone (read-only) --}}
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">{{ __('settings.phone') }}</label>

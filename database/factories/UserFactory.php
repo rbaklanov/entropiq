@@ -23,6 +23,22 @@ class UserFactory extends Factory
         ];
     }
 
+    public function withEmail(string $email = 'user@example.com'): static
+    {
+        return $this->state(fn () => [
+            'email' => $email,
+            'email_verified_at' => null,
+        ]);
+    }
+
+    public function withVerifiedEmail(string $email = 'user@example.com'): static
+    {
+        return $this->state(fn () => [
+            'email' => $email,
+            'email_verified_at' => now(),
+        ]);
+    }
+
     public function premium(): static
     {
         return $this->state(fn () => [

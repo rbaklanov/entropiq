@@ -6,7 +6,13 @@ return [
     'name_placeholder' => 'Как вас зовут?',
     'phone' => 'Телефон',
 
+    'email' => 'Email',
+    'email_placeholder' => 'name@example.com',
+    'email_verified' => 'Адрес подтверждён',
+    'email_unverified' => 'Адрес не подтверждён. Сводка не отправляется.',
+    'email_resend' => 'Отправить письмо ещё раз',
     'email_weekly' => 'Еженедельная сводка на email',
+    'email_weekly_needs_email' => 'Укажите и подтвердите email в профиле',
     'push_goals' => 'Уведомления о целях',
     'push_ai_advice' => 'Уведомления об AI-советах',
 
