@@ -74,11 +74,13 @@ class Analytics extends Component
         $locale = app()->getLocale();
 
         $periodLocked = ! $subscriptionService->canViewPeriod(auth()->user(), $from);
+        $exportParams = ['from' => $from->toDateString(), 'to' => $to->toDateString()];
 
         if ($periodLocked) {
             return view('livewire.analytics', [
                 'periodLocked' => true,
                 'locale' => $locale,
+                'exportParams' => $exportParams,
             ]);
         }
 
@@ -95,6 +97,7 @@ class Analytics extends Component
         return view('livewire.analytics', array_merge($data, [
             'periodLocked' => false,
             'locale' => $locale,
+            'exportParams' => $exportParams,
         ]));
     }
 

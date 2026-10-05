@@ -9,4 +9,9 @@ return [
     'comment' => 'Comment',
     'income' => 'Income',
     'expense' => 'Expense',
+    'balance' => 'Balance',
+    'pdf_title' => 'Entropiq transactions',
+    'period' => 'Period',
+    'period_all' => 'All time',
+    'generated' => 'Generated',
 ];

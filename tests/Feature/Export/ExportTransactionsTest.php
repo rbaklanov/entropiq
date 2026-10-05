@@ -4,6 +4,7 @@ use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 uses(RefreshDatabase::class);
 
@@ -114,5 +115,103 @@ describe('export:transactions command', function () {
         expect($content)->toContain('50,00');
 
         @unlink($output);
+    });
+});
+
+describe('GET /analytics/export formats', function () {
+    beforeEach(function () {
+        $this->user = User::factory()->premium()->onboarded()->create(['phone_verified_at' => now()]);
+
+        Transaction::factory()->for($this->user)->expense()->create([
+            'category_id' => Category::factory()->expense()->create()->id,
+            'amount' => 150000,
+            'date' => '2026-03-15',
+            'comment' => 'Аренда',
+        ]);
+    });
+
+    it('downloads a PDF document', function () {
+        $response = $this->actingAs($this->user)
+            ->get('/analytics/export?format=pdf')
+            ->assertOk();
+
+        expect($response->headers->get('Content-Type'))->toContain('application/pdf')
+            ->and($response->streamedContent())->toStartWith('%PDF');
+    });
+
+    it('downloads an Excel workbook with the transaction rows', function () {
+        $response = $this->actingAs($this->user)
+            ->get('/analytics/export?format=xlsx&from=2026-03-01&to=2026-03-31')
+            ->assertOk();
+
+        $path = tempnam(sys_get_temp_dir(), 'xlsx');
+        file_put_contents($path, $response->streamedContent());
+
+        $rows = IOFactory::load($path)->getActiveSheet()->toArray();
+        @unlink($path);
+
+        expect($rows)->toHaveCount(2)
+            ->and($rows[0][0])->toBe(__('export.date'))
+            ->and($rows[1][2])->not->toBeEmpty()
+            ->and($rows[1][5])->toBe('Аренда');
+    });
+
+    it('applies the date filter to the Excel workbook', function () {
+        $response = $this->actingAs($this->user)
+            ->get('/analytics/export?format=xlsx&from=2026-04-01&to=2026-04-30')
+            ->assertOk();
+
+        $path = tempnam(sys_get_temp_dir(), 'xlsx');
+        file_put_contents($path, $response->streamedContent());
+
+        $rows = IOFactory::load($path)->getActiveSheet()->toArray();
+        @unlink($path);
+
+        expect($rows)->toHaveCount(1);
+    });
+
+    it('rejects an unknown format', function () {
+        $this->actingAs($this->user)
+            ->getJson('/analytics/export?format=docx')
+            ->assertUnprocessable();
+    });
+
+    it('does not export other users transactions', function () {
+        $other = User::factory()->premium()->onboarded()->create(['phone_verified_at' => now()]);
+
+        $response = $this->actingAs($other)->get('/analytics/export?format=csv')->assertOk();
+
+        expect(trim($response->streamedContent()))->not->toContain('Аренда');
+    });
+
+    it('requires premium for PDF and Excel', function () {
+        $free = User::factory()->onboarded()->create(['phone_verified_at' => now()]);
+
+        $this->actingAs($free)->get('/analytics/export?format=pdf')->assertRedirect(route('settings.subscription'));
+        $this->actingAs($free)->get('/analytics/export?format=xlsx')->assertRedirect(route('settings.subscription'));
+    });
+});
+
+describe('export buttons on the analytics page', function () {
+    it('links free users to the subscription page with a lock', function () {
+        $free = User::factory()->onboarded()->create(['phone_verified_at' => now()]);
+
+        $this->actingAs($free)
+            ->get(route('analytics'))
+            ->assertOk()
+            ->assertSee('🔒')
+            ->assertSee(route('settings.subscription'))
+            ->assertDontSee('format=pdf', false);
+    });
+
+    it('links premium users to the export without a lock', function () {
+        $premium = User::factory()->premium()->onboarded()->create(['phone_verified_at' => now()]);
+
+        $this->actingAs($premium)
+            ->get(route('analytics'))
+            ->assertOk()
+            ->assertSee('format=pdf', false)
+            ->assertSee('format=xlsx', false)
+            ->assertDontSee('🔒');
     });
 });

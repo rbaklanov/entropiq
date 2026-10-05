@@ -1,7 +1,24 @@
 <div class="space-y-6">
 
     {{-- Header --}}
-    <h1 class="text-h1">{{ __('analytics.title') }}</h1>
+    <div class="flex items-center justify-between gap-3">
+        <h1 class="text-h1">{{ __('analytics.title') }}</h1>
+
+        <div class="flex gap-2">
+            @foreach(['pdf' => 'export_pdf', 'xlsx' => 'export_excel'] as $format => $labelKey)
+                <a
+                    href="{{ auth()->user()->isPremium() ? route('analytics.export', $exportParams + ['format' => $format]) : route('settings.subscription') }}"
+                    @unless(auth()->user()->isPremium()) title="{{ __('subscription.premium_lock') }}" @endunless
+                    class="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                >
+                    @unless(auth()->user()->isPremium())
+                        <span aria-hidden="true">🔒</span>
+                    @endunless
+                    {{ __("analytics.{$labelKey}") }}
+                </a>
+            @endforeach
+        </div>
+    </div>
 
     {{-- Tabs --}}
     <div class="flex gap-1 rounded-xl bg-gray-100 p-1">
