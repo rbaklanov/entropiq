@@ -158,17 +158,16 @@ class GoalDetail extends Component
     {
         $calc = app(GoalCalculationService::class);
         $monthsLeft = $calc->getMonthsLeft($this->goal);
-        $scenarios = $calc->buildScenarios($this->goal);
-        $whatIf = $calc->whatIf($this->goal, $this->whatIfAmount);
+        $subscriptionService = app(SubscriptionServiceInterface::class);
+        $premiumLocked = ! $subscriptionService->isPremium(auth()->user());
+        $scenarios = $premiumLocked ? [] : $calc->buildScenarios($this->goal);
+        $whatIf = $premiumLocked ? [] : $calc->whatIf($this->goal, $this->whatIfAmount);
         $contributions = $this->goal->contributions()
             ->orderByDesc('date')
             ->orderByDesc('id')
             ->get();
 
         $paceStatus = $this->calculatePaceStatus($calc);
-
-        $subscriptionService = app(SubscriptionServiceInterface::class);
-        $premiumLocked = ! $subscriptionService->isPremium(auth()->user());
 
         return view('livewire.goals.goal-detail', [
             'progress' => $this->goal->progressPercent(),

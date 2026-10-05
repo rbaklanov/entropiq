@@ -1,7 +1,7 @@
 @props(['message' => __('subscription.premium_lock'), 'actionUrl' => route('settings.subscription')])
 
 <div {{ $attributes->merge(['class' => 'relative overflow-hidden rounded-xl']) }}>
-    <div class="pointer-events-none select-none blur-sm">
+    <div class="pointer-events-none select-none blur-sm" aria-hidden="true" inert>
         {{ $slot }}
     </div>
 
