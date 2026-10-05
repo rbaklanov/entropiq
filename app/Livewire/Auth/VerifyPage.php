@@ -5,6 +5,7 @@ namespace App\Livewire\Auth;
 use App\Actions\SendVerificationCode;
 use App\Actions\VerifyCode;
 use App\Models\VerificationCode;
+use App\Support\PhoneFormatter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -71,11 +72,13 @@ class VerifyPage extends Component
 
         $this->dispatch('timer-reset');
 
-        session()->flash('success', __('auth.code_sent', ['phone' => $this->phone]));
+        session()->flash('success', __('auth.code_sent', ['phone' => PhoneFormatter::mask($this->phone)]));
     }
 
     public function render(): View
     {
-        return view('livewire.auth.verify-page');
+        return view('livewire.auth.verify-page', [
+            'maskedPhone' => PhoneFormatter::mask($this->phone),
+        ]);
     }
 }

@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'login_title' => 'Sign in to Entropiq',
+    'login_title' => 'Sign in or create an account',
     'login_subtitle' => 'Enter your phone number to sign in or register',
     'phone_label' => 'Phone number',
     'send_code' => 'Get code',
-    'verify_title' => 'Enter code',
+    'verify_title' => 'Enter the SMS code',
     'verify_subtitle' => 'We sent an SMS code to :phone',
     'verify_button' => 'Verify',
     'change_number' => 'Change number',

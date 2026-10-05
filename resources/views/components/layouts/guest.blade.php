@@ -22,8 +22,8 @@
         <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
             <a href="/" class="text-xl font-extrabold tracking-tight text-primary-600">Entropiq</a>
             <nav class="hidden items-center gap-6 sm:flex">
-                <a href="#features" class="text-sm font-medium text-gray-600 transition hover:text-gray-900">{{ __('landing.features_title') }}</a>
-                <a href="#pricing" class="text-sm font-medium text-gray-600 transition hover:text-gray-900">{{ __('landing.pricing_title') }}</a>
+                <a href="{{ route('landing') }}#features" class="text-sm font-medium text-gray-600 transition hover:text-gray-900">{{ __('landing.features_title') }}</a>
+                <a href="{{ route('landing') }}#pricing" class="text-sm font-medium text-gray-600 transition hover:text-gray-900">{{ __('landing.pricing_title') }}</a>
             </nav>
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-1 rounded-lg border border-gray-200 p-0.5">
@@ -65,7 +65,7 @@
                 <div>
                     <h4 class="text-sm font-semibold text-gray-900">{{ __('landing.footer_support') }}</h4>
                     <nav class="mt-3 flex flex-col gap-2">
-                        <a href="#" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_faq') }}</a>
+                        <a href="{{ route('faq') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_faq') }}</a>
                         <a href="mailto:support@entropiq.ru" class="text-sm text-gray-500 transition hover:text-gray-700">support@entropiq.ru</a>
                     </nav>
                 </div>
