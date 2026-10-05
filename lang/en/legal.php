@@ -58,7 +58,7 @@ return [
 
     'terms_plans_title' => '4. Subscription Plans',
     'terms_plans_free' => 'Free plan with limitations (50 transactions/month, 1 goal).',
-    'terms_plans_premium' => 'Premium plan with extended features (299 ₽/month).',
+    'terms_plans_premium' => 'Premium plan with extended features (99 ₽/month).',
     'terms_plans_refund' => 'Premium refunds are available within 7 days of purchase.',
 
     'terms_obligations_title' => '5. User Obligations',

@@ -13,7 +13,13 @@
 
     $sign = '';
     if ($showSign) {
-        $sign = $type === 'expense' ? '−' : '+';
+        $sign = match (true) {
+            $type === 'expense' => '−',
+            $type === 'income' => '+',
+            $amount < 0 => '−',
+            $amount > 0 => '+',
+            default => '',
+        };
     }
 
     $colorClass = match($type) {

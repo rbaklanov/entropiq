@@ -86,7 +86,7 @@ return [
     'pricing_no_export' => 'PDF/Excel export',
     'pricing_free_cta' => 'Start for free',
     'pricing_premium' => 'Premium',
-    'pricing_premium_price' => '299 ₽',
+    'pricing_premium_price' => '99 ₽',
     'pricing_month' => 'mo',
     'pricing_premium_transactions' => 'Unlimited transactions',
     'pricing_premium_goals' => 'Up to 10 goals',
