@@ -385,3 +385,132 @@ describe('calculateInflationLoss', function () {
         expect($result)->toBe(0);
     });
 });
+
+function seedPublishedTotalCpi(int $months, float $value = 100.5, int $endYear = 2025, int $endMonth = 12): void
+{
+    $end = Carbon::create($endYear, $endMonth, 1);
+
+    for ($i = 0; $i < $months; $i++) {
+        CpiValue::create([
+            'period' => $end->copy()->subMonths($i),
+            'category_code' => 'TOTAL',
+            'value' => $value,
+            'source' => 'test',
+        ]);
+    }
+}
+
+describe('estimation of unpublished months', function () {
+    it('estimates months after the latest published CPI by the recent average', function () {
+        seedPublishedTotalCpi(12);
+
+        $result = $this->service->calculateRealValue(1000000, Carbon::create(2026, 1, 1), Carbon::create(2026, 2, 1));
+
+        expect($result)->toBe((int) round(1000000 / (1.005 ** 2)));
+    });
+
+    it('combines published and estimated months in one period', function () {
+        seedPublishedTotalCpi(12);
+
+        $result = $this->service->calculateRealValue(1000000, Carbon::create(2025, 12, 1), Carbon::create(2026, 1, 1));
+
+        expect($result)->toBe((int) round(1000000 / (1.005 ** 2)));
+    });
+
+    it('uses the geometric mean of the last 12 published months', function () {
+        foreach (range(1, 12) as $month) {
+            CpiValue::create([
+                'period' => Carbon::create(2025, $month, 1),
+                'category_code' => 'TOTAL',
+                'value' => $month % 2 === 0 ? 101.0 : 100.0,
+                'source' => 'test',
+            ]);
+        }
+
+        $result = $this->service->calculateRealValue(1000000, Carbon::create(2026, 1, 1), Carbon::create(2026, 1, 1));
+
+        expect($result)->toBe((int) round(1000000 / sqrt(1.01)));
+    });
+
+    it('ignores published months older than the last 12', function () {
+        CpiValue::create(['period' => Carbon::create(2024, 12, 1), 'category_code' => 'TOTAL', 'value' => 125.0, 'source' => 'test']);
+        seedPublishedTotalCpi(12);
+
+        $result = $this->service->calculateRealValue(1000000, Carbon::create(2026, 1, 1), Carbon::create(2026, 1, 1));
+
+        expect($result)->toBe((int) round(1000000 / 1.005));
+    });
+
+    it('keeps real value unchanged for fully published periods', function () {
+        seedPublishedTotalCpi(12);
+
+        $result = $this->service->calculateRealValue(1000000, Carbon::create(2025, 11, 1), Carbon::create(2025, 12, 1));
+
+        expect($result)->toBe((int) round(1000000 / (1.005 ** 2)));
+    });
+
+    it('does not store estimates', function () {
+        seedPublishedTotalCpi(12);
+
+        $this->service->calculateRealValue(1000000, Carbon::create(2026, 1, 1), Carbon::create(2026, 6, 1));
+
+        expect(CpiValue::count())->toBe(12);
+    });
+
+    it('stays nominal when no CPI has ever been published', function () {
+        $result = $this->service->calculateRealValue(1000000, Carbon::create(2026, 1, 1), Carbon::create(2026, 2, 1));
+
+        expect($result)->toBe(1000000);
+    });
+
+    it('stays nominal for a past period before the first published month', function () {
+        seedPublishedTotalCpi(12);
+
+        $result = $this->service->calculateRealValue(1000000, Carbon::create(2015, 1, 1), Carbon::create(2015, 3, 1));
+
+        expect($result)->toBe(1000000);
+    });
+
+    it('applies the estimate to inflation loss', function () {
+        seedPublishedTotalCpi(12);
+        $category = createCategory();
+
+        Transaction::factory()->for($this->user)->income()->create([
+            'category_id' => $category->id,
+            'amount' => 1000000,
+            'date' => Carbon::create(2026, 1, 15),
+        ]);
+
+        $result = $this->service->calculateInflationLoss(
+            $this->user->id,
+            Carbon::create(2026, 1, 1),
+            Carbon::create(2026, 1, 31),
+        );
+
+        expect($result)->toBe((int) round(1000000 * (1 - 1 / 1.005)));
+    });
+});
+
+describe('published period tracking', function () {
+    it('returns the latest published month', function () {
+        seedPublishedTotalCpi(3);
+
+        expect($this->service->latestPublishedPeriod()->toDateString())->toBe('2025-12-01');
+    });
+
+    it('returns null when nothing is published', function () {
+        expect($this->service->latestPublishedPeriod())->toBeNull();
+    });
+
+    it('reports estimated months only when the period ends after the latest published month', function () {
+        seedPublishedTotalCpi(3);
+
+        expect($this->service->hasEstimatedMonths(Carbon::create(2025, 10, 1), Carbon::create(2025, 12, 31)))->toBeFalse()
+            ->and($this->service->hasEstimatedMonths(Carbon::create(2025, 12, 1), Carbon::create(2026, 1, 31)))->toBeTrue()
+            ->and($this->service->hasEstimatedMonths(Carbon::create(2026, 2, 1), Carbon::create(2026, 2, 28)))->toBeTrue();
+    });
+
+    it('never reports estimated months without published data', function () {
+        expect($this->service->hasEstimatedMonths(Carbon::create(2026, 1, 1), Carbon::create(2026, 2, 28)))->toBeFalse();
+    });
+});

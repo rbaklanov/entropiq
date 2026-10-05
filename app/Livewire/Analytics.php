@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Contracts\AnalyticsServiceInterface;
+use App\Contracts\InflationServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -139,7 +140,13 @@ class Analytics extends Component
 
         $dateFormat = $granularity === 'month' ? 'M y' : 'd M';
 
+        $inflation = app(InflationServiceInterface::class);
+        $cpiPublishedMonth = $inflation->hasEstimatedMonths($from, $to)
+            ? $inflation->latestPublishedPeriod()?->translatedFormat('F Y')
+            : null;
+
         return [
+            'cpiPublishedMonth' => $cpiPublishedMonth,
             'dynamics' => $dynamics,
             'inflationLoss' => $inflationLoss,
             'chartSeries' => [
