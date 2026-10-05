@@ -44,6 +44,7 @@ return [
 
     'admin' => [
         'phones' => env('ADMIN_PHONES', ''),
+        'email' => env('ADMIN_EMAIL'),
     ],
 
     'llm' => [
