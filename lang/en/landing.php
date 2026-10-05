@@ -105,8 +105,7 @@ return [
     'footer_terms' => 'Terms of service',
     'footer_faq' => 'FAQ',
     'faq_title' => 'FAQ',
-    'faq_empty' => 'This section is being prepared. Answers to common questions will appear here soon.',
-    'faq_support' => 'If you need help right now, write to',
+    'faq_support' => 'Did not find an answer? Write to',
 
     'footer_support' => 'Support',
 ];
