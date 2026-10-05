@@ -50,6 +50,11 @@ return [
         'driver' => env('LLM_DRIVER', 'fake'),
     ],
 
+    'emiss' => [
+        'base_url' => env('EMISS_BASE_URL', 'https://www.fedstat.ru'),
+        'timeout' => (float) env('EMISS_TIMEOUT', 30.0),
+    ],
+
     'gigachat' => [
         'client_id' => env('GIGACHAT_CLIENT_ID', ''),
         'client_secret' => env('GIGACHAT_CLIENT_SECRET', ''),

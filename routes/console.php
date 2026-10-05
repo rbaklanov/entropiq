@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('recurring:process')->daily();
 Schedule::command('advice:generate')->daily();
 Schedule::command('digest:send')->weeklyOn(1, '09:00');
+Schedule::command('cpi:sync')->dailyAt('06:00')->withoutOverlapping()->onOneServer();
