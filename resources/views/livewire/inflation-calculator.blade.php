@@ -85,6 +85,12 @@
                 <span>{{ __('landing.calculator_bar_kept') }}</span>
                 <span>{{ $percentage }}%</span>
             </div>
+
+            @if($cpiPublishedMonth)
+                <p class="mt-3 text-left text-xs text-gray-400" data-testid="cpi-estimate-note">
+                    {{ __('analytics.cpi_estimate_note', ['month' => $cpiPublishedMonth]) }}
+                </p>
+            @endif
         </div>
     @endif
 </div>

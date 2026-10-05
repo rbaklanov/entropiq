@@ -14,6 +14,10 @@ interface InflationServiceInterface
 
     public function calculateRealValue(int $nominalAmount, Carbon $fromDate, Carbon $toDate): int;
 
+    public function latestPublishedPeriod(): ?Carbon;
+
+    public function hasEstimatedMonths(Carbon $from, Carbon $to): bool;
+
     public function calculatePersonalInflation(int $userId, Carbon $from, Carbon $to): float;
 
     public function calculateInflationLoss(int $userId, Carbon $from, Carbon $to): int;

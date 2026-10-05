@@ -73,14 +73,12 @@ class InflationService implements InflationServiceInterface
     /**
      * Convert nominal amount to real value (adjusted for inflation).
      *
-     * Real = Nominal / compound_index
+     * Real = Nominal / compound_index. Months after the latest published CPI
+     * are estimated, see monthlyIndicesForPeriod().
      */
     public function calculateRealValue(int $nominalAmount, Carbon $fromDate, Carbon $toDate): int
     {
-        $values = CpiValue::where('category_code', self::TOTAL_CATEGORY_CODE)
-            ->whereBetween('period', [$fromDate->copy()->startOfMonth(), $toDate->copy()->startOfMonth()])
-            ->orderBy('period')
-            ->pluck('value');
+        $values = $this->monthlyIndicesForPeriod($fromDate, $toDate);
 
         if ($values->isEmpty()) {
             return $nominalAmount;
@@ -89,6 +87,20 @@ class InflationService implements InflationServiceInterface
         $compoundIndex = $this->compoundIndex($values);
 
         return (int) round($nominalAmount / $compoundIndex);
+    }
+
+    public function latestPublishedPeriod(): ?Carbon
+    {
+        $period = CpiValue::where('category_code', self::TOTAL_CATEGORY_CODE)->max('period');
+
+        return $period ? Carbon::parse($period)->startOfMonth() : null;
+    }
+
+    public function hasEstimatedMonths(Carbon $from, Carbon $to): bool
+    {
+        $latest = $this->latestPublishedPeriod();
+
+        return $latest !== null && $to->copy()->startOfMonth()->gt($latest);
     }
 
     /**
@@ -171,10 +183,7 @@ class InflationService implements InflationServiceInterface
             return 0;
         }
 
-        $values = CpiValue::where('category_code', self::TOTAL_CATEGORY_CODE)
-            ->whereBetween('period', [$from->copy()->startOfMonth(), $to->copy()->startOfMonth()])
-            ->orderBy('period')
-            ->pluck('value');
+        $values = $this->monthlyIndicesForPeriod($from, $to);
 
         if ($values->isEmpty()) {
             return 0;
@@ -186,10 +195,51 @@ class InflationService implements InflationServiceInterface
     }
 
     /**
+     * Monthly TOTAL indices for the months of a period. Months after the latest
+     * published CPI (Rosstat publishes with a lag) are filled with the geometric
+     * mean of the last 12 published months. Estimates are never stored.
+     *
+     * @return Collection<int, float>
+     */
+    private function monthlyIndicesForPeriod(Carbon $from, Carbon $to): Collection
+    {
+        $first = $from->copy()->startOfMonth();
+        $last = $to->copy()->startOfMonth();
+
+        $published = CpiValue::where('category_code', self::TOTAL_CATEGORY_CODE)
+            ->whereBetween('period', [$first, $last])
+            ->orderBy('period')
+            ->get();
+
+        $values = $published->map(fn (CpiValue $cpi) => (float) $cpi->value);
+        $latest = $this->latestPublishedPeriod();
+
+        if ($latest === null || $last->lte($latest)) {
+            return $values;
+        }
+
+        $estimate = $this->estimatedMonthlyIndex();
+        $firstEstimated = $latest->copy()->addMonth()->max($first);
+        $estimatedMonths = (int) $firstEstimated->diffInMonths($last) + 1;
+
+        return $values->concat(array_fill(0, $estimatedMonths, $estimate));
+    }
+
+    private function estimatedMonthlyIndex(): float
+    {
+        $recent = CpiValue::where('category_code', self::TOTAL_CATEGORY_CODE)
+            ->orderByDesc('period')
+            ->limit(12)
+            ->pluck('value');
+
+        return pow($this->compoundIndex($recent), 1 / $recent->count()) * 100.0;
+    }
+
+    /**
      * Multiply monthly indices (each like 100.84) into a compound multiplier.
      * E.g. 100.84 × 100.46 / 100^2 = 1.013...
      *
-     * @param  Collection<int, string|float>  $monthlyValues
+     * @param  Collection<int, float|string>|Collection<int, float>  $monthlyValues
      */
     private function compoundIndex(Collection $monthlyValues): float
     {
