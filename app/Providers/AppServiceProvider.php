@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\AdminAlertServiceInterface;
 use App\Contracts\AiAdviceServiceInterface;
 use App\Contracts\AnalyticsServiceInterface;
 use App\Contracts\CpiProviderInterface;
@@ -15,6 +16,7 @@ use App\Contracts\SubscriptionServiceInterface;
 use App\Integrations\Emiss\EmissConnector;
 use App\Integrations\SmsAero\SmsAeroConnector;
 use App\Models\User;
+use App\Services\AdminAlertService;
 use App\Services\AiAdviceService;
 use App\Services\AnalyticsService;
 use App\Services\EmissCpiService;
@@ -47,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
         ExportServiceInterface::class => ExportService::class,
         AnalyticsServiceInterface::class => AnalyticsService::class,
         CpiProviderInterface::class => EmissCpiService::class,
+        AdminAlertServiceInterface::class => AdminAlertService::class,
     ];
 
     public function register(): void
