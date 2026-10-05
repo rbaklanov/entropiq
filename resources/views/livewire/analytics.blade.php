@@ -145,6 +145,12 @@
                         />
                     </div>
 
+                    @if($cpiPublishedMonth)
+                        <p class="text-xs text-gray-500" data-testid="cpi-estimate-note">
+                            {{ __('analytics.cpi_estimate_note', ['month' => $cpiPublishedMonth]) }}
+                        </p>
+                    @endif
+
                     @if($inflationLoss > 0)
                         <div class="rounded-xl bg-warning-50 border border-warning-100 p-4">
                             <div class="flex items-start gap-3">

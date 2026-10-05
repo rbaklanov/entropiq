@@ -33,6 +33,8 @@ return [
 
     'total' => 'Total',
 
+    'cpi_estimate_note' => 'The consumer price index is published up to :month. For later months the real value is estimated using the average monthly index of the last 12 published months.',
+
     'no_data' => 'No data for the selected period',
     'no_data_hint' => 'Add transactions or select a different period',
 

@@ -21,6 +21,8 @@ class InflationCalculator extends Component
 
     public ?float $percentage = null;
 
+    public ?string $cpiPublishedMonth = null;
+
     public function mount(): void
     {
         $this->calculate();
@@ -62,6 +64,7 @@ class InflationCalculator extends Component
             $this->realValue = null;
             $this->loss = null;
             $this->percentage = null;
+            $this->cpiPublishedMonth = null;
 
             return;
         }
@@ -85,6 +88,9 @@ class InflationCalculator extends Component
             $realValueKopecks = (int) round($amountKopecks / $compoundRate);
         }
 
+        $this->cpiPublishedMonth = $inflationService->hasEstimatedMonths($fromDate, $toDate)
+            ? $inflationService->latestPublishedPeriod()?->translatedFormat('F Y')
+            : null;
         $this->realValue = $realValueKopecks;
         $this->loss = $amountKopecks - $realValueKopecks;
         $this->percentage = round($realValueKopecks / $amountKopecks * 100, 1);
