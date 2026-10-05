@@ -49,6 +49,7 @@ return [
 
     'attributes' => [
         'phone' => 'номер телефона',
+        'email' => 'email',
         'code' => 'код',
         'name' => 'имя',
         'amount' => 'сумма',

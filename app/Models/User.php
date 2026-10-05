@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Locale;
 use App\Enums\SubscriptionPlan;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -17,6 +18,8 @@ use Laravel\Sanctum\HasApiTokens;
 /**
  * @property Locale $locale
  * @property SubscriptionPlan $subscription_plan
+ * @property ?string $email
+ * @property ?Carbon $email_verified_at
  * @property ?Carbon $phone_verified_at
  * @property ?Carbon $onboarding_completed_at
  */
@@ -30,6 +33,8 @@ class User extends Authenticatable
     protected $fillable = [
         'phone',
         'name',
+        'email',
+        'email_verified_at',
         'locale',
         'currency_code',
         'subscription_plan',
@@ -44,8 +49,22 @@ class User extends Authenticatable
             'locale' => Locale::class,
             'subscription_plan' => SubscriptionPlan::class,
             'phone_verified_at' => 'datetime',
+            'email_verified_at' => 'datetime',
             'onboarding_completed_at' => 'datetime',
         ];
+    }
+
+    /** @return Attribute<string|null, string|null> */
+    protected function email(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => filled($value) ? mb_strtolower(trim($value)) : null,
+        );
+    }
+
+    public function hasVerifiedEmail(): bool
+    {
+        return filled($this->email) && $this->email_verified_at !== null;
     }
 
     /** @return HasMany<Transaction, $this> */

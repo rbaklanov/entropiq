@@ -58,10 +58,17 @@
         <h2 class="mb-4 text-sm font-semibold text-gray-900">{{ __('common.settings_notifications') }}</h2>
 
         <div class="space-y-4">
-            <label class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">{{ __('settings.email_weekly') }}</span>
-                <input type="checkbox" wire:model.live="emailWeekly" class="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-            </label>
+            @if($user->hasVerifiedEmail())
+                <label class="flex items-center justify-between">
+                    <span class="text-sm text-gray-700">{{ __('settings.email_weekly') }}</span>
+                    <input type="checkbox" wire:model.live="emailWeekly" class="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                </label>
+            @else
+                <div class="text-sm text-gray-500" data-testid="email-weekly-hint">
+                    {{ __('settings.email_weekly') }}.
+                    <a href="{{ route('settings.profile') }}" class="font-medium text-primary-600 hover:text-primary-700">{{ __('settings.email_weekly_needs_email') }}</a>
+                </div>
+            @endif
 
             <label class="flex items-center justify-between">
                 <span class="text-sm text-gray-700">{{ __('settings.push_goals') }}</span>

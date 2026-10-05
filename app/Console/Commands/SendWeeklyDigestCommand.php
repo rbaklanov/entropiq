@@ -29,25 +29,29 @@ class SendWeeklyDigestCommand extends Command
             $query->where('id', $userId);
         }
 
-        $users = $query->get();
+        [$recipients, $withoutEmail] = $query->get()->partition(
+            fn (User $user) => $user->hasVerifiedEmail()
+        );
 
-        if ($users->isEmpty()) {
+        if ($withoutEmail->isNotEmpty()) {
+            $this->warn("Skipped {$withoutEmail->count()} user(s) without a verified email.");
+        }
+
+        if ($recipients->isEmpty()) {
             $this->info(__('digest.no_recipients'));
 
             return self::SUCCESS;
         }
 
-        $this->info("Sending digest to {$users->count()} user(s)...");
+        $this->info("Sending digest to {$recipients->count()} user(s)...");
 
-        foreach ($users as $user) {
-            $this->info("Sending to user #{$user->id} ({$user->phone})...");
+        foreach ($recipients as $user) {
+            $this->info("Sending to user #{$user->id}...");
 
-            $email = $user->email ?? "user{$user->id}@entropiq.local";
-
-            Mail::to($email)->send(new WeeklyDigestMail($user, $from, $to));
+            Mail::to($user->email)->send(new WeeklyDigestMail($user, $from, $to));
         }
 
-        $this->comment("Sent {$users->count()} digest(s).");
+        $this->comment("Sent {$recipients->count()} digest(s).");
 
         return self::SUCCESS;
     }
