@@ -77,7 +77,8 @@ describe('FAQ page and footer links', function () {
         $this->get('/faq')
             ->assertOk()
             ->assertSee(__('landing.faq_title'))
-            ->assertSee(__('landing.faq_empty'));
+            ->assertSee(__('faq.sections.0.title'))
+            ->assertSee(__('faq.sections.0.items.0.q'));
     });
 
     it('links the footer FAQ to the FAQ page instead of a stub', function () {
