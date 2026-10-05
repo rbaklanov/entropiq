@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\AiAdviceServiceInterface;
 use App\Contracts\AnalyticsServiceInterface;
+use App\Contracts\CpiProviderInterface;
 use App\Contracts\ExportServiceInterface;
 use App\Contracts\GoalCalculationServiceInterface;
 use App\Contracts\InflationServiceInterface;
@@ -11,10 +12,12 @@ use App\Contracts\LlmServiceInterface;
 use App\Contracts\PaymentServiceInterface;
 use App\Contracts\SmsServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
+use App\Integrations\Emiss\EmissConnector;
 use App\Integrations\SmsAero\SmsAeroConnector;
 use App\Models\User;
 use App\Services\AiAdviceService;
 use App\Services\AnalyticsService;
+use App\Services\EmissCpiService;
 use App\Services\ExportService;
 use App\Services\FakeLlmService;
 use App\Services\FakePaymentService;
@@ -43,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
         SubscriptionServiceInterface::class => SubscriptionService::class,
         ExportServiceInterface::class => ExportService::class,
         AnalyticsServiceInterface::class => AnalyticsService::class,
+        CpiProviderInterface::class => EmissCpiService::class,
     ];
 
     public function register(): void
@@ -66,6 +70,11 @@ class AppServiceProvider extends ServiceProvider
                 timeout: $timeout,
             );
         });
+
+        $this->app->bind(EmissConnector::class, fn (): EmissConnector => new EmissConnector(
+            baseUrl: (string) config('services.emiss.base_url'),
+            timeout: (float) config('services.emiss.timeout'),
+        ));
 
         $this->app->bind(LlmServiceInterface::class, function (Container $app): LlmServiceInterface {
             $driver = config('services.llm.driver', 'fake');
