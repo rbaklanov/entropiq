@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\ExportServiceInterface;
-use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
+use App\Http\Requests\ExportTransactionsRequest;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportController extends Controller
@@ -13,18 +12,15 @@ class ExportController extends Controller
         private readonly ExportServiceInterface $exportService,
     ) {}
 
-    public function transactions(Request $request): StreamedResponse
+    public function transactions(ExportTransactionsRequest $request): StreamedResponse
     {
-        $filters = [];
+        $user = $request->user();
+        $filters = $request->filters();
 
-        if ($request->filled('from')) {
-            $filters['from'] = Carbon::parse($request->input('from'));
-        }
-
-        if ($request->filled('to')) {
-            $filters['to'] = Carbon::parse($request->input('to'));
-        }
-
-        return $this->exportService->transactionsToCsv($request->user(), $filters);
+        return match ($request->exportFormat()) {
+            'pdf' => $this->exportService->transactionsToPdf($user, $filters),
+            'xlsx' => $this->exportService->transactionsToExcel($user, $filters),
+            default => $this->exportService->transactionsToCsv($user, $filters),
+        };
     }
 }
