@@ -19,6 +19,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DemoSeeder extends Seeder
 {
@@ -28,22 +29,24 @@ class DemoSeeder extends Seeder
 
     public function run(): void
     {
-        $user = $this->createDemoUser();
+        DB::transaction(function () {
+            $user = $this->createDemoUser();
 
-        $this->command->info("Demo user created: {$user->phone}");
+            $this->command->info("Demo user created: {$user->phone}");
 
-        $categories = $this->getCategories();
-        $transactionCount = $this->seedTransactions($user, $categories);
+            $categories = $this->getCategories();
+            $transactionCount = $this->seedTransactions($user, $categories);
 
-        $this->command->info("Created {$transactionCount} transactions over 6 months.");
+            $this->command->info("Created {$transactionCount} transactions over 6 months.");
 
-        $this->seedRecurringRules($user, $categories);
-        $this->seedGoals($user);
-        $this->seedAiAdvice($user);
-        $this->seedSubscription($user);
-        $this->seedNotificationSettings($user);
+            $this->seedRecurringRules($user, $categories);
+            $this->seedGoals($user);
+            $this->seedAiAdvice($user);
+            $this->seedSubscription($user);
+            $this->seedNotificationSettings($user);
 
-        $this->command->info('DemoSeeder completed.');
+            $this->command->info('DemoSeeder completed.');
+        });
     }
 
     private function createDemoUser(): User
@@ -120,7 +123,7 @@ class DemoSeeder extends Seeder
 
         $freelance = $incomeCategories['Фриланс'] ?? null;
 
-        if ($freelance && fake()->boolean(40)) {
+        if ($freelance && random_int(1, 100) <= 40) {
             $this->createTransaction($user, $freelance, TransactionType::Income, $this->vary(25_000_00, 40), $this->randomDate($monthStart, $monthEnd), 'Проект');
             $count++;
         }
@@ -145,7 +148,7 @@ class DemoSeeder extends Seeder
                 continue;
             }
 
-            $times = fake()->numberBetween($config['min_times'], $config['max_times']);
+            $times = random_int($config['min_times'], $config['max_times']);
 
             for ($i = 0; $i < $times; $i++) {
                 $amount = $this->vary($config['avg_amount'], $config['variance'] ?? 20);
@@ -385,7 +388,7 @@ class DemoSeeder extends Seeder
             $remaining -= $amount;
 
             $monthsAgo = $count - $i;
-            $date = Carbon::now()->subMonths($monthsAgo)->addDays(fake()->numberBetween(1, 15));
+            $date = Carbon::now()->subMonths($monthsAgo)->addDays(random_int(1, 15));
 
             GoalContribution::create([
                 'goal_id' => $goal->id,
@@ -543,7 +546,7 @@ class DemoSeeder extends Seeder
 
     private function vary(int $baseAmount, int $variancePercent = 20): int
     {
-        $factor = 1 + (fake()->numberBetween(-$variancePercent, $variancePercent) / 100);
+        $factor = 1 + (random_int(-$variancePercent, $variancePercent) / 100);
 
         return (int) round($baseAmount * $factor);
     }
@@ -552,6 +555,6 @@ class DemoSeeder extends Seeder
     {
         $days = $start->diffInDays($end);
 
-        return $start->copy()->addDays(fake()->numberBetween(0, max(0, $days)));
+        return $start->copy()->addDays(random_int(0, max(0, $days)));
     }
 }
