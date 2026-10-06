@@ -8,6 +8,7 @@ use App\Enums\TransactionType;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Support\Money;
 use Illuminate\Support\Carbon;
 
 class SavingsOptimizationRule implements AdviceRuleInterface
@@ -73,12 +74,13 @@ class SavingsOptimizationRule implements AdviceRuleInterface
 
         $potentialSaving = (int) round($discretionaryTotal * self::SUGGESTED_CUT_PERCENT / 100);
         $monthlySaving = (int) round($potentialSaving / self::LOOKBACK_MONTHS);
+        $monthlySavingText = Money::amount($monthlySaving);
         $discretionaryPercent = (int) round($discretionaryShare * 100);
 
         return new AdvicePayload(
             ruleKey: 'savings_optimization',
             title: 'Потенциальная экономия',
-            body: "Необязательные расходы (кафе, развлечения, одежда, подписки) составляют {$discretionaryPercent}% от общих трат. Сокращение на 10% сэкономит ~{$monthlySaving} ₽/мес.",
+            body: "Необязательные расходы (кафе, развлечения, одежда, подписки) составляют {$discretionaryPercent}% от общих трат. Сокращение на 10% сэкономит ~{$monthlySavingText} ₽/мес.",
             basisData: [
                 'rule' => 'savings_optimization',
                 'discretionary_total' => (int) $discretionaryTotal,

@@ -120,8 +120,8 @@ describe('FakeLlmService', function () {
             basisData: [
                 'rule' => 'category_spike',
                 'category_name' => 'Продукты',
-                'current_total' => 50000,
-                'avg_monthly' => 30000,
+                'current_total' => 5000000,
+                'avg_monthly' => 3000000,
                 'growth_percent' => 67,
             ],
         );
@@ -129,7 +129,7 @@ describe('FakeLlmService', function () {
         $result = $llm->generateAdviceText($payload);
 
         expect($result['title'])->toContain('Продукты');
-        expect($result['body'])->toContain('50000');
+        expect($result['body'])->toContain('50 000 ₽')->toContain('30 000 ₽/мес');
         expect($result['body'])->toContain('67%');
     });
 
@@ -147,4 +147,19 @@ describe('FakeLlmService', function () {
         expect($result['title'])->toBe('Raw Title');
         expect($result['body'])->toBe('Raw Body');
     });
+});
+
+describe('FakeLlmService money formatting', function () {
+    it('shows rubles for every template that mentions money', function (string $rule, array $data, array $expected) {
+        $result = (new FakeLlmService)->generateAdviceText(new AdvicePayload($rule, 'raw', 'raw', $data));
+
+        foreach ($expected as $text) {
+            expect($result['title'].' '.$result['body'])->toContain($text);
+        }
+    })->with([
+        'overspending' => ['overspending', ['income' => 2191830, 'expense' => 3653050, 'overspend' => 1461220, 'overspend_percent' => 67], ['36 530,50 ₽', '21 918,30 ₽', '14 612,20 ₽']],
+        'unusual transaction' => ['unusual_transaction', ['category_name' => 'Кафе', 'amount' => 1317600, 'multiplier' => 11.4, 'date' => '2026-10-06'], ['13 176 ₽']],
+        'savings' => ['savings_optimization', ['discretionary_share_percent' => 26, 'monthly_saving' => 207460], ['2 074,60 ₽', '24 895,20 ₽']],
+        'category spike' => ['category_spike', ['category_name' => 'Кафе', 'current_total' => 1425600, 'avg_monthly' => 732000, 'growth_percent' => 95], ['14 256 ₽', '7 320 ₽/мес']],
+    ]);
 });
