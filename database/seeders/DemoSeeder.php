@@ -93,7 +93,7 @@ class DemoSeeder extends Seeder
         $user->transactions()->delete();
 
         $count = 0;
-        $startDate = Carbon::now()->subMonths(6)->startOfMonth();
+        $startDate = Carbon::now()->startOfMonth()->subMonths(6);
 
         for ($month = 0; $month < 6; $month++) {
             $monthStart = $startDate->copy()->addMonths($month);
@@ -104,7 +104,95 @@ class DemoSeeder extends Seeder
             $count += $this->seedMonthlyExpenses($user, $categories['expense'], $monthStart, $monthEnd, $monthNumber);
         }
 
-        return $count;
+        return $count + $this->seedCurrentMonth($user, $categories);
+    }
+
+    /**
+     * @param  array{expense: array<string, Category>, income: array<string, Category>}  $categories
+     */
+    private function seedCurrentMonth(User $user, array $categories): int
+    {
+        $today = Carbon::today();
+        $monthStart = $today->copy()->startOfMonth();
+        $elapsedShare = $today->day / $today->daysInMonth;
+
+        $count = $this->seedMonthlyExpenses($user, $categories['expense'], $monthStart, $today, $monthStart->month, $elapsedShare);
+
+        return $count + $this->seedCurrentMonthScenario($user, $categories, $monthStart);
+    }
+
+    /**
+     * Adds a growth in one category, a one off purchase and an advance that is smaller than the
+     * month's expenses, so the spike, unusual transaction and overspending advice rules all fire.
+     *
+     * @param  array{expense: array<string, Category>, income: array<string, Category>}  $categories
+     */
+    private function seedCurrentMonthScenario(User $user, array $categories, Carbon $monthStart): int
+    {
+        $dining = $categories['expense']['Кафе и рестораны'] ?? null;
+        $groceries = $categories['expense']['Продукты'] ?? null;
+        $salary = $categories['income']['Зарплата'] ?? null;
+
+        if (! $dining || ! $groceries || ! $salary) {
+            return 0;
+        }
+
+        $today = Carbon::today();
+
+        $this->createTransaction(
+            $user,
+            $dining,
+            TransactionType::Expense,
+            (int) ceil($this->previousMonthlyAverage($user, $dining, $monthStart) * 1.8),
+            $today,
+            'Корпоратив и ужин с командой',
+        );
+
+        $this->createTransaction(
+            $user,
+            $groceries,
+            TransactionType::Expense,
+            (int) ceil($this->unusualPurchaseThreshold($user, $groceries) * 1.5),
+            $today,
+            'Разовая закупка к празднику',
+        );
+
+        $monthExpenses = (int) $user->transactions()
+            ->where('type', TransactionType::Expense)
+            ->where('date', '>=', $monthStart)
+            ->sum('amount');
+
+        $this->createTransaction($user, $salary, TransactionType::Income, (int) round($monthExpenses * 0.6), $monthStart, 'Аванс');
+
+        return 3;
+    }
+
+    private function previousMonthlyAverage(User $user, Category $category, Carbon $monthStart): float
+    {
+        $total = (int) $user->transactions()
+            ->where('type', TransactionType::Expense)
+            ->where('category_id', $category->id)
+            ->where('date', '>=', $monthStart->copy()->subMonths(3))
+            ->where('date', '<', $monthStart)
+            ->sum('amount');
+
+        return $total / 3;
+    }
+
+    private function unusualPurchaseThreshold(User $user, Category $category): float
+    {
+        $stats = $user->transactions()
+            ->where('type', TransactionType::Expense)
+            ->where('category_id', $category->id)
+            ->where('date', '<', Carbon::now()->subWeek())
+            ->where('date', '>=', Carbon::now()->subMonths(3)->startOfMonth())
+            ->selectRaw('AVG(amount) as avg_amount, STDDEV(amount) as stddev_amount')
+            ->first();
+
+        $average = (float) $stats?->getAttribute('avg_amount');
+        $deviation = (float) $stats?->getAttribute('stddev_amount');
+
+        return $average + max($deviation, $average) * 3;
     }
 
     /**
@@ -134,7 +222,7 @@ class DemoSeeder extends Seeder
     /**
      * @param  array<string, Category>  $expenseCategories
      */
-    private function seedMonthlyExpenses(User $user, array $expenseCategories, Carbon $monthStart, Carbon $monthEnd, int $monthNumber): int
+    private function seedMonthlyExpenses(User $user, array $expenseCategories, Carbon $monthStart, Carbon $monthEnd, int $monthNumber, float $monthShare = 1.0): int
     {
         $isSummer = in_array($monthNumber, [6, 7, 8], true);
 
@@ -148,7 +236,7 @@ class DemoSeeder extends Seeder
                 continue;
             }
 
-            $times = random_int($config['min_times'], $config['max_times']);
+            $times = (int) round(random_int($config['min_times'], $config['max_times']) * $monthShare);
 
             for ($i = 0; $i < $times; $i++) {
                 $amount = $this->vary($config['avg_amount'], $config['variance'] ?? 20);
