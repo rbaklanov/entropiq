@@ -7,6 +7,7 @@ use App\Integrations\GigaChat\Requests\GetAccessTokenRequest;
 use App\Services\FakeLlmService;
 use App\Services\GigaChatService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 
@@ -222,5 +223,79 @@ describe('GigaChatService', function () {
         config(['services.llm.driver' => 'fake']);
         $service = app(LlmServiceInterface::class);
         expect($service)->toBeInstanceOf(FakeLlmService::class);
+    });
+});
+
+describe('GigaChat configuration', function () {
+    function gigaChatVerification(): bool|string
+    {
+        $service = app(GigaChatService::class);
+
+        return (new ReflectionProperty($service, 'verifySsl'))->getValue($service);
+    }
+
+    beforeEach(function () {
+        config([
+            'services.gigachat.verify_ssl' => true,
+            'services.gigachat.ca_bundle' => resource_path('certs/russian-trusted-ca.pem'),
+        ]);
+    });
+
+    it('verifies TLS against the bundled Russian CA file by default', function () {
+        expect(gigaChatVerification())->toBe(resource_path('certs/russian-trusted-ca.pem'));
+    });
+
+    it('can turn verification off explicitly', function () {
+        config(['services.gigachat.verify_ssl' => false]);
+
+        expect(gigaChatVerification())->toBeFalse();
+    });
+
+    it('accepts a custom CA file', function () {
+        $path = tempnam(sys_get_temp_dir(), 'ca-');
+        config(['services.gigachat.ca_bundle' => $path]);
+
+        expect(gigaChatVerification())->toBe($path);
+
+        unlink($path);
+    });
+
+    it('uses the system store when the CA file is missing', function () {
+        config(['services.gigachat.ca_bundle' => '/nonexistent/bundle.pem']);
+
+        expect(gigaChatVerification())->toBeTrue();
+    });
+
+    it('passes the CA file to both connectors', function () {
+        $connector = new App\Integrations\GigaChat\GigaChatOAuthConnector('id', 'secret', gigaChatVerification());
+
+        expect($connector->config()->get('verify'))->toBe(resource_path('certs/russian-trusted-ca.pem'));
+    });
+});
+
+describe('GigaChat missing credentials warning', function () {
+    it('warns once an hour that templates are used instead of the model', function () {
+        Log::spy();
+
+        $service = new GigaChatService(fallbackService: new FakeLlmService, clientId: '', clientSecret: '');
+
+        $service->generateAdviceText($this->payload);
+        $service->generateAdviceText($this->payload);
+        $service->generateAdviceText($this->payload);
+
+        Log::shouldHaveReceived('warning')->once()->with(Mockery::pattern('/credentials are not set/'));
+    });
+
+    it('does not warn about credentials when they are set', function () {
+        Log::spy();
+
+        MockClient::global([
+            GetAccessTokenRequest::class => $this->mockOAuthResponse,
+            ChatCompletionRequest::class => MockResponse::make(['choices' => [['message' => ['content' => json_encode(['title' => 't', 'body' => 'b'])]]]], 200),
+        ]);
+
+        (new GigaChatService(fallbackService: new FakeLlmService, clientId: 'id', clientSecret: 'secret'))->generateAdviceText($this->payload);
+
+        Log::shouldNotHaveReceived('warning', [Mockery::pattern('/credentials are not set/')]);
     });
 });

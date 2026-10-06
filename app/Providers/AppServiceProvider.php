@@ -54,6 +54,20 @@ class AppServiceProvider extends ServiceProvider
         AdminAlertServiceInterface::class => AdminAlertService::class,
     ];
 
+    /**
+     * @param  array<string, mixed>  $config
+     */
+    private function gigaChatTlsVerification(array $config): bool|string
+    {
+        if (! ($config['verify_ssl'] ?? true)) {
+            return false;
+        }
+
+        $bundle = $config['ca_bundle'] ?? null;
+
+        return is_string($bundle) && is_file($bundle) ? $bundle : true;
+    }
+
     public function register(): void
     {
         $this->app->bind(GigaChatService::class, function (Container $app): GigaChatService {
@@ -62,7 +76,7 @@ class AppServiceProvider extends ServiceProvider
             $clientSecret = is_array($config) && isset($config['client_secret']) ? (string) $config['client_secret'] : '';
             $scope = is_array($config) && isset($config['scope']) ? (string) $config['scope'] : 'GIGACHAT_API_PERS';
             $model = is_array($config) && isset($config['model']) ? (string) $config['model'] : 'GigaChat';
-            $verifySsl = is_array($config) && isset($config['verify_ssl']) ? (bool) $config['verify_ssl'] : false;
+            $verifySsl = $this->gigaChatTlsVerification(is_array($config) ? $config : []);
             $timeout = is_array($config) && isset($config['timeout']) ? (float) $config['timeout'] : 30.0;
 
             return new GigaChatService(

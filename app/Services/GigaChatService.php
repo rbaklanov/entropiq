@@ -16,6 +16,8 @@ class GigaChatService implements LlmServiceInterface
 {
     private const CACHE_PREFIX = 'gigachat:token:';
 
+    private const MISSING_CREDENTIALS_CACHE_KEY = 'gigachat:missing-credentials-warned';
+
     private const DEFAULT_TOKEN_TTL_SECONDS = 1500;
 
     private const EXPIRY_SAFETY_MARGIN_SECONDS = 120;
@@ -26,7 +28,7 @@ class GigaChatService implements LlmServiceInterface
         private readonly string $clientSecret,
         private readonly string $scope = 'GIGACHAT_API_PERS',
         private readonly string $model = 'GigaChat',
-        private readonly bool|string $verifySsl = false,
+        private readonly bool|string $verifySsl = true,
         private readonly float $timeout = 30.0,
         private ?GigaChatOAuthConnector $oauthConnector = null,
         private ?GigaChatConnector $gigachatConnector = null,
@@ -38,7 +40,9 @@ class GigaChatService implements LlmServiceInterface
     public function generateAdviceText(AdvicePayload $payload): array
     {
         if (empty($this->clientId) || empty($this->clientSecret)) {
-            Log::debug('GigaChat credentials are not set, using FakeLlmService fallback');
+            if (Cache::add(self::MISSING_CREDENTIALS_CACHE_KEY, true, now()->addHour())) {
+                Log::warning('GigaChat credentials are not set, advice texts come from FakeLlmService templates');
+            }
 
             return $this->fallbackService->generateAdviceText($payload);
         }

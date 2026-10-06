@@ -19,7 +19,7 @@ class GigaChatConnector extends Connector
 
     public function __construct(
         public readonly string $accessToken,
-        public readonly bool|string $verifySsl = false,
+        public readonly bool|string $verifySsl = true,
         ?float $timeout = null,
     ) {
         if ($timeout !== null) {
