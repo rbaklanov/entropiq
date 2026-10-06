@@ -3,10 +3,12 @@
 namespace App\Livewire;
 
 use App\Contracts\InflationServiceInterface;
+use App\Contracts\SubscriptionServiceInterface;
 use App\Enums\TransactionType;
 use App\Models\AiAdvice;
 use App\Models\Goal;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Services\GoalCalculationService;
 use App\Services\TransactionService;
 use Illuminate\Support\Carbon;
@@ -21,12 +23,25 @@ class Dashboard extends Component
 
     private const TOP_CATEGORIES_LIMIT = 5;
 
+    private function isAdviceLocked(SubscriptionServiceInterface $subscriptionService, User $user, ?AiAdvice $advice): bool
+    {
+        if ($advice === null) {
+            return false;
+        }
+
+        $openAdviceId = $subscriptionService->openAdviceId($user);
+
+        return $openAdviceId !== null && $openAdviceId !== $advice->id;
+    }
+
     public function render(): View
     {
         $service = app(TransactionService::class);
         $inflation = app(InflationServiceInterface::class);
         $calc = app(GoalCalculationService::class);
-        $userId = auth()->id();
+        $user = auth()->user();
+        $userId = $user->id;
+        $subscriptionService = app(SubscriptionServiceInterface::class);
 
         $monthStart = Carbon::now()->startOfMonth();
         $monthEnd = Carbon::now()->endOfMonth();
@@ -115,6 +130,8 @@ class Dashboard extends Component
             'personalInflation' => $personalInflation,
             'goalData' => $goalData,
             'dailyAdvice' => $dailyAdvice,
+            'adviceTeaser' => ! $subscriptionService->isPremium($user),
+            'adviceLocked' => $this->isAdviceLocked($subscriptionService, $user, $dailyAdvice),
         ]);
     }
 }

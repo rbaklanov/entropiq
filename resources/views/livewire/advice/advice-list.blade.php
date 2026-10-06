@@ -15,7 +15,11 @@
     @else
         <div class="space-y-3">
             @foreach($advices as $advice)
-                <x-ai-advice-card :advice="$advice" />
+                <x-ai-advice-card
+                    :advice="$advice"
+                    :teaser="!$premium"
+                    :locked="$openAdviceId !== null && $advice->id !== $openAdviceId"
+                />
             @endforeach
         </div>
     @endif

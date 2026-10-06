@@ -45,7 +45,7 @@
 
     {{-- Daily advice --}}
     @if($dailyAdvice)
-        <x-ai-advice-card :advice="$dailyAdvice" />
+        <x-ai-advice-card :advice="$dailyAdvice" :teaser="$adviceTeaser" :locked="$adviceLocked" />
     @endif
 
     {{-- Goals ribbon --}}

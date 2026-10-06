@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Contracts\SubscriptionServiceInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AiAdviceCollection;
 use App\Http\Resources\AiAdviceResource;
 use App\Models\AiAdvice;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class AiAdviceController extends Controller
 {
@@ -16,13 +16,13 @@ class AiAdviceController extends Controller
         private readonly SubscriptionServiceInterface $subscriptionService,
     ) {}
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): AiAdviceCollection
     {
         $advices = AiAdvice::where('user_id', $request->user()->id)
             ->orderByDesc('generated_at')
             ->paginate(20);
 
-        return AiAdviceResource::collection($advices);
+        return new AiAdviceCollection($advices);
     }
 
     public function show(Request $request, AiAdvice $advice): AiAdviceResource|JsonResponse

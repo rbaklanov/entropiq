@@ -41,25 +41,26 @@ class SubscriptionService implements SubscriptionServiceInterface
         return $this->goalsRemaining($user) > 0;
     }
 
-    public function canViewAdvice(User $user, AiAdvice $advice): bool
+    public function openAdviceId(User $user): ?int
     {
         if ($user->isPremium()) {
-            return true;
+            return null;
         }
-
-        $weekStart = Carbon::now()->startOfWeek();
 
         $firstViewedThisWeek = AiAdvice::where('user_id', $user->id)
             ->where('is_read', true)
-            ->where('updated_at', '>=', $weekStart)
+            ->where('updated_at', '>=', Carbon::now()->startOfWeek())
             ->orderBy('updated_at')
             ->first();
 
-        if (! $firstViewedThisWeek) {
-            return true;
-        }
+        return $firstViewedThisWeek?->id;
+    }
 
-        return $firstViewedThisWeek->id === $advice->id;
+    public function canViewAdvice(User $user, AiAdvice $advice): bool
+    {
+        $openAdviceId = $this->openAdviceId($user);
+
+        return $openAdviceId === null || $openAdviceId === $advice->id;
     }
 
     public function canViewPeriod(User $user, Carbon $periodStart): bool
