@@ -26,6 +26,7 @@ return [
     'personal_inflation' => 'Your inflation',
     'average_inflation' => 'National average',
     'inflation_explanation' => 'Calculated based on your spending structure and Rosstat category price indices',
+    'inflation_basis' => 'Category indices and the national average are annualized over the last 12 published months (through :month). The selected period only determines the structure of your spending.',
     'inflation_category' => 'Category',
     'inflation_share' => 'Budget share',
     'inflation_cpi' => 'Category CPI',

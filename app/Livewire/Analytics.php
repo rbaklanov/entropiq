@@ -170,6 +170,7 @@ class Analytics extends Component
         $breakdown = $analytics->getPersonalInflationBreakdown($userId, $from, $to);
 
         return [
+            'cpiBasisMonth' => app(InflationServiceInterface::class)->latestPublishedPeriod()?->translatedFormat('F Y'),
             'personalRate' => $breakdown['personal_rate'],
             'officialRate' => $breakdown['official_rate'],
             'breakdown' => $breakdown['breakdown'],
