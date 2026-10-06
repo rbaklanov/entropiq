@@ -126,7 +126,7 @@ class CpiImportCommand extends Command
 
             $alreadyOfficial = CpiValue::where('period', $period->toDateString())
                 ->where('category_code', $record['category_code'])
-                ->where('source', 'emiss')
+                ->whereIn('source', CpiValue::OFFICIAL_SOURCES)
                 ->exists();
 
             if ($alreadyOfficial) {

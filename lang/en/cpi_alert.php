@@ -15,7 +15,7 @@ return [
     'stale_latest' => 'Latest published month',
     'stale_expected' => 'Expected no earlier than',
     'stale_none' => 'no data',
-    'stale_causes' => 'Possible causes: the scheduler is not running (check storage/logs/scheduler.log and supervisor), EMISS changed its response format or stopped returning the "All goods and services" item. Until data appears, real amounts for new months are estimated.',
-    'reason_empty' => 'EMISS returned no data for the requested period.',
+    'stale_causes' => 'Possible causes: the scheduler is not running (check storage/logs/scheduler.log and supervisor), the source (EMISS or Rosstat) is unreachable from the server, changed its data format or stopped returning "All goods and services". Until data appears, real amounts for new months are estimated.',
+    'reason_empty' => 'The data source returned no values for the requested period.',
     'reason_nothing_stored' => 'EMISS returned data, but no value passed validation.',
 ];

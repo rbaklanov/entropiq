@@ -214,3 +214,17 @@ describe('cpi:sync failure alert', function () {
         $mail->assertSeeInHtml('php artisan cpi:sync --from=2026-07-01');
     });
 });
+
+describe('cpi:sync source labels', function () {
+    it('stores the source reported by the provider', function () {
+        fakeCpiProvider(collect([
+            new CpiRecord(Carbon::create(2026, 8, 1), 'TOTAL', 99.92, CpiValue::SOURCE_ROSSTAT_WORKBOOK),
+            new CpiRecord(Carbon::create(2026, 8, 1), 'FOOD', 99.74),
+        ]));
+
+        $this->artisan('cpi:sync')->assertSuccessful();
+
+        expect(CpiValue::where('category_code', 'TOTAL')->value('source'))->toBe('rosstat_xlsx')
+            ->and(CpiValue::where('category_code', 'FOOD')->value('source'))->toBe('emiss');
+    });
+});

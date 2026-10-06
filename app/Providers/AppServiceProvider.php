@@ -14,11 +14,13 @@ use App\Contracts\PaymentServiceInterface;
 use App\Contracts\SmsServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
 use App\Integrations\Emiss\EmissConnector;
+use App\Integrations\Rosstat\RosstatConnector;
 use App\Integrations\SmsAero\SmsAeroConnector;
 use App\Models\User;
 use App\Services\AdminAlertService;
 use App\Services\AiAdviceService;
 use App\Services\AnalyticsService;
+use App\Services\ChainedCpiProvider;
 use App\Services\EmissCpiService;
 use App\Services\ExportService;
 use App\Services\FakeLlmService;
@@ -27,6 +29,7 @@ use App\Services\GigaChatService;
 use App\Services\GoalCalculationService;
 use App\Services\InflationService;
 use App\Services\LogSmsService;
+use App\Services\RosstatCpiService;
 use App\Services\SmsAeroService;
 use App\Services\SubscriptionService;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -48,7 +51,6 @@ class AppServiceProvider extends ServiceProvider
         SubscriptionServiceInterface::class => SubscriptionService::class,
         ExportServiceInterface::class => ExportService::class,
         AnalyticsServiceInterface::class => AnalyticsService::class,
-        CpiProviderInterface::class => EmissCpiService::class,
         AdminAlertServiceInterface::class => AdminAlertService::class,
     ];
 
@@ -72,6 +74,23 @@ class AppServiceProvider extends ServiceProvider
                 verifySsl: $verifySsl,
                 timeout: $timeout,
             );
+        });
+
+        $this->app->bind(RosstatConnector::class, fn (): RosstatConnector => new RosstatConnector(
+            baseUrl: (string) config('services.rosstat.base_url'),
+            timeout: (float) config('services.rosstat.timeout'),
+            caBundle: config('services.rosstat.ca_bundle'),
+        ));
+
+        $this->app->bind(CpiProviderInterface::class, function (Container $app): CpiProviderInterface {
+            return match (config('services.cpi.provider')) {
+                'emiss' => $app->make(EmissCpiService::class),
+                'rosstat' => $app->make(RosstatCpiService::class),
+                default => new ChainedCpiProvider([
+                    $app->make(EmissCpiService::class),
+                    $app->make(RosstatCpiService::class),
+                ]),
+            };
         });
 
         $this->app->bind(EmissConnector::class, fn (): EmissConnector => new EmissConnector(
