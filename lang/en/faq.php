@@ -28,7 +28,7 @@ return [
                 ],
                 [
                     'q' => 'Where does the inflation data come from?',
-                    'a' => 'From the consumer price index published by Rosstat, which we receive through EMISS (fedstat.ru), the official statistics portal. The data is updated once a month.',
+                    'a' => 'From the consumer price index published by Rosstat. We receive it from official sources: the EMISS portal (fedstat.ru) or directly from the Rosstat website. The data is updated once a month.',
                 ],
                 [
                     'q' => 'Why is the real balance estimated for the most recent months?',

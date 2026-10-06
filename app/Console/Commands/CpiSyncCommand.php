@@ -20,9 +20,7 @@ class CpiSyncCommand extends Command
         {--to= : End of the period (YYYY-MM-DD). Default: today}
         {--no-alert : Do not email the administrator when the sync fails}';
 
-    protected $description = 'Fetch monthly CPI from EMISS (fedstat.ru) and store it in cpi_values';
-
-    private const SOURCE = 'emiss';
+    protected $description = 'Fetch monthly CPI from the configured source (EMISS, Rosstat) and store it in cpi_values';
 
     private const VALID_VALUE_MIN = 80.0;
 
@@ -44,26 +42,26 @@ class CpiSyncCommand extends Command
             : now()->subMonths(3)->startOfMonth();
         $to = $this->option('to') ? Carbon::parse($this->option('to')) : now();
 
-        $this->info("Fetching CPI from EMISS for {$from->toDateString()} - {$to->toDateString()}...");
+        $this->info("Fetching CPI for {$from->toDateString()} - {$to->toDateString()}...");
 
         try {
             $records = $provider->fetch($from, $to);
         } catch (Throwable $exception) {
-            Log::error('CPI sync from EMISS failed, keeping previously stored data', [
+            Log::error('CPI sync failed, keeping previously stored data', [
                 'message' => $exception->getMessage(),
             ]);
-            $this->error("EMISS request failed: {$exception->getMessage()}");
+            $this->error("CPI request failed: {$exception->getMessage()}");
             $this->notifyAdmin($exception->getMessage(), $from, $to);
 
             return self::FAILURE;
         }
 
         if ($records->isEmpty()) {
-            Log::warning('CPI sync from EMISS returned no data', [
+            Log::warning('CPI sync returned no data', [
                 'from' => $from->toDateString(),
                 'to' => $to->toDateString(),
             ]);
-            $this->warn('EMISS returned no data for the period. Stored values were not changed.');
+            $this->warn('The CPI source returned no data for the period. Stored values were not changed.');
             $this->notifyAdmin(__('cpi_alert.reason_empty'), $from, $to);
 
             return self::FAILURE;
@@ -94,7 +92,7 @@ class CpiSyncCommand extends Command
                 ],
                 [
                     'value' => $record->value,
-                    'source' => self::SOURCE,
+                    'source' => $record->source,
                 ],
             );
 

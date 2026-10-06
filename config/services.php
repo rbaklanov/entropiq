@@ -51,6 +51,16 @@ return [
         'driver' => env('LLM_DRIVER', 'fake'),
     ],
 
+    'cpi' => [
+        'provider' => env('CPI_PROVIDER', 'auto'),
+    ],
+
+    'rosstat' => [
+        'base_url' => env('ROSSTAT_BASE_URL', 'https://rosstat.gov.ru'),
+        'timeout' => (float) env('ROSSTAT_TIMEOUT', 60.0),
+        'ca_bundle' => env('ROSSTAT_CA_BUNDLE', resource_path('certs/russian-trusted-ca.pem')),
+    ],
+
     'emiss' => [
         'base_url' => env('EMISS_BASE_URL', 'https://www.fedstat.ru'),
         'timeout' => (float) env('EMISS_TIMEOUT', 30.0),

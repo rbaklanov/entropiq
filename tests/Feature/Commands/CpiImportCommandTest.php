@@ -202,4 +202,36 @@ describe('cpi:import and official data', function () {
 
         expect((float) $stored->value)->toBe((float) $record['value']);
     });
+
+    it('does not overwrite values loaded from the Rosstat workbook', function () {
+        $this->artisan('cpi:import', ['--categories' => true])->assertSuccessful();
+
+        $record = collect(json_decode(file_get_contents(database_path('data/cpi_values.json')), true)['data'])->first();
+
+        CpiValue::where('period', $record['period'])
+            ->where('category_code', $record['category_code'])
+            ->update(['value' => 123.45, 'source' => 'rosstat_xlsx']);
+
+        $this->artisan('cpi:import')->assertSuccessful();
+
+        $stored = CpiValue::where('period', $record['period'])->where('category_code', $record['category_code'])->first();
+
+        expect((float) $stored->value)->toBe(123.45);
+    });
+
+    it('still overwrites the approximate seed values labelled rosstat', function () {
+        $this->artisan('cpi:import', ['--categories' => true])->assertSuccessful();
+
+        $record = collect(json_decode(file_get_contents(database_path('data/cpi_values.json')), true)['data'])->first();
+
+        CpiValue::where('period', $record['period'])
+            ->where('category_code', $record['category_code'])
+            ->update(['value' => 123.45, 'source' => 'rosstat']);
+
+        $this->artisan('cpi:import')->assertSuccessful();
+
+        $stored = CpiValue::where('period', $record['period'])->where('category_code', $record['category_code'])->first();
+
+        expect((float) $stored->value)->toBe((float) $record['value']);
+    });
 });

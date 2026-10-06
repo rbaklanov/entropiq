@@ -17,6 +17,13 @@ class CpiValue extends Model
     /** @use HasFactory<CpiValueFactory> */
     use HasFactory;
 
+    public const SOURCE_EMISS = 'emiss';
+
+    public const SOURCE_ROSSTAT_WORKBOOK = 'rosstat_xlsx';
+
+    /** @var array<int, string> */
+    public const OFFICIAL_SOURCES = [self::SOURCE_EMISS, self::SOURCE_ROSSTAT_WORKBOOK];
+
     protected $fillable = [
         'period',
         'category_code',
