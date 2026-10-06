@@ -1,5 +1,7 @@
 <?php
 
+use App\Contracts\AiAdviceServiceInterface;
+use App\Enums\TransactionType;
 use App\Models\AiAdvice;
 use App\Models\Category;
 use App\Models\Goal;
@@ -7,9 +9,11 @@ use App\Models\NotificationSetting;
 use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\AiAdviceRuleEngine;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 
 uses(RefreshDatabase::class);
 
@@ -99,5 +103,79 @@ describe('DemoSeeder', function () {
             ->all();
 
         expect($offenders)->toBe([]);
+    });
+});
+
+describe('DemoSeeder current month scenario', function () {
+    $dates = [
+        'first day of the month' => '2026-10-01 09:00:00',
+        'early in the month' => '2026-10-06 14:00:00',
+        'middle of the month' => '2026-10-15 12:00:00',
+        'last day of the month' => '2026-10-31 23:00:00',
+        'end of February' => '2027-02-28 10:00:00',
+        'first minutes of the year' => '2027-01-01 00:30:00',
+    ];
+
+    beforeEach(function () {
+        $this->seed(CategorySeeder::class);
+        config(['services.llm.driver' => 'fake']);
+    });
+
+    it('adds current month transactions up to today and none in the future', function (string $date) {
+        $this->travelTo(Carbon::parse($date));
+        $this->seed(DemoSeeder::class);
+
+        $currentMonth = demoUser()->transactions()->where('date', '>=', now()->startOfMonth())->get();
+
+        expect($currentMonth)->not->toBeEmpty()
+            ->and($currentMonth->max('date')->lte(now()->endOfDay()))->toBeTrue()
+            ->and(demoUser()->transactions()->where('date', '>', now()->endOfDay())->count())->toBe(0);
+    })->with($dates);
+
+    it('makes the current month overspend', function (string $date) {
+        $this->travelTo(Carbon::parse($date));
+        $this->seed(DemoSeeder::class);
+
+        $month = demoUser()->transactions()->where('date', '>=', now()->startOfMonth());
+
+        $income = (int) (clone $month)->where('type', TransactionType::Income)->sum('amount');
+        $expense = (int) (clone $month)->where('type', TransactionType::Expense)->sum('amount');
+
+        expect($income)->toBeGreaterThan(0)
+            ->and($expense)->toBeGreaterThan($income);
+    })->with($dates);
+
+    it('always triggers the spike, unusual transaction and overspending rules', function (string $date) {
+        $this->travelTo(Carbon::parse($date));
+
+        foreach (range(1, 5) as $attempt) {
+            $this->seed(DemoSeeder::class);
+
+            $rules = collect(app(AiAdviceRuleEngine::class)->evaluate(demoUser()))->pluck('ruleKey')->all();
+
+            expect($rules)->toContain('category_spike', 'unusual_transaction', 'overspending');
+        }
+    })->with($dates);
+
+    it('lets advice generation create advice for the demo account', function () {
+        $this->seed(DemoSeeder::class);
+
+        $advices = app(AiAdviceServiceInterface::class)->generateForUser(demoUser());
+        $rules = $advices->map(fn (AiAdvice $advice) => $advice->basis_data['rule'] ?? null)->all();
+
+        expect($advices->count())->toBeGreaterThanOrEqual(3)
+            ->and($rules)->toContain('category_spike', 'unusual_transaction', 'overspending');
+    });
+
+    it('keeps the previous six months', function () {
+        $this->seed(DemoSeeder::class);
+
+        $months = demoUser()->transactions()
+            ->where('date', '<', now()->startOfMonth())
+            ->pluck('date')
+            ->map(fn ($date) => $date->format('Y-m'))
+            ->unique();
+
+        expect($months->count())->toBe(6);
     });
 });
