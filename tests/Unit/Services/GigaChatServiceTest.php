@@ -23,8 +23,8 @@ beforeEach(function () {
         body: 'Расходы выросли',
         basisData: [
             'category_name' => 'Кафе',
-            'current_total' => 15000,
-            'avg_monthly' => 10000,
+            'current_total' => 1500000,
+            'avg_monthly' => 1000000,
             'growth_percent' => 50,
         ],
     );
@@ -158,7 +158,7 @@ describe('GigaChatService', function () {
         $result = $service->generateAdviceText($this->payload);
 
         expect($result['title'])->toBe('Расходы в категории «Кафе» растут')
-            ->and($result['body'])->toContain('15000 ₽ в категории «Кафе»');
+            ->and($result['body'])->toContain('15 000 ₽ в категории «Кафе»');
     });
 
     it('falls back to FakeLlmService when OAuth request fails', function () {
@@ -297,5 +297,30 @@ describe('GigaChat missing credentials warning', function () {
         (new GigaChatService(fallbackService: new FakeLlmService, clientId: 'id', clientSecret: 'secret'))->generateAdviceText($this->payload);
 
         Log::shouldNotHaveReceived('warning', [Mockery::pattern('/credentials are not set/')]);
+    });
+});
+
+describe('GigaChat prompt money units', function () {
+    it('sends amounts in rubles and says so in the instructions', function () {
+        $mock = MockClient::global([
+            GetAccessTokenRequest::class => $this->mockOAuthResponse,
+            ChatCompletionRequest::class => MockResponse::make(['choices' => [['message' => ['content' => json_encode(['title' => 't', 'body' => 'b'])]]]], 200),
+        ]);
+
+        (new GigaChatService(fallbackService: new FakeLlmService, clientId: 'id', clientSecret: 'secret'))->generateAdviceText($this->payload);
+
+        $mock->assertSent(function ($request) {
+            if (! $request instanceof ChatCompletionRequest) {
+                return false;
+            }
+
+            $system = $request->messages[0]['content'];
+            $user = $request->messages[1]['content'];
+
+            return str_contains($system, 'указаны в рублях')
+                && str_contains($user, '"current_total": 15000')
+                && str_contains($user, '"avg_monthly": 10000')
+                && ! str_contains($user, '1500000');
+        });
     });
 });

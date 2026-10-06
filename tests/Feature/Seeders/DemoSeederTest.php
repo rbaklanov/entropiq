@@ -179,3 +179,23 @@ describe('DemoSeeder current month scenario', function () {
         expect($months->count())->toBe(6);
     });
 });
+
+describe('DemoSeeder advice texts', function () {
+    it('shows money in rubles in every generated advice', function () {
+        $this->seed(CategorySeeder::class);
+        config(['services.llm.driver' => 'fake']);
+        $this->seed(DemoSeeder::class);
+
+        $advices = app(AiAdviceServiceInterface::class)->generateForUser(demoUser());
+
+        $overspending = $advices->first(fn (AiAdvice $a) => ($a->basis_data['rule'] ?? null) === 'overspending');
+
+        expect($overspending)->not->toBeNull()
+            ->and($overspending->body)->toContain(App\Support\Money::amount($overspending->basis_data['expense']).' ₽')
+            ->and($overspending->body)->not->toContain((string) $overspending->basis_data['expense']);
+
+        foreach ($advices as $advice) {
+            expect($advice->body)->not->toMatch('/\d{7,}\s*₽/');
+        }
+    });
+});

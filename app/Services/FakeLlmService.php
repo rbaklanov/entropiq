@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\LlmServiceInterface;
 use App\Dto\AdvicePayload;
+use App\Support\Money;
 
 class FakeLlmService implements LlmServiceInterface
 {
@@ -74,14 +75,14 @@ class FakeLlmService implements LlmServiceInterface
         return match ($payload->ruleKey) {
             'category_spike' => [
                 'category' => $data['category_name'] ?? '—',
-                'current' => $data['current_total'] ?? 0,
-                'avg' => $data['avg_monthly'] ?? 0,
+                'current' => Money::amount($data['current_total'] ?? 0),
+                'avg' => Money::amount($data['avg_monthly'] ?? 0),
                 'percent' => $data['growth_percent'] ?? 0,
             ],
             'overspending' => [
-                'income' => $data['income'] ?? 0,
-                'expense' => $data['expense'] ?? 0,
-                'overspend' => $data['overspend'] ?? 0,
+                'income' => Money::amount($data['income'] ?? 0),
+                'expense' => Money::amount($data['expense'] ?? 0),
+                'overspend' => Money::amount($data['overspend'] ?? 0),
                 'percent' => $data['overspend_percent'] ?? 0,
             ],
             'goal_behind_schedule' => [
@@ -92,14 +93,14 @@ class FakeLlmService implements LlmServiceInterface
             ],
             'unusual_transaction' => [
                 'category' => $data['category_name'] ?? '—',
-                'amount' => $data['amount'] ?? 0,
+                'amount' => Money::amount($data['amount'] ?? 0),
                 'multiplier' => $data['multiplier'] ?? 0,
                 'date' => $data['date'] ?? '—',
             ],
             'savings_optimization' => [
                 'share' => $data['discretionary_share_percent'] ?? 0,
-                'saving' => $data['monthly_saving'] ?? 0,
-                'annual' => ($data['monthly_saving'] ?? 0) * 12,
+                'saving' => Money::amount($data['monthly_saving'] ?? 0),
+                'annual' => Money::amount(($data['monthly_saving'] ?? 0) * 12),
             ],
             default => [],
         };
