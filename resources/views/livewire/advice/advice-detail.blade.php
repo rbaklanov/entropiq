@@ -65,7 +65,7 @@
                 'monthly_saving' => 'Экономия в месяц',
                 'period_months' => 'Период анализа (мес.)',
             ];
-            $moneyKeys = ['current_total', 'avg_monthly', 'income', 'expense', 'overspend', 'amount', 'discretionary_total', 'total_expense', 'potential_saving', 'monthly_saving'];
+            $moneyKeys = \App\Dto\AdvicePayload::MONEY_KEYS;
             $percentKeys = ['growth_percent', 'overspend_percent', 'expected_percent', 'actual_percent', 'lag_percent', 'discretionary_share_percent'];
             $multiplierKeys = ['multiplier'];
         @endphp
@@ -80,7 +80,7 @@
                             <span class="text-sm text-gray-500">{{ $labels[$key] ?? $key }}</span>
                             <span class="text-sm font-medium text-gray-900">
                                 @if(in_array($key, $moneyKeys))
-                                    {{ number_format($value / 100, 0, ',', ' ') }} ₽
+                                    {{ \App\Support\Money::amount($value) }} ₽
                                 @elseif(in_array($key, $percentKeys))
                                     {{ $value }}%
                                 @elseif(in_array($key, $multiplierKeys))

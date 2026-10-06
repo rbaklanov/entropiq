@@ -74,6 +74,7 @@ describe('CategorySpikeRule', function () {
         expect($result->ruleKey)->toBe('category_spike');
         expect($result->basisData['growth_percent'])->toBeGreaterThan(20);
         expect($result->basisData['category_id'])->toBe($this->category->id);
+        expect($result->body)->toContain('Средний расход: 100 ₽/мес, в этом месяце: 500 ₽');
 
         Carbon::setTestNow();
     });
@@ -163,6 +164,7 @@ describe('OverspendingRule', function () {
         expect($result->basisData['overspend'])->toBe(30000);
         expect($result->basisData['income'])->toBe(50000);
         expect($result->basisData['expense'])->toBe(80000);
+        expect($result->body)->toContain('превысили доходы на 300 ₽ (60%). Доход: 500 ₽, расход: 800 ₽');
     });
 });
 
@@ -284,6 +286,7 @@ describe('UnusualTransactionRule', function () {
         expect($result->ruleKey)->toBe('unusual_transaction');
         expect($result->basisData['amount'])->toBe(50000);
         expect($result->basisData['multiplier'])->toBeGreaterThan(3.0);
+        expect($result->body)->toContain('транзакция на 500 ₽ в категории');
 
         Carbon::setTestNow();
     });
@@ -336,6 +339,7 @@ describe('SavingsOptimizationRule', function () {
         expect($result)->not->toBeNull();
         expect($result->ruleKey)->toBe('savings_optimization');
         expect($result->basisData['discretionary_share_percent'])->toBeGreaterThanOrEqual(15);
+        expect($result->body)->toContain('сэкономит ~'.App\Support\Money::amount($result->basisData['monthly_saving']).' ₽/мес');
 
         Carbon::setTestNow();
     });

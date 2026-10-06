@@ -8,6 +8,7 @@ use App\Enums\TransactionType;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Support\Money;
 use Illuminate\Support\Carbon;
 
 class UnusualTransactionRule implements AdviceRuleInterface
@@ -77,11 +78,12 @@ class UnusualTransactionRule implements AdviceRuleInterface
         $category = Category::find($biggestAnomaly->category_id);
         $categoryName = $category ? $category->localizedName() : '—';
         $multiplierRounded = round($biggestMultiplier, 1);
+        $amountText = Money::amount($biggestAnomaly->amount);
 
         return new AdvicePayload(
             ruleKey: 'unusual_transaction',
             title: 'Крупная нетипичная транзакция',
-            body: "Обнаружена транзакция на {$biggestAnomaly->amount} ₽ в категории «{$categoryName}». Это в {$multiplierRounded}x больше вашего среднего расхода в этой категории.",
+            body: "Обнаружена транзакция на {$amountText} ₽ в категории «{$categoryName}». Это в {$multiplierRounded}x больше вашего среднего расхода в этой категории.",
             basisData: [
                 'rule' => 'unusual_transaction',
                 'transaction_id' => $biggestAnomaly->id,
