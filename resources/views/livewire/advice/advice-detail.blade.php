@@ -14,8 +14,8 @@
                 <div class="mb-4 flex items-center gap-3">
                     <span class="flex h-10 w-10 items-center justify-center rounded-full bg-warning-50 text-xl">✨</span>
                     <div>
-                        <h1 class="text-lg font-semibold text-gray-900">{{ $advice->title }}</h1>
-                        <p class="text-xs text-gray-400">{{ $advice->generated_at->translatedFormat('j F Y, H:i') }}</p>
+                        <div class="h-5 w-48 rounded bg-gray-200"></div>
+                        <p class="mt-1 text-xs text-gray-400">{{ $advice->generated_at->translatedFormat('j F Y, H:i') }}</p>
                     </div>
                 </div>
                 <p class="text-sm text-gray-500">{{ __('subscription.advice_limit') }}</p>
