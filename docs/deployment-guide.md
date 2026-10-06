@@ -970,6 +970,11 @@ ADMIN_PHONES=
 # Адрес администратора для оповещений о сбоях (сейчас: сбой cpi:sync). Без него письма не уходят
 ADMIN_EMAIL=
 
+# Источник данных ИПЦ: auto (ЕМИСС, затем Росстат), emiss или rosstat.
+# ЕМИСС блокирует адреса дата-центров (403), на боевом сервере ставить rosstat.
+# Сертификат Росстата проверяется по resources/certs/russian-trusted-ca.pem, системное хранилище не меняется
+CPI_PROVIDER=rosstat
+
 # Sentry (deferred, see docs/ai/tech-debt.md)
 SENTRY_LARAVEL_DSN=
 

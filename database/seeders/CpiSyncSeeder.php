@@ -34,7 +34,7 @@ class CpiSyncSeeder extends Seeder
 
     private function warnAboutFallback(string $details): void
     {
-        $this->command->warn('EMISS is unavailable, CPI stays on approximate seed data (source rosstat). Run `cpi:sync --from=2023-01-01` later.');
+        $this->command->warn('CPI sources are unavailable, CPI stays on approximate seed data (source rosstat). Run `cpi:sync --from=2023-01-01` later.');
         $this->command->line($details);
     }
 }

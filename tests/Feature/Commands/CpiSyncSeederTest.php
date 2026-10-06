@@ -54,7 +54,7 @@ describe('CpiSyncSeeder', function () {
         bindCpiProvider(new RuntimeException('connection timed out'));
 
         $this->artisan('db:seed', ['--class' => CpiSyncSeeder::class])
-            ->expectsOutputToContain('EMISS is unavailable')
+            ->expectsOutputToContain('unavailable')
             ->assertSuccessful();
 
         expect(CpiValue::count())->toBe($before)
