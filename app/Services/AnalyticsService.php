@@ -130,13 +130,13 @@ readonly class AnalyticsService implements AnalyticsServiceInterface
             ->get()
             ->keyBy('mapping_to_app_category_id');
 
-        $breakdown = $expenses->map(function (Transaction $expense) use ($categories, $categoryMappings, $totalExpense, $from, $to, $officialRate) {
+        $breakdown = $expenses->map(function (Transaction $expense) use ($categories, $categoryMappings, $totalExpense, $officialRate) {
             $category = $categories->get($expense->category_id);
             $share = (float) $expense->getAttribute('total') / $totalExpense;
 
             $cpiCategory = $categoryMappings->get($expense->category_id);
             $categoryCpi = $cpiCategory
-                ? $this->inflationService->getCpiForPeriod($from, $to, $cpiCategory->code)
+                ? $this->inflationService->getCurrentCategoryCpi($cpiCategory->code)
                 : $officialRate;
 
             return [

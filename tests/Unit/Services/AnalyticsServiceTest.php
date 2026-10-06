@@ -495,3 +495,48 @@ describe('getTrends', function () {
         expect($oldTrend['direction'])->toBe('down');
     });
 });
+
+describe('personal inflation breakdown consistency', function () {
+    beforeEach(function () {
+        foreach (range(1, 12) as $month) {
+            foreach (['TOTAL' => 100.50, 'FOOD' => 101.00, 'TRANSPORT' => $month >= 11 ? 97.0 : 100.5] as $code => $value) {
+                CpiValue::create(['period' => Carbon::create(2025, $month, 1), 'category_code' => $code, 'value' => $value, 'source' => 'test']);
+            }
+        }
+
+        $this->food = createExpenseCategory(['name' => ['ru' => 'Продукты', 'en' => 'Food']]);
+        $this->transport = createExpenseCategory(['name' => ['ru' => 'Транспорт', 'en' => 'Transport']]);
+        $this->other = createExpenseCategory(['name' => ['ru' => 'Прочее', 'en' => 'Other']]);
+
+        CpiCategory::create(['code' => 'FOOD', 'name' => 'Food', 'mapping_to_app_category_id' => $this->food->id]);
+        CpiCategory::create(['code' => 'TRANSPORT', 'name' => 'Transport', 'mapping_to_app_category_id' => $this->transport->id]);
+
+        foreach ([[$this->food, 500000], [$this->transport, 300000], [$this->other, 200000]] as [$category, $amount]) {
+            Transaction::factory()->for($this->user)->expense()->create(['category_id' => $category->id, 'amount' => $amount, 'date' => '2025-12-15']);
+        }
+    });
+
+    it('makes the contributions add up to the headline rate for every period', function () {
+        foreach ([['2025-12-01', '2025-12-31'], ['2025-10-01', '2025-12-31'], ['2025-01-01', '2025-12-31']] as [$from, $to]) {
+            $result = $this->service->getPersonalInflationBreakdown($this->user->id, Carbon::parse($from), Carbon::parse($to));
+
+            expect(array_sum(array_column($result['breakdown'], 'contribution')))
+                ->toEqualWithDelta($result['personal_rate'], 0.001);
+        }
+    });
+
+    it('shows the same category rates regardless of the period', function () {
+        $short = $this->service->getPersonalInflationBreakdown($this->user->id, Carbon::parse('2025-12-01'), Carbon::parse('2025-12-31'));
+        $long = $this->service->getPersonalInflationBreakdown($this->user->id, Carbon::parse('2025-01-01'), Carbon::parse('2025-12-31'));
+
+        expect(array_column($short['breakdown'], 'category_cpi', 'category_id'))
+            ->toEqual(array_column($long['breakdown'], 'category_cpi', 'category_id'));
+    });
+
+    it('uses the overall rate for categories without a CPI mapping', function () {
+        $result = $this->service->getPersonalInflationBreakdown($this->user->id, Carbon::parse('2025-12-01'), Carbon::parse('2025-12-31'));
+        $other = collect($result['breakdown'])->firstWhere('category_id', $this->other->id);
+
+        expect($other['category_cpi'])->toEqualWithDelta($result['official_rate'], 0.0001);
+    });
+});

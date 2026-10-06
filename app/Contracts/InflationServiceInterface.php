@@ -8,6 +8,8 @@ interface InflationServiceInterface
 {
     public function getCurrentCpi(): float;
 
+    public function getCurrentCategoryCpi(string $categoryCode): float;
+
     public function getCpiForPeriod(Carbon $from, Carbon $to, string $categoryCode = 'TOTAL'): float;
 
     public function getCpiByCategory(string $categoryCode, Carbon $period): ?float;
