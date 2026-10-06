@@ -7,6 +7,7 @@ use App\Dto\AdvicePayload;
 use App\Enums\TransactionType;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Support\Money;
 use Illuminate\Support\Carbon;
 
 class CategorySpikeRule implements AdviceRuleInterface
@@ -56,11 +57,13 @@ class CategorySpikeRule implements AdviceRuleInterface
 
         $category = \App\Models\Category::find($biggestSpike['category_id']);
         $categoryName = $category ? $category->localizedName() : '—';
+        $avgText = Money::amount($biggestSpike['avg_monthly']);
+        $currentText = Money::amount($biggestSpike['current_total']);
 
         return new AdvicePayload(
             ruleKey: 'category_spike',
             title: "Рост расходов в категории «{$categoryName}»",
-            body: "Расходы в категории «{$categoryName}» выросли на {$biggestSpike['growth_percent']}% по сравнению со средним за 3 месяца. Средний расход: {$biggestSpike['avg_monthly']} ₽/мес, в этом месяце: {$biggestSpike['current_total']} ₽.",
+            body: "Расходы в категории «{$categoryName}» выросли на {$biggestSpike['growth_percent']}% по сравнению со средним за 3 месяца. Средний расход: {$avgText} ₽/мес, в этом месяце: {$currentText} ₽.",
             basisData: [
                 'rule' => 'category_spike',
                 'category_id' => $biggestSpike['category_id'],
