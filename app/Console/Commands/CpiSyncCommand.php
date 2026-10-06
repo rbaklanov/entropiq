@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Contracts\AdminAlertServiceInterface;
 use App\Contracts\CpiProviderInterface;
 use App\Dto\CpiRecord;
 use App\Mail\CpiSyncFailedMail;
@@ -9,9 +10,7 @@ use App\Models\CpiCategory;
 use App\Models\CpiValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 class CpiSyncCommand extends Command
@@ -29,9 +28,14 @@ class CpiSyncCommand extends Command
 
     private const VALID_VALUE_MAX = 130.0;
 
-    private const ALERT_THROTTLE_KEY = 'cpi-sync:failure-alert-sent';
+    private const ALERT_THROTTLE_KEY = 'cpi-sync-failure';
 
     private const ALERT_THROTTLE_HOURS = 12;
+
+    public function __construct(private readonly AdminAlertServiceInterface $alerts)
+    {
+        parent::__construct();
+    }
 
     public function handle(CpiProviderInterface $provider): int
     {
@@ -120,24 +124,11 @@ class CpiSyncCommand extends Command
             return;
         }
 
-        $recipient = config('services.admin.email');
-
-        if (! $recipient) {
-            Log::warning('ADMIN_EMAIL is not set, CPI sync failure alert was not sent');
-
-            return;
-        }
-
-        if (! Cache::add(self::ALERT_THROTTLE_KEY, true, now()->addHours(self::ALERT_THROTTLE_HOURS))) {
-            return;
-        }
-
-        try {
-            Mail::to($recipient)->send(new CpiSyncFailedMail($reason, $from, $to, now()));
-        } catch (Throwable $exception) {
-            Cache::forget(self::ALERT_THROTTLE_KEY);
-            Log::error('Unable to send CPI sync failure alert', ['message' => $exception->getMessage()]);
-        }
+        $this->alerts->send(
+            new CpiSyncFailedMail($reason, $from, $to, now()),
+            self::ALERT_THROTTLE_KEY,
+            self::ALERT_THROTTLE_HOURS,
+        );
     }
 
     private function isPlausible(CpiRecord $record): bool
