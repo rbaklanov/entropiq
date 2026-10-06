@@ -674,6 +674,8 @@ SMSAERO_TEST_MODE=true
 # LLM
 GIGACHAT_CLIENT_ID=<client_id>
 GIGACHAT_CLIENT_SECRET=<secret>
+# TLS проверяется по resources/certs/russian-trusted-ca.pem, по умолчанию включено. Не ставить false
+GIGACHAT_VERIFY_SSL=true
 ```
 
 ### 3.6. Запуск Stage
@@ -998,6 +1000,8 @@ SMSAERO_TEST_MODE=false
 # LLM
 GIGACHAT_CLIENT_ID=<client_id>
 GIGACHAT_CLIENT_SECRET=<secret>
+# TLS проверяется по resources/certs/russian-trusted-ca.pem, по умолчанию включено. Не ставить false
+GIGACHAT_VERIFY_SSL=true
 ```
 
 **Изменения `.env` вступают в силу только после пересоздания контейнера.** В `docker-compose.prod.yml` файл подключён как `env_file: .env`: Docker читает его в момент создания контейнера. Правка файла на сервере и `php artisan config:cache` внутри уже запущенного контейнера новые значения не подхватывают, в кэш конфигурации попадёт старое окружение. После любой правки `.env` (например, `ADMIN_EMAIL`, `CPI_PROVIDER`, `MAIL_*`) выполнить:

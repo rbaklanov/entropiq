@@ -71,7 +71,8 @@ return [
         'client_secret' => env('GIGACHAT_CLIENT_SECRET', ''),
         'scope' => env('GIGACHAT_SCOPE', 'GIGACHAT_API_PERS'),
         'model' => env('GIGACHAT_MODEL', 'GigaChat'),
-        'verify_ssl' => filter_var(env('GIGACHAT_VERIFY_SSL', false), FILTER_VALIDATE_BOOLEAN),
+        'verify_ssl' => filter_var(env('GIGACHAT_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
+        'ca_bundle' => env('GIGACHAT_CA_BUNDLE', resource_path('certs/russian-trusted-ca.pem')),
         'timeout' => (float) env('GIGACHAT_TIMEOUT', 30.0),
     ],
 
