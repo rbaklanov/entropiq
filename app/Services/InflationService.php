@@ -16,6 +16,8 @@ class InflationService implements InflationServiceInterface
 
     private const DEFAULT_ANNUAL_INFLATION = 0.095;
 
+    private const MIN_MONTHS_FOR_CATEGORY_RATE = 6;
+
     /**
      * Current overall CPI — cumulative index for the trailing 12 months.
      * Returns annual inflation rate as a decimal (e.g. 0.095 for 9.5%).
@@ -55,6 +57,31 @@ class InflationService implements InflationServiceInterface
         $months = max(1, $values->count());
 
         return $this->annualizeRate($compoundIndex, $months);
+    }
+
+    /**
+     * Annual rate of a category over the last 12 published months, the same window
+     * as getCurrentCpi(). Falls back to the overall rate when the category has too
+     * few published months in that window to give a stable annual figure.
+     */
+    public function getCurrentCategoryCpi(string $categoryCode): float
+    {
+        $to = $this->latestPublishedPeriod();
+
+        if ($categoryCode === self::TOTAL_CATEGORY_CODE || $to === null) {
+            return $this->getCurrentCpi();
+        }
+
+        $values = CpiValue::where('category_code', $categoryCode)
+            ->whereBetween('period', [$to->copy()->subMonths(11), $to])
+            ->orderBy('period')
+            ->pluck('value');
+
+        if ($values->count() < self::MIN_MONTHS_FOR_CATEGORY_RATE) {
+            return $this->getCurrentCpi();
+        }
+
+        return $this->annualizeRate($this->compoundIndex($values), $values->count());
     }
 
     /**
@@ -107,7 +134,8 @@ class InflationService implements InflationServiceInterface
      * Personal inflation rate based on user's spending structure.
      *
      * Formula: Σ(share_i × cpi_i) where share_i is the user's spending
-     * share in category i, and cpi_i is the annualized inflation for that category.
+     * share in category i over the selected period, and cpi_i is the annual
+     * inflation of that category over the last 12 published months.
      *
      * Returns annual rate as decimal (e.g. 0.102 for 10.2%).
      */
@@ -138,7 +166,7 @@ class InflationService implements InflationServiceInterface
             $cpiCategory = $categoryMappings->get($expense->category_id);
 
             if ($cpiCategory) {
-                $categoryInflation = $this->getCpiForPeriod($from, $to, $cpiCategory->code);
+                $categoryInflation = $this->getCurrentCategoryCpi($cpiCategory->code);
                 $weightedInflation += $share * $categoryInflation;
                 $mappedShare += $share;
             }
@@ -151,7 +179,7 @@ class InflationService implements InflationServiceInterface
         $unmappedShare = 1.0 - $mappedShare;
 
         if ($unmappedShare > 0) {
-            $totalInflation = $this->getCpiForPeriod($from, $to);
+            $totalInflation = $this->getCurrentCpi();
             $weightedInflation += $unmappedShare * $totalInflation;
         }
 

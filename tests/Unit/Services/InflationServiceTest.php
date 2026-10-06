@@ -514,3 +514,109 @@ describe('published period tracking', function () {
         expect($this->service->hasEstimatedMonths(Carbon::create(2026, 1, 1), Carbon::create(2026, 2, 28)))->toBeFalse();
     });
 });
+
+function seedCategoryCpi(string $code, array $monthlyValues, int $year = 2026, int $startMonth = 1): void
+{
+    foreach ($monthlyValues as $i => $value) {
+        CpiValue::create([
+            'period' => Carbon::create($year, $startMonth + $i, 1),
+            'category_code' => $code,
+            'value' => $value,
+            'source' => 'test',
+        ]);
+    }
+}
+
+function mappedCpiCategory(string $code): Category
+{
+    $category = Category::factory()->expense()->system()->create(['name' => ['ru' => $code, 'en' => $code]]);
+
+    CpiCategory::create(['code' => $code, 'name' => $code, 'mapping_to_app_category_id' => $category->id]);
+
+    return $category;
+}
+
+describe('getCurrentCategoryCpi', function () {
+    it('annualizes the last 12 published months of the category', function () {
+        seedMonthlyTotalCpi(array_fill(0, 12, 100.50), 2025);
+        seedCategoryCpi('FOOD', array_fill(0, 12, 101.00), 2025);
+
+        expect($this->service->getCurrentCategoryCpi('FOOD'))->toEqualWithDelta(1.01 ** 12 - 1, 0.0001);
+    });
+
+    it('uses the same window as the overall rate even when the category has older data', function () {
+        seedMonthlyTotalCpi(array_fill(0, 12, 100.50), 2025);
+        seedCategoryCpi('FOOD', [130.0], 2024, 6);
+        seedCategoryCpi('FOOD', array_fill(0, 12, 100.20), 2025);
+
+        expect($this->service->getCurrentCategoryCpi('FOOD'))->toEqualWithDelta(1.002 ** 12 - 1, 0.0001);
+    });
+
+    it('returns the overall rate for TOTAL', function () {
+        seedMonthlyTotalCpi(array_fill(0, 12, 100.50), 2025);
+
+        expect($this->service->getCurrentCategoryCpi('TOTAL'))->toBe($this->service->getCurrentCpi());
+    });
+
+    it('falls back to the overall rate when the category has fewer than 6 months in the window', function () {
+        seedMonthlyTotalCpi(array_fill(0, 12, 100.50), 2025);
+        seedCategoryCpi('FOOD', array_fill(0, 5, 90.00), 2025, 8);
+
+        expect($this->service->getCurrentCategoryCpi('FOOD'))->toBe($this->service->getCurrentCpi());
+    });
+
+    it('falls back to the overall rate for an unknown category', function () {
+        seedMonthlyTotalCpi(array_fill(0, 12, 100.50), 2025);
+
+        expect($this->service->getCurrentCategoryCpi('NOPE'))->toBe($this->service->getCurrentCpi());
+    });
+
+    it('returns the default rate when nothing is published', function () {
+        expect($this->service->getCurrentCategoryCpi('FOOD'))->toBe(0.095);
+    });
+
+    it('is not distorted by a seasonal drop in the last two months', function () {
+        seedMonthlyTotalCpi(array_fill(0, 12, 100.50), 2025);
+        seedCategoryCpi('TRANSPORT', [100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 98.81, 96.30], 2025);
+
+        $rate = $this->service->getCurrentCategoryCpi('TRANSPORT');
+
+        expect($rate)->toBeGreaterThan(-0.1)->toBeLessThan(0.1);
+    });
+});
+
+describe('calculatePersonalInflation over different periods', function () {
+    beforeEach(function () {
+        seedMonthlyTotalCpi(array_fill(0, 12, 100.50), 2025);
+        seedCategoryCpi('FOOD', array_fill(0, 12, 101.00), 2025);
+        seedCategoryCpi('TRANSPORT', [100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 98.81, 96.30], 2025);
+
+        $this->food = mappedCpiCategory('FOOD');
+        $this->transport = mappedCpiCategory('TRANSPORT');
+
+        Transaction::factory()->for($this->user)->expense()->create(['category_id' => $this->food->id, 'amount' => 6000000, 'date' => Carbon::create(2025, 12, 10)]);
+        Transaction::factory()->for($this->user)->expense()->create(['category_id' => $this->transport->id, 'amount' => 4000000, 'date' => Carbon::create(2025, 12, 12)]);
+    });
+
+    it('does not change with the length of the selected period', function () {
+        $week = $this->service->calculatePersonalInflation($this->user->id, Carbon::create(2025, 12, 8), Carbon::create(2025, 12, 14));
+        $quarter = $this->service->calculatePersonalInflation($this->user->id, Carbon::create(2025, 10, 1), Carbon::create(2025, 12, 31));
+        $year = $this->service->calculatePersonalInflation($this->user->id, Carbon::create(2025, 1, 1), Carbon::create(2025, 12, 31));
+
+        expect($week)->toEqualWithDelta($quarter, 0.00001)->toEqualWithDelta($year, 0.00001);
+    });
+
+    it('stays within a sensible range after a seasonal drop in one category', function () {
+        $rate = $this->service->calculatePersonalInflation($this->user->id, Carbon::create(2025, 10, 1), Carbon::create(2025, 12, 31));
+
+        expect($rate)->toBeGreaterThan(0.0)->toBeLessThan(0.15);
+    });
+
+    it('weights category rates by the spending shares of the selected period', function () {
+        $rate = $this->service->calculatePersonalInflation($this->user->id, Carbon::create(2025, 12, 1), Carbon::create(2025, 12, 31));
+
+        $expected = 0.6 * $this->service->getCurrentCategoryCpi('FOOD') + 0.4 * $this->service->getCurrentCategoryCpi('TRANSPORT');
+
+        expect($rate)->toEqualWithDelta($expected, 0.00001);
+    });
+});

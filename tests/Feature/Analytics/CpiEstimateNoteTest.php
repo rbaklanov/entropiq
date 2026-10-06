@@ -79,3 +79,22 @@ describe('CPI estimate note in the inflation calculator', function () {
             ->assertDontSeeHtml('data-testid="cpi-estimate-note"');
     });
 });
+
+describe('CPI basis note on the personal inflation tab', function () {
+    it('names the last published month', function () {
+        seedCpiUpTo(now()->subMonths(2));
+
+        Livewire::actingAs(userWithTransactionThisMonth())
+            ->test(Analytics::class)
+            ->set('tab', 'inflation')
+            ->assertSeeHtml('data-testid="cpi-basis-note"')
+            ->assertSee(now()->subMonths(2)->translatedFormat('F Y'));
+    });
+
+    it('is hidden when no CPI exists at all', function () {
+        Livewire::actingAs(userWithTransactionThisMonth())
+            ->test(Analytics::class)
+            ->set('tab', 'inflation')
+            ->assertDontSeeHtml('data-testid="cpi-basis-note"');
+    });
+});

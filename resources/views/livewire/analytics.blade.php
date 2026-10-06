@@ -188,6 +188,12 @@
                     {{ __('analytics.inflation_explanation') }}
                 </p>
 
+                @if($cpiBasisMonth)
+                    <p class="text-xs text-gray-500 px-1" data-testid="cpi-basis-note">
+                        {{ __('analytics.inflation_basis', ['month' => $cpiBasisMonth]) }}
+                    </p>
+                @endif
+
                 @if(!empty($breakdown))
                     <div class="rounded-xl bg-white shadow-sm divide-y divide-gray-50">
                         <div class="hidden sm:flex items-center px-5 py-3 text-small font-medium text-gray-400">
