@@ -23,7 +23,7 @@
                 },
                 series: {{ Js::from($data) }},
                 labels: {{ Js::from($labels) }},
-                colors: {{ Js::from($colors) }},
+                colors: {{ Js::from($colors) }}.map((c) => c.startsWith('#') ? c : window.themeColor(c)),
                 plotOptions: {
                     pie: {
                         donut: {

@@ -33,6 +33,7 @@ return [
     'inflation_contribution' => 'Contribution',
 
     'total' => 'Total',
+    'other_categories' => 'Other (:count)',
 
     'cpi_estimate_note' => 'The consumer price index is published up to :month. For later months the real value is estimated using the average monthly index of the last 12 published months.',
 

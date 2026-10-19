@@ -30,6 +30,28 @@ describe('balance-card', function () {
     });
 });
 
+describe('category icons', function () {
+    it('draws every system category with a line icon instead of its emoji', function () {
+        $this->seed(\Database\Seeders\CategorySeeder::class);
+
+        $categories = \App\Models\Category::query()->where('is_system', true)->get();
+
+        expect($categories)->not->toBeEmpty();
+
+        foreach ($categories as $category) {
+            $html = Blade::render('<x-category-icon :icon="$icon" />', ['icon' => $category->icon]);
+
+            expect($html)->toContain('<svg')->not->toContain($category->icon);
+        }
+    });
+
+    it('falls back to a muted emoji for an unknown icon', function () {
+        expect(Blade::render('<x-category-icon icon="🦄" />'))
+            ->toContain('🦄')
+            ->toContain('grayscale');
+    });
+});
+
 describe('charts', function () {
     it('keeps the whole chart script inside the x-data attribute', function (string $component) {
         $html = Blade::render($component);

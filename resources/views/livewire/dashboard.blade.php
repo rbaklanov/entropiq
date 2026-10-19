@@ -104,7 +104,7 @@
                         <li class="border-b border-gray-200 py-2.5">
                             <div class="flex items-center justify-between gap-3">
                                 <span class="flex items-center gap-2 text-[15px] text-gray-900">
-                                    <span aria-hidden="true">{{ $cat['icon'] }}</span>
+                                    <x-category-glyph :icon="$cat['icon']" class="h-[18px] w-[18px] text-gray-500" />
                                     {{ $cat['name'] }}
                                 </span>
                                 <span class="flex items-baseline gap-2">

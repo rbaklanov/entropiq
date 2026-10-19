@@ -117,9 +117,59 @@ class Analytics extends Component
         return [
             'expenses' => $expenses,
             'trendsMap' => $trendsMap,
-            'chartData' => array_column($expenses, 'total'),
-            'chartLabels' => array_map(fn (array $e) => $e['category_name'][$locale] ?? '—', $expenses),
-            'chartColors' => array_map(fn (array $e) => $e['category_color'] ?? '#6366F1', $expenses),
+            ...$this->donutSlices($expenses, $locale),
+        ];
+    }
+
+    /**
+     * The largest categories get muted palette colours, the rest share one grey "other" slice:
+     * nobody can tell seventeen hues apart on a ring.
+     *
+     * @param  array<int, array<string, mixed>>  $expenses  sorted by total, largest first
+     * @return array{chartData: list<int>, chartLabels: list<string>, chartColors: list<string>, categorySwatches: array<int, string>}
+     */
+    private function donutSlices(array $expenses, string $locale): array
+    {
+        $palette = ['gray-900', 'primary-600', 'success-600', 'premium-500', 'primary-300'];
+        $otherColor = 'gray-300';
+
+        $highlighted = array_slice($expenses, 0, count($palette));
+        $rest = array_slice($expenses, count($palette));
+
+        $data = [];
+        $labels = [];
+        $colors = [];
+        $swatches = [];
+
+        foreach ($highlighted as $index => $expense) {
+            $data[] = (int) $expense['total'];
+            $labels[] = $expense['category_name'][$locale] ?? '—';
+            $colors[] = $palette[$index];
+            $swatches[(int) $expense['category_id']] = $palette[$index];
+        }
+
+        if (count($rest) === 1) {
+            $data[] = (int) $rest[0]['total'];
+            $labels[] = $rest[0]['category_name'][$locale] ?? '—';
+            $colors[] = $otherColor;
+            $swatches[(int) $rest[0]['category_id']] = $otherColor;
+        }
+
+        if (count($rest) > 1) {
+            $data[] = (int) array_sum(array_column($rest, 'total'));
+            $labels[] = __('analytics.other_categories', ['count' => count($rest)]);
+            $colors[] = $otherColor;
+
+            foreach ($rest as $expense) {
+                $swatches[(int) $expense['category_id']] = $otherColor;
+            }
+        }
+
+        return [
+            'chartData' => $data,
+            'chartLabels' => $labels,
+            'chartColors' => $colors,
+            'categorySwatches' => $swatches,
         ];
     }
 
