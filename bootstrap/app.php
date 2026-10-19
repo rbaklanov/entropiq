@@ -16,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->redirectGuestsTo('/login');
 
+        $middleware->validateCsrfTokens(except: [
+            'payments/robokassa/result',
+            'payments/success',
+            'payments/fail',
+        ]);
+
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
         ]);

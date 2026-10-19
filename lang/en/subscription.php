@@ -17,8 +17,6 @@ return [
     'expires_at' => 'Active until :date',
     'upgrade' => 'Upgrade to Premium',
     'manage' => 'Manage subscription',
-    'cancel' => 'Cancel subscription',
-    'cancel_confirm' => 'Are you sure? Premium access will remain until the end of the paid period.',
 
     'guarantee' => '7-day money-back guarantee',
     'subscribe' => 'Subscribe',
@@ -41,5 +39,4 @@ return [
     'period_limit' => 'Free plan analytics is limited to the last month.',
 
     'upgraded' => 'Subscription activated! Welcome to Premium.',
-    'cancelled' => 'Subscription cancelled.',
 ];

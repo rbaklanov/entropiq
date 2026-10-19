@@ -5,6 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\Payments\FakeCheckoutController;
+use App\Http\Controllers\Payments\PaymentReturnController;
+use App\Http\Controllers\Payments\RobokassaResultController;
 use App\Http\Controllers\TransactionsController;
 use App\Livewire\Advice\AdviceDetail;
 use App\Livewire\Advice\AdviceList;
@@ -34,6 +37,13 @@ Route::get('/terms', fn () => view('pages.guest.terms'))->name('terms');
 Route::get('/faq', fn () => view('pages.guest.faq'))->name('faq');
 Route::get('/offer', fn () => view('pages.guest.offer'))->name('offer');
 Route::get('/consent', fn () => view('pages.guest.consent'))->name('consent');
+
+Route::match(['get', 'post'], '/payments/robokassa/result', RobokassaResultController::class)->name('payments.robokassa.result');
+Route::match(['get', 'post'], '/payments/success', [PaymentReturnController::class, 'success'])->name('payments.success');
+Route::match(['get', 'post'], '/payments/fail', [PaymentReturnController::class, 'fail'])->name('payments.fail');
+Route::get('/payments/fake/{payment}', FakeCheckoutController::class)
+    ->middleware(['auth', 'signed'])
+    ->name('payments.fake.checkout');
 Route::get('/email/verify/{user}/{hash}', EmailVerificationController::class)
     ->middleware(['signed', 'throttle:6,1'])
     ->name('email.verify');

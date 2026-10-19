@@ -18,6 +18,18 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="rounded-xl bg-danger-50 p-4 text-sm font-medium text-danger-700">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if($renewsSoon)
+        <div class="rounded-xl bg-warning-50 p-4 text-sm font-medium text-warning-700">
+            {{ __('payments.auto_renew_soon', ['date' => $activeSubscription->ends_at->translatedFormat('j F Y'), 'amount' => $renewalAmount]) }}
+        </div>
+    @endif
+
     {{-- Current plan badge --}}
     @if($isPremium && $activeSubscription)
         <div class="rounded-xl bg-premium-50 p-5">
@@ -107,6 +119,20 @@
 
         </div>
 
+        {{-- Auto renewal consent --}}
+        <label for="auto-renew" class="flex items-start gap-3 text-sm text-gray-600">
+            <input
+                type="checkbox"
+                id="auto-renew"
+                wire:model="autoRenew"
+                class="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-premium-600 focus:ring-premium-500"
+            />
+            <span>
+                {{ __('payments.auto_renew_label') }}
+                <a href="{{ route('offer') }}" class="underline" target="_blank">{{ __('payments.auto_renew_offer_link') }}</a>.
+            </span>
+        </label>
+
         {{-- Guarantee --}}
         <p class="text-center text-xs text-gray-400">🛡️ {{ __('subscription.guarantee') }}</p>
 
@@ -119,17 +145,30 @@
             <span wire:loading.remove wire:target="subscribe">{{ __('subscription.subscribe') }}</span>
             <span wire:loading wire:target="subscribe">...</span>
         </button>
-    @else
-        {{-- Cancel button for premium users --}}
+
+        <p class="text-center text-xs text-gray-400">
+            {{ __('payments.offer_acceptance') }}
+            <a href="{{ route('offer') }}" class="underline" target="_blank">{{ __('payments.offer_link') }}</a>
+        </p>
+    @elseif($activeSubscription)
+        {{-- Auto renewal for premium users --}}
         <div class="rounded-xl bg-white p-5 shadow-sm">
-            <p class="text-sm text-gray-600">{{ __('subscription.cancel_confirm') }}</p>
-            <button
-                wire:click="cancel"
-                wire:confirm="{{ __('subscription.cancel_confirm') }}"
-                class="mt-4 rounded-lg border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-            >
-                {{ __('subscription.cancel') }}
-            </button>
+            @if($activeSubscription->auto_renew)
+                <p class="text-sm text-gray-600">
+                    {{ __('payments.auto_renew_on', ['date' => $activeSubscription->ends_at->translatedFormat('j F Y'), 'amount' => $renewalAmount]) }}
+                </p>
+                <button
+                    wire:click="disableAutoRenew"
+                    wire:confirm="{{ __('payments.disable_auto_renew_confirm') }}"
+                    class="mt-4 rounded-lg border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                >
+                    {{ __('payments.disable_auto_renew') }}
+                </button>
+            @else
+                <p class="text-sm text-gray-600">
+                    {{ __('payments.auto_renew_off', ['date' => $activeSubscription->ends_at->translatedFormat('j F Y')]) }}
+                </p>
+            @endif
         </div>
     @endif
 

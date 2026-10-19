@@ -236,7 +236,7 @@ describe('Subscription lifecycle', function () {
             ])
             ->assertCreated();
 
-        $subscriptionService->cancel($user);
+        $subscriptionService->revoke($user);
         $user->refresh();
         app('auth')->forgetGuards();
 

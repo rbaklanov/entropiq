@@ -30,7 +30,25 @@ interface SubscriptionServiceInterface
 
     public function goalsRemaining(User $user): ?int;
 
-    public function subscribe(User $user, SubscriptionPlan $plan): Subscription;
+    public function subscribe(User $user, SubscriptionPlan $plan, bool $autoRenew = false): Subscription;
 
-    public function cancel(User $user): void;
+    /**
+     * Extends a paid subscription by one more period after a successful renewal charge.
+     */
+    public function renew(Subscription $subscription): Subscription;
+
+    /**
+     * Stops future charges. Premium stays until the end of the paid period.
+     */
+    public function disableAutoRenew(User $user): void;
+
+    /**
+     * Ends a subscription whose paid period is over.
+     */
+    public function expire(Subscription $subscription): void;
+
+    /**
+     * Ends Premium at once, for example after a refund.
+     */
+    public function revoke(User $user): void;
 }

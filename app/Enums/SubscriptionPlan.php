@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Support\Money;
+use Illuminate\Support\Carbon;
 
 enum SubscriptionPlan: string
 {
@@ -16,6 +17,22 @@ enum SubscriptionPlan: string
             self::Free => 0,
             self::Monthly => 9900,
             self::Yearly => 59000,
+        };
+    }
+
+    public function periodEnd(Carbon $from): Carbon
+    {
+        return match ($this) {
+            self::Yearly => $from->copy()->addYear(),
+            default => $from->copy()->addMonth(),
+        };
+    }
+
+    public function periodStart(Carbon $end): Carbon
+    {
+        return match ($this) {
+            self::Yearly => $end->copy()->subYear(),
+            default => $end->copy()->subMonth(),
         };
     }
 
