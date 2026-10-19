@@ -25,6 +25,12 @@ return [
     'show_nominal' => 'Номинально',
     'show_real' => 'Реально',
 
+    'savings_trend' => 'Накопления с начала года',
+    'savings_trend_nominal' => 'Номинально',
+    'savings_trend_real' => 'Реально',
+    'savings_trend_loss' => 'съела инфляция',
+    'savings_trend_more' => 'Подробнее в аналитике',
+    'savings_trend_chart' => 'Накопления по месяцам с начала года: номинальные и реальные',
     'personal_inflation' => 'Ваша инфляция',
     'personal_inflation_tooltip' => 'Рассчитывается на основе структуры ваших расходов и данных Росстата по категориям ИПЦ.',
     'national_avg' => 'средняя по РФ',

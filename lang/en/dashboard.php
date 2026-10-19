@@ -25,6 +25,12 @@ return [
     'show_nominal' => 'Nominal',
     'show_real' => 'Real',
 
+    'savings_trend' => 'Savings since January',
+    'savings_trend_nominal' => 'Nominal',
+    'savings_trend_real' => 'Real',
+    'savings_trend_loss' => 'eaten by inflation',
+    'savings_trend_more' => 'More in analytics',
+    'savings_trend_chart' => 'Monthly savings since January, nominal and real',
     'personal_inflation' => 'Your inflation',
     'personal_inflation_tooltip' => 'Calculated based on your spending structure and CPI data by category.',
     'national_avg' => 'national avg',

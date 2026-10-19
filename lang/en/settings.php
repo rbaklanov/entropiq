@@ -16,6 +16,10 @@ return [
     'push_goals' => 'Goal notifications',
     'push_ai_advice' => 'AI advice notifications',
 
+    'appearance' => 'Appearance',
+    'appearance_system' => 'System',
+    'appearance_light' => 'Light',
+    'appearance_dark' => 'Dark',
     'preferences' => 'Preferences',
 
     'delete_confirm' => 'Are you sure? All your data will be permanently deleted.',
