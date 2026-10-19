@@ -67,6 +67,12 @@ class User extends Authenticatable
         return filled($this->email) && $this->email_verified_at !== null;
     }
 
+    /** @return HasMany<Consent, $this> */
+    public function consents(): HasMany
+    {
+        return $this->hasMany(Consent::class);
+    }
+
     /** @return HasMany<Transaction, $this> */
     public function transactions(): HasMany
     {

@@ -97,6 +97,7 @@ return [
     'faq_title' => 'FAQ',
     'faq_support' => 'Did not find an answer? Write to',
 
-    'footer_seller' => ':name, TIN :inn, professional income tax (NPD) payer',
+    'footer_offer' => 'Public offer',
+    'footer_consent' => 'Consent to data processing',
     'footer_support' => 'Support',
 ];

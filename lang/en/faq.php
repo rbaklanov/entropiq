@@ -53,7 +53,7 @@ return [
                 ],
                 [
                     'q' => 'How do I cancel the subscription, and can I get a refund?',
-                    'a' => 'You can cancel the subscription in Settings, Subscription. Premium access remains until the end of the paid period. A 7-day money-back guarantee applies.',
+                    'a' => 'You can cancel the subscription in Settings, Subscription. Premium access remains until the end of the paid period. Within 7 days of payment you can get a full refund; later, the price of the unused days is refunded. See the public offer for details.',
                 ],
             ],
         ],

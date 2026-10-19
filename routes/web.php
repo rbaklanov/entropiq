@@ -32,6 +32,8 @@ Route::get('/', fn () => view('pages.guest.landing'))->name('landing');
 Route::get('/privacy', fn () => view('pages.guest.privacy'))->name('privacy');
 Route::get('/terms', fn () => view('pages.guest.terms'))->name('terms');
 Route::get('/faq', fn () => view('pages.guest.faq'))->name('faq');
+Route::get('/offer', fn () => view('pages.guest.offer'))->name('offer');
+Route::get('/consent', fn () => view('pages.guest.consent'))->name('consent');
 Route::get('/email/verify/{user}/{hash}', EmailVerificationController::class)
     ->middleware(['signed', 'throttle:6,1'])
     ->name('email.verify');

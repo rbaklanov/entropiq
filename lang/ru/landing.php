@@ -94,7 +94,8 @@ return [
     'footer_privacy' => 'Политика конфиденциальности',
     'footer_terms' => 'Пользовательское соглашение',
     'footer_faq' => 'FAQ',
-    'footer_seller' => ':name, ИНН :inn, плательщик НПД',
+    'footer_offer' => 'Публичная оферта',
+    'footer_consent' => 'Согласие на обработку данных',
     'footer_support' => 'Поддержка',
 
     'faq_title' => 'Частые вопросы',

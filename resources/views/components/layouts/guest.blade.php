@@ -66,7 +66,7 @@
                     <h4 class="text-sm font-semibold text-gray-900">{{ __('landing.footer_support') }}</h4>
                     <nav class="mt-3 flex flex-col gap-2">
                         <a href="{{ route('faq') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_faq') }}</a>
-                        <a href="mailto:{{ config('app.seller.email') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ config('app.seller.email') }}</a>
+                        <a href="mailto:{{ App\Support\Seller::email() }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ App\Support\Seller::email() }}</a>
                         @if(filled(config('app.seller.phone')))
                             <a href="tel:{{ preg_replace('/[^+\d]/', '', config('app.seller.phone')) }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ config('app.seller.phone') }}</a>
                         @endif
@@ -75,14 +75,16 @@
                 <div>
                     <h4 class="text-sm font-semibold text-gray-900">{{ __('landing.footer_terms') }}</h4>
                     <nav class="mt-3 flex flex-col gap-2">
-                        <a href="{{ route('privacy') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_privacy') }}</a>
+                        <a href="{{ route('offer') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_offer') }}</a>
                         <a href="{{ route('terms') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_terms') }}</a>
+                        <a href="{{ route('privacy') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_privacy') }}</a>
+                        <a href="{{ route('consent') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_consent') }}</a>
                     </nav>
                 </div>
             </div>
             <div class="mt-8 space-y-2 border-t border-gray-200 pt-6 text-center">
-                @if(filled(config('app.seller.name')) && filled(config('app.seller.inn')))
-                    <p class="text-sm text-gray-500">{{ __('landing.footer_seller', ['name' => config('app.seller.name'), 'inn' => config('app.seller.inn')]) }}</p>
+                @if(App\Support\Seller::hasRequisites())
+                    <p class="text-sm text-gray-500">{{ App\Support\Seller::requisites() }}</p>
                 @endif
                 <p class="text-sm text-gray-400">&copy; {{ date('Y') }} Entropiq. All rights reserved.</p>
             </div>

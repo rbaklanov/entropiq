@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Auth;
 
+use App\Actions\RecordConsent;
 use App\Actions\SendVerificationCode;
 use App\Actions\VerifyCode;
+use App\Enums\ConsentType;
 use App\Models\VerificationCode;
 use App\Support\PhoneFormatter;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -40,7 +43,7 @@ class VerifyPage extends Component
     /**
      * @throws ValidationException
      */
-    public function verify(VerifyCode $action): void
+    public function verify(VerifyCode $action, RecordConsent $recordConsent): void
     {
         $this->isSubmitting = true;
 
@@ -48,10 +51,22 @@ class VerifyPage extends Component
 
         $user = $action->execute($this->phone, $this->code);
 
+        $consent = session('consent');
+
+        if (is_array($consent)) {
+            $recordConsent->execute(
+                $user,
+                ConsentType::PersonalData,
+                $consent['ip_address'] ?? null,
+                $consent['user_agent'] ?? null,
+                Carbon::parse($consent['accepted_at']),
+            );
+        }
+
         Auth::login($user);
 
         session()->regenerate();
-        session()->forget('phone');
+        session()->forget(['phone', 'consent']);
 
         $destination = $user->hasCompletedOnboarding()
             ? route('dashboard')
