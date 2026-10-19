@@ -95,6 +95,22 @@
         <h2 class="mb-4 text-[15px] font-semibold text-gray-900">{{ __('settings.preferences') }}</h2>
 
         <div class="space-y-4">
+            {{-- Appearance: Flux keeps the choice in the browser and follows the system by default --}}
+            <div class="flex flex-wrap items-center justify-between gap-3" x-data>
+                <span class="text-[15px] text-gray-900" id="appearance-label">{{ __('settings.appearance') }}</span>
+                <div role="group" aria-labelledby="appearance-label" class="inline-flex rounded-md border border-gray-200 bg-paper p-0.5">
+                    @foreach(['system', 'light', 'dark'] as $mode)
+                        <button
+                            type="button"
+                            x-on:click="$flux.appearance = '{{ $mode }}'"
+                            :aria-pressed="($flux.appearance === '{{ $mode }}').toString()"
+                            :class="$flux.appearance === '{{ $mode }}' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'"
+                            class="min-h-10 rounded px-3 text-sm transition-colors"
+                        >{{ __("settings.appearance_{$mode}") }}</button>
+                    @endforeach
+                </div>
+            </div>
+
             {{-- Language --}}
             <div class="flex items-center justify-between">
                 <span class="text-[15px] text-gray-900">{{ __('common.settings_language') }}</span>

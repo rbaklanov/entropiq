@@ -115,4 +115,22 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Markdown Mail Settings
+    |--------------------------------------------------------------------------
+    |
+    | Markdown mails use the "Paper and ink" theme from
+    | resources/views/vendor/mail/html/themes/entropiq.css.
+    |
+    */
+
+    'markdown' => [
+        'theme' => 'entropiq',
+
+        'paths' => [
+            resource_path('views/vendor/mail'),
+        ],
+    ],
+
 ];

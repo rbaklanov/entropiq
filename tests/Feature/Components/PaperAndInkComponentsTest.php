@@ -30,6 +30,33 @@ describe('balance-card', function () {
     });
 });
 
+describe('savings-trend', function () {
+    it('shows nominal, real and the inflation gap of the last month', function () {
+        $dynamics = [
+            ['date' => '2026-01-01', 'cumulative_balance' => 4200000, 'real_cumulative_balance' => 4170000],
+            ['date' => '2026-02-01', 'cumulative_balance' => 8450000, 'real_cumulative_balance' => 8340000],
+            ['date' => '2026-03-01', 'cumulative_balance' => 12600000, 'real_cumulative_balance' => 12370000],
+        ];
+
+        $html = Blade::render('<x-savings-trend :dynamics="$dynamics" />', ['dynamics' => $dynamics]);
+
+        expect($html)
+            ->toContain(__('dashboard.savings_trend'))
+            ->toContain('126 000 ₽')
+            ->toContain('123 700 ₽')
+            ->toContain('−2 300 ₽')
+            ->toContain('pen-draw');
+    });
+
+    it('stays hidden until there are two months to draw a line through', function () {
+        $html = Blade::render('<x-savings-trend :dynamics="$dynamics" />', [
+            'dynamics' => [['date' => '2026-01-01', 'cumulative_balance' => 100000, 'real_cumulative_balance' => 99000]],
+        ]);
+
+        expect(trim($html))->toBe('');
+    });
+});
+
 describe('category icons', function () {
     it('draws every system category with a line icon instead of its emoji', function () {
         $this->seed(\Database\Seeders\CategorySeeder::class);

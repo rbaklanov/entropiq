@@ -130,7 +130,93 @@
     --color-accent: var(--color-primary-600);
 }
 
+/*
+ * Dark paper (ENQ-149). The same token names get night values, so every utility follows.
+ * The gray scale is mirrored: gray-50 stays the page, gray-900 stays the main text.
+ * Loud colours become light tints, so `bg-primary-600 text-white` reads as light ink on a dark card.
+ * The .dark class is set on <html> by @fluxAppearance (system, light or dark).
+ */
 @layer base {
+    :root.dark {
+        color-scheme: dark;
+
+        --color-white: #201C17;
+        --color-paper: #16130F;
+        --color-gray-50: #16130F;
+        --color-gray-100: #2A251E;
+        --color-gray-200: #3B342B;
+        --color-gray-300: #4D453A;
+        --color-gray-400: #948A7B;
+        --color-gray-500: #B5AB9C;
+        --color-gray-600: #C7BEB0;
+        --color-gray-700: #D8D0C3;
+        --color-gray-800: #E4DDD1;
+        --color-gray-900: #EFE8DC;
+        --color-gray-950: #F7F2E9;
+
+        --color-primary-50: #18202F;
+        --color-primary-100: #1F2B43;
+        --color-primary-200: #2B3C5E;
+        --color-primary-300: #4A6296;
+        --color-primary-400: #7290CC;
+        --color-primary-500: #8AA6DD;
+        --color-primary-600: #9DB4E8;
+        --color-primary-700: #C3D2F2;
+        --color-primary-800: #D6E0F5;
+        --color-primary-900: #E8EEFA;
+        --color-primary-950: #F3F6FC;
+
+        --color-success-50: #142219;
+        --color-success-100: #1B3022;
+        --color-success-200: #27452F;
+        --color-success-300: #3F6B4B;
+        --color-success-400: #5E9A6E;
+        --color-success-500: #79B58C;
+        --color-success-600: #8CC79A;
+        --color-success-700: #A9D8B3;
+        --color-success-800: #C4E5CB;
+        --color-success-900: #DDF0E1;
+        --color-success-950: #EEF8F0;
+
+        --color-danger-50: #2A1513;
+        --color-danger-100: #3B1C19;
+        --color-danger-200: #582824;
+        --color-danger-300: #8A3E37;
+        --color-danger-400: #C25E55;
+        --color-danger-500: #D9726A;
+        --color-danger-600: #E58A82;
+        --color-danger-700: #F0AAA4;
+        --color-danger-800: #F6C6C1;
+        --color-danger-900: #FADDDA;
+        --color-danger-950: #FDEEEC;
+
+        --color-warning-50: #2C1A12;
+        --color-warning-100: #3F2419;
+        --color-warning-200: #5A3322;
+        --color-warning-300: #8A4C30;
+        --color-warning-400: #C56F48;
+        --color-warning-500: #D9805A;
+        --color-warning-600: #E39069;
+        --color-warning-700: #EEAE8F;
+        --color-warning-800: #F4C6AF;
+        --color-warning-900: #F9DDCF;
+        --color-warning-950: #FCEEE7;
+
+        --color-premium-50: #221726;
+        --color-premium-100: #312238;
+        --color-premium-200: #483250;
+        --color-premium-300: #6E4D7B;
+        --color-premium-400: #9A72AB;
+        --color-premium-500: #B48CC4;
+        --color-premium-600: #C9A3D6;
+        --color-premium-700: #D9BCE2;
+        --color-premium-800: #E6D2EC;
+        --color-premium-900: #F1E6F4;
+        --color-premium-950: #F8F2FA;
+
+        --shadow-lg: 0 1px 0 0 var(--color-gray-200), 0 12px 24px -16px rgb(0 0 0 / 0.6);
+    }
+
     body {
         background-color: var(--color-paper);
     }
@@ -138,6 +224,52 @@
     [x-cloak] {
         display: none !important;
     }
+}
+
+/* The date picker theme comes from a CDN in light colours; repaint it with tokens so it follows the dark paper too. */
+body .flatpickr-calendar {
+    background: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    box-shadow: var(--shadow-lg);
+    color: var(--color-gray-900);
+}
+
+.flatpickr-calendar .flatpickr-months .flatpickr-month,
+.flatpickr-calendar .flatpickr-current-month,
+.flatpickr-calendar .flatpickr-weekday,
+.flatpickr-calendar .flatpickr-day,
+.flatpickr-calendar .flatpickr-months .flatpickr-prev-month,
+.flatpickr-calendar .flatpickr-months .flatpickr-next-month {
+    color: var(--color-gray-900);
+    fill: var(--color-gray-900);
+    background: transparent;
+}
+
+.flatpickr-calendar .flatpickr-day.prevMonthDay,
+.flatpickr-calendar .flatpickr-day.nextMonthDay,
+.flatpickr-calendar .flatpickr-day.flatpickr-disabled {
+    color: var(--color-gray-400);
+}
+
+.flatpickr-calendar .flatpickr-day:hover {
+    background: var(--color-gray-100);
+    border-color: var(--color-gray-100);
+}
+
+.flatpickr-calendar .flatpickr-day.selected,
+.flatpickr-calendar .flatpickr-day.selected:hover {
+    background: var(--color-gray-900);
+    border-color: var(--color-gray-900);
+    color: var(--color-white);
+}
+
+.flatpickr-calendar .flatpickr-day.today {
+    border-color: var(--color-primary-600);
+}
+
+body .flatpickr-calendar.flatpickr-calendar::before,
+body .flatpickr-calendar.flatpickr-calendar::after {
+    display: none;
 }
 
 /* Long documents (offer, terms, privacy, consent). The typography plugin is not installed, so `prose` is ours. */
