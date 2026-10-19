@@ -144,10 +144,10 @@
                 @foreach([3, 6, 12, 24, 36] as $months)
                     <button
                         wire:click="setPresetMonths({{ $months }})"
-                        class="rounded-full px-4 py-1.5 text-sm font-medium transition
+                        class="min-h-10 rounded-md border px-4 text-sm transition-colors
                             {{ $presetMonths === $months
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+                                ? 'border-gray-900 bg-gray-900 text-white'
+                                : 'border-gray-200 text-gray-900 hover:border-gray-900' }}"
                     >
                         {{ __('goals.preset_months', ['count' => $months]) }}
                     </button>

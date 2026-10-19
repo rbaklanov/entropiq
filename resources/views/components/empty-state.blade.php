@@ -1,6 +1,6 @@
 @props(['icon' => null, 'title', 'description' => null, 'actionUrl' => null, 'actionLabel' => null])
 
-<div {{ $attributes->merge(['class' => 'flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center']) }}>
+<div {{ $attributes->merge(['class' => 'flex flex-col items-center justify-center rounded-md border border-dashed border-gray-300 px-6 py-12 text-center']) }}>
     @if($icon)
         <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-2xl">
             {{ $icon }}

@@ -40,7 +40,7 @@
                     id="name"
                     type="text"
                     wire:model="name"
-                    class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                    class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                     placeholder="{{ __('settings.name_placeholder') }}"
                 >
                 @error('name')
@@ -55,7 +55,7 @@
                     id="email"
                     type="email"
                     wire:model="email"
-                    class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                    class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                     placeholder="{{ __('settings.email_placeholder') }}"
                 >
                 @error('email')

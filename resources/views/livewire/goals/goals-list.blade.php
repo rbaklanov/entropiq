@@ -43,7 +43,6 @@
     @if(!$canCreateGoal)
         <x-upsell-banner
             :message="__('goals.limit_upsell')"
-            icon="🎯"
         />
     @endif
 
@@ -52,10 +51,10 @@
         @foreach(['active' => __('goals.filter_active'), 'achieved' => __('goals.filter_achieved'), 'all' => __('goals.filter_all')] as $key => $label)
             <button
                 wire:click="setFilter('{{ $key }}')"
-                class="rounded-full px-4 py-1.5 text-sm font-medium transition
+                class="min-h-10 rounded-md border px-4 text-sm transition-colors
                     {{ $filter === $key
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+                        ? 'border-gray-900 bg-gray-900 text-white'
+                        : 'border-gray-200 text-gray-900 hover:border-gray-900' }}"
             >
                 {{ $label }}
             </button>
@@ -65,7 +64,6 @@
     {{-- Goals grid --}}
     @if($goalData->isEmpty())
         <x-empty-state
-            icon="🎯"
             :title="__('goals.no_goals')"
             :description="__('goals.no_goals_description')"
             :actionUrl="route('goals.create')"
