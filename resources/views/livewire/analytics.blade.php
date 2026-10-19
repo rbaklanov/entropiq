@@ -206,7 +206,7 @@
                         @foreach($breakdown as $row)
                             <div class="flex items-center px-5 py-3">
                                 <div class="flex flex-1 items-center gap-3 min-w-0">
-                                    <span class="text-base" aria-hidden="true">{{ $row['category_icon'] ?? '📦' }}</span>
+                                    <x-category-icon :icon="$row['category_icon'] ?? '📦'" size="xs" />
                                     <span class="text-sm text-gray-900 truncate">{{ $row['category_name'][$locale] ?? '—' }}</span>
                                 </div>
                                 <div class="flex items-center gap-0">
