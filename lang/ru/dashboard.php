@@ -21,6 +21,9 @@ return [
 
     'inflation_loss' => 'из-за инфляции',
     'real_balance' => 'Реальный баланс (в текущих ценах)',
+    'amounts_toggle' => 'Показывать суммы',
+    'show_nominal' => 'Номинально',
+    'show_real' => 'Реально',
 
     'personal_inflation' => 'Ваша инфляция',
     'personal_inflation_tooltip' => 'Рассчитывается на основе структуры ваших расходов и данных Росстата по категориям ИПЦ.',

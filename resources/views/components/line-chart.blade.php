@@ -6,7 +6,7 @@
 ])
 
 @php
-    $defaultColors = ['#6366F1', '#F59E0B'];
+    $defaultColors = null;
     $chartColors = $colors ?? $defaultColors;
 @endphp
 
@@ -24,23 +24,24 @@
                 chart: {
                     type: 'area',
                     height: {{ $height }},
-                    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+                    fontFamily: "'Golos Text', ui-sans-serif, system-ui, sans-serif",
+                    animations: { enabled: ! window.prefersReducedMotion(), speed: 900 },
                     toolbar: { show: false },
                     zoom: { enabled: false },
                 },
                 series: {{ Js::from($series) }},
-                colors: {{ Js::from($chartColors) }},
+                colors: {{ Js::from($chartColors) }} ?? [window.themeColor('gray-900'), window.themeColor('primary-600')],
                 xaxis: {
                     categories: {{ Js::from($categories) }},
                     labels: {
-                        style: { colors: '#9CA3AF', fontSize: '12px' },
+                        style: { colors: window.themeColor('gray-500'), fontSize: '12px' },
                     },
                     axisBorder: { show: false },
                     axisTicks: { show: false },
                 },
                 yaxis: {
                     labels: {
-                        style: { colors: '#9CA3AF', fontSize: '12px' },
+                        style: { colors: window.themeColor('gray-500'), fontSize: '12px' },
                         formatter: (val) => new Intl.NumberFormat(locale, { notation: 'compact' }).format(Math.round(val / 100)) + ' ₽',
                     },
                 },
@@ -49,19 +50,14 @@
                     width: 2.5,
                 },
                 fill: {
-                    type: 'gradient',
-                    gradient: {
-                        shadeIntensity: 1,
-                        opacityFrom: 0.15,
-                        opacityTo: 0.02,
-                        stops: [0, 100],
-                    },
+                    type: 'solid',
+                    opacity: 0.06,
                 },
                 dataLabels: {
                     enabled: false,
                 },
                 grid: {
-                    borderColor: '#F3F4F6',
+                    borderColor: window.themeColor('gray-200'),
                     strokeDashArray: 4,
                     padding: { left: 8, right: 8 },
                 },
@@ -70,7 +66,7 @@
                     horizontalAlign: 'left',
                     fontWeight: 500,
                     fontSize: '13px',
-                    labels: { colors: '#374151' },
+                    labels: { colors: window.themeColor('gray-700') },
                     markers: { radius: 3 },
                     itemMargin: { horizontal: 12 },
                 },

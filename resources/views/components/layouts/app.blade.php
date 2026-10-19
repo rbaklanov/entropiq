@@ -8,7 +8,7 @@
     <title>{{ $title ?? config('app.name', 'Entropiq') }}</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=golos-text:400,500,600,700|literata:400,600,700" rel="stylesheet" />
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -25,9 +25,9 @@
     <div class="flex min-h-screen">
 
         {{-- Desktop sidebar (lg+) --}}
-        <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-gray-200 bg-white lg:flex">
+        <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-gray-200 bg-paper lg:flex">
             <div class="flex h-16 items-center px-6">
-                <a href="/dashboard" class="text-h3 text-primary-600">Entropiq</a>
+                <a href="/dashboard" aria-label="Entropiq"><x-wordmark class="text-2xl" /></a>
             </div>
 
             <nav class="flex-1 space-y-1 px-3 py-4">
@@ -59,11 +59,11 @@
         </aside>
 
         {{-- Main content --}}
-        <div class="flex flex-1 flex-col lg:pl-64">
+        <div class="flex min-w-0 flex-1 flex-col lg:pl-64">
 
             {{-- Top bar (mobile) --}}
-            <header class="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 lg:hidden">
-                <a href="/dashboard" class="text-h3 text-primary-600">Entropiq</a>
+            <header class="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-gray-200 bg-paper px-4 lg:hidden">
+                <a href="/dashboard" aria-label="Entropiq"><x-wordmark class="text-2xl" /></a>
             </header>
 
             {{-- Page content --}}

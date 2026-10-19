@@ -1,15 +1,15 @@
-<div class="space-y-6">
+<div class="mx-auto max-w-5xl space-y-6">
 
     {{-- Greeting --}}
     <div>
-        <h1 class="text-h1">
+        <h1 class="text-h1 sm:text-4xl">
             @if(auth()->user()->name)
                 {{ __('dashboard.greeting', ['name' => auth()->user()->name]) }}
             @else
                 {{ __('dashboard.greeting_short') }}
             @endif
         </h1>
-        <p class="mt-1 text-sm text-gray-500">{{ now()->translatedFormat('j F, l') }}</p>
+        <p class="mt-1 text-[15px] text-gray-500">{{ now()->translatedFormat('j F, l') }}</p>
     </div>
 
     {{-- Balance card --}}
@@ -20,44 +20,47 @@
     />
 
     {{-- Monthly metrics --}}
-    <div class="grid grid-cols-3 gap-3">
-        <div class="rounded-xl bg-white p-4 shadow-sm">
-            <p class="text-small text-gray-500">{{ __('dashboard.income') }}</p>
-            <x-money-display :amount="$monthlySummary['income']" type="income" size="md" :showSign="true" />
-        </div>
-        <div class="rounded-xl bg-white p-4 shadow-sm">
-            <p class="text-small text-gray-500">{{ __('dashboard.expenses') }}</p>
-            <x-money-display :amount="$monthlySummary['expense']" type="expense" size="md" :showSign="true" />
-        </div>
-        <div class="rounded-xl bg-white p-4 shadow-sm">
-            <p class="text-small text-gray-500">{{ __('dashboard.savings_rate') }}</p>
-            <p class="text-number-md {{ $savingsRate >= 0 ? 'text-success-600' : 'text-danger-500' }}">
-                {{ $savingsRate }}%
-            </p>
-        </div>
+    <section class="rounded-md border border-gray-200 bg-white px-6 py-5">
+        <h2 class="text-sm font-semibold text-gray-900">{{ ucfirst(now()->translatedFormat('F')) }}</h2>
+        <dl class="mt-3 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+            <div>
+                <dt class="text-[13px] text-gray-500">{{ __('dashboard.income') }}</dt>
+                <dd><x-money-display :amount="$monthlySummary['income']" type="income" size="md" :showSign="true" /></dd>
+            </div>
+            <div>
+                <dt class="text-[13px] text-gray-500">{{ __('dashboard.expenses') }}</dt>
+                <dd><x-money-display :amount="$monthlySummary['expense']" type="expense" size="md" :showSign="true" /></dd>
+            </div>
+            <div class="col-span-2 sm:col-span-1">
+                <dt class="text-[13px] text-gray-500">{{ __('dashboard.savings_rate') }}</dt>
+                <dd class="text-number-md {{ $savingsRate >= 0 ? 'text-gray-900' : 'text-danger-600' }}">{{ $savingsRate }}%</dd>
+            </div>
+        </dl>
+    </section>
+
+    <div @class(['grid gap-6', 'lg:grid-cols-2' => (bool) $dailyAdvice])>
+        {{-- Inflation widget --}}
+        <x-inflation-widget
+            :personalInflation="$personalInflation"
+            :nationalInflation="$nationalInflation"
+        />
+
+        {{-- Daily advice --}}
+        @if($dailyAdvice)
+            <x-ai-advice-card :advice="$dailyAdvice" :teaser="$adviceTeaser" :locked="$adviceLocked" />
+        @endif
     </div>
-
-    {{-- Inflation widget --}}
-    <x-inflation-widget
-        :personalInflation="$personalInflation"
-        :nationalInflation="$nationalInflation"
-    />
-
-    {{-- Daily advice --}}
-    @if($dailyAdvice)
-        <x-ai-advice-card :advice="$dailyAdvice" :teaser="$adviceTeaser" :locked="$adviceLocked" />
-    @endif
 
     {{-- Goals ribbon --}}
     @if($goalData->isNotEmpty())
-        <div>
-            <div class="mb-3 flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-gray-900">{{ __('dashboard.goals') }}</h2>
+        <section>
+            <div class="mb-3 flex items-baseline justify-between">
+                <h2 class="text-[15px] font-semibold text-gray-900">{{ __('dashboard.goals') }}</h2>
                 <a href="{{ route('goals.index') }}" class="text-sm text-primary-600 hover:text-primary-700">
                     {{ __('dashboard.view_all') }}
                 </a>
             </div>
-            <div class="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 scrollbar-hide">
+            <div class="scrollbar-hide -mx-4 flex gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                 @foreach($goalData as $item)
                     <x-goal-card
                         :goal="$item['goal']"
@@ -68,96 +71,80 @@
                     />
                 @endforeach
             </div>
-        </div>
+        </section>
     @else
-        <div class="rounded-2xl border-2 border-dashed border-gray-200 p-6 text-center">
-            <p class="text-2xl">🎯</p>
-            <p class="mt-2 text-sm font-medium text-gray-900">{{ __('dashboard.goals_empty') }}</p>
-            <p class="mt-1 text-xs text-gray-500">{{ __('dashboard.goals_empty_cta') }}</p>
+        <section class="rounded-md border border-dashed border-gray-300 p-8 text-center">
+            <h2 class="font-serif text-xl font-semibold text-gray-900">{{ __('dashboard.goals_empty') }}</h2>
+            <p class="mt-1.5 text-sm text-gray-500">{{ __('dashboard.goals_empty_cta') }}</p>
             <a
                 href="{{ route('goals.create') }}"
-                class="mt-3 inline-block rounded-full bg-primary-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
+                class="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
             >
                 {{ __('dashboard.goals_create') }}
             </a>
-        </div>
+        </section>
     @endif
 
-    {{-- Top expense categories --}}
-    @if($topCategories->isNotEmpty())
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-gray-900">{{ __('dashboard.top_expenses') }}</h2>
-                <a href="{{ route('transactions.index', ['type' => 'expense']) }}" class="text-sm text-primary-600 hover:text-primary-700">
+    <div class="grid gap-6 lg:grid-cols-2">
+        {{-- Top expense categories --}}
+        @if($topCategories->isNotEmpty())
+            <section>
+                <div class="mb-1 flex items-baseline justify-between">
+                    <h2 class="text-[15px] font-semibold text-gray-900">{{ __('dashboard.top_expenses') }}</h2>
+                    <a href="{{ route('transactions.index', ['type' => 'expense']) }}" class="text-sm text-primary-600 hover:text-primary-700">
+                        {{ __('dashboard.view_all') }}
+                    </a>
+                </div>
+
+                <ul>
+                    @foreach($topCategories as $cat)
+                        @php
+                            $percent = $totalExpense > 0 ? round($cat['total'] / $totalExpense * 100) : 0;
+                        @endphp
+                        <li class="border-b border-gray-200 py-2.5">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="flex items-center gap-2 text-[15px] text-gray-900">
+                                    <span aria-hidden="true">{{ $cat['icon'] }}</span>
+                                    {{ $cat['name'] }}
+                                </span>
+                                <span class="flex items-baseline gap-2">
+                                    <x-money-display :amount="$cat['total']" type="expense" size="xs" />
+                                    <span class="text-small text-gray-500">{{ $percent }}%</span>
+                                </span>
+                            </div>
+                            <div aria-hidden="true" class="mt-1.5 h-1 overflow-hidden rounded-sm bg-gray-100">
+                                <div class="ink-grow h-full rounded-sm bg-gray-900" style="width: {{ $percent }}%"></div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
+        {{-- Recent transactions --}}
+        <section @class(['lg:col-span-2' => $topCategories->isEmpty()])>
+            <div class="mb-1 flex items-baseline justify-between">
+                <h2 class="text-[15px] font-semibold text-gray-900">{{ __('dashboard.recent_transactions') }}</h2>
+                <a href="{{ route('transactions.index') }}" class="text-sm text-primary-600 hover:text-primary-700">
                     {{ __('dashboard.view_all') }}
                 </a>
             </div>
 
-            <div class="space-y-3">
-                @foreach($topCategories as $cat)
-                    @php
-                        $percent = $totalExpense > 0 ? round($cat['total'] / $totalExpense * 100) : 0;
-                    @endphp
-                    <div>
-                        <div class="mb-1 flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="text-base">{{ $cat['icon'] }}</span>
-                                <span class="text-sm text-gray-700">{{ $cat['name'] }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <x-money-display :amount="$cat['total']" type="expense" size="xs" />
-                                <span class="text-small text-gray-400">{{ $percent }}%</span>
-                            </div>
-                        </div>
-                        <div class="h-1.5 overflow-hidden rounded-full bg-gray-100">
-                            <div
-                                class="h-full rounded-full transition-all duration-500"
-                                style="width: {{ $percent }}%; background-color: {{ $cat['color'] }}"
-                            ></div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
-    {{-- Recent transactions --}}
-    <div>
-        <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-900">{{ __('dashboard.recent_transactions') }}</h2>
-            <a href="{{ route('transactions.index') }}" class="text-sm text-primary-600 hover:text-primary-700">
-                {{ __('dashboard.view_all') }}
-            </a>
-        </div>
-
-        @if($recentTransactions->isEmpty())
-            <x-empty-state
-                icon="📝"
-                :title="__('transactions.no_transactions')"
-                :description="__('transactions.no_transactions_cta')"
-                :actionUrl="route('transactions.create')"
-                :actionLabel="__('transactions.add')"
-            />
-        @else
-            <div class="space-y-1">
-                @foreach($recentTransactions as $transaction)
-                    <x-transaction-row :transaction="$transaction" />
-                @endforeach
-            </div>
-        @endif
-    </div>
-
-    {{-- Quick add button (mobile) --}}
-    <div class="flex justify-center pb-4 lg:hidden">
-        <a
-            href="{{ route('transactions.create') }}"
-            class="inline-flex items-center gap-2 rounded-full bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-primary-700"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            {{ __('transactions.add') }}
-        </a>
+            @if($recentTransactions->isEmpty())
+                <x-empty-state
+                    :title="__('transactions.no_transactions')"
+                    :description="__('transactions.no_transactions_cta')"
+                    :actionUrl="route('transactions.create')"
+                    :actionLabel="__('transactions.add')"
+                />
+            @else
+                <div class="divide-y divide-gray-200 border-b border-gray-200">
+                    @foreach($recentTransactions as $transaction)
+                        <x-transaction-row :transaction="$transaction" />
+                    @endforeach
+                </div>
+            @endif
+        </section>
     </div>
 
 </div>

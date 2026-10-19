@@ -8,90 +8,120 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Visual language "Paper and ink" (ENQ-148): warm paper, ink text, serif display,
+ * ink blue as the only loud accent, rust reserved for what inflation takes away.
+ * Token names are kept from the previous palette so existing utilities follow the new look.
+ */
 @theme {
     /* Typography */
-    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Golos Text', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif: 'Literata', Georgia, 'Times New Roman', serif;
 
-    /* Primary — Indigo */
-    --color-primary-50: #EEF2FF;
-    --color-primary-100: #E0E7FF;
-    --color-primary-200: #C7D2FE;
-    --color-primary-300: #A5B4FC;
-    --color-primary-400: #818CF8;
-    --color-primary-500: #6366F1;
-    --color-primary-600: #4F46E5;
-    --color-primary-700: #4338CA;
-    --color-primary-800: #3730A3;
-    --color-primary-900: #312E81;
-    --color-primary-950: #1E1B4B;
+    /* Surfaces: white is the card paper, gray is warm paper and ink */
+    --color-white: #FBF8F2;
+    --color-paper: #F5F0E6;
+    --color-gray-50: #F5F0E6;
+    --color-gray-100: #EDE5D6;
+    --color-gray-200: #D9CFBE;
+    --color-gray-300: #C2B6A2;
+    --color-gray-400: #766C60;
+    --color-gray-500: #5C544A;
+    --color-gray-600: #4A433A;
+    --color-gray-700: #3A342D;
+    --color-gray-800: #2B2620;
+    --color-gray-900: #1E1A15;
+    --color-gray-950: #120F0C;
 
-    /* Success / Income — Green */
-    --color-success-50: #ECFDF5;
-    --color-success-100: #D1FAE5;
-    --color-success-200: #A7F3D0;
-    --color-success-300: #6EE7B7;
-    --color-success-400: #34D399;
-    --color-success-500: #10B981;
-    --color-success-600: #059669;
-    --color-success-700: #047857;
-    --color-success-800: #065F46;
-    --color-success-900: #064E3B;
-    --color-success-950: #022C22;
+    /* Primary: ink blue */
+    --color-primary-50: #EEF2F9;
+    --color-primary-100: #DCE4F2;
+    --color-primary-200: #B9C8E4;
+    --color-primary-300: #8EA5D0;
+    --color-primary-400: #6482BB;
+    --color-primary-500: #3F62A3;
+    --color-primary-600: #2C4A86;
+    --color-primary-700: #203766;
+    --color-primary-800: #182A4E;
+    --color-primary-900: #111E38;
+    --color-primary-950: #0A1222;
 
-    /* Danger / Expense — Red */
-    --color-danger-50: #FEF2F2;
-    --color-danger-100: #FEE2E2;
-    --color-danger-200: #FECACA;
-    --color-danger-300: #FCA5A5;
-    --color-danger-400: #F87171;
-    --color-danger-500: #EF4444;
-    --color-danger-600: #DC2626;
-    --color-danger-700: #B91C1C;
-    --color-danger-800: #991B1B;
-    --color-danger-900: #7F1D1D;
-    --color-danger-950: #450A0A;
+    /* Success / Income: ledger green */
+    --color-success-50: #EDF5EF;
+    --color-success-100: #D4E8DA;
+    --color-success-200: #A9D1B5;
+    --color-success-300: #79B58C;
+    --color-success-400: #4F9566;
+    --color-success-500: #3A7D4F;
+    --color-success-600: #2F6B3F;
+    --color-success-700: #255533;
+    --color-success-800: #1C4027;
+    --color-success-900: #142D1C;
+    --color-success-950: #0B1A10;
 
-    /* Warning / Inflation — Orange */
-    --color-warning-50: #FFFBEB;
-    --color-warning-100: #FEF3C7;
-    --color-warning-200: #FDE68A;
-    --color-warning-300: #FCD34D;
-    --color-warning-400: #FBBF24;
-    --color-warning-500: #F59E0B;
-    --color-warning-600: #D97706;
-    --color-warning-700: #B45309;
-    --color-warning-800: #92400E;
-    --color-warning-900: #78350F;
-    --color-warning-950: #451A03;
+    /* Danger: muted red for errors and destructive actions */
+    --color-danger-50: #FBEDEC;
+    --color-danger-100: #F5D5D2;
+    --color-danger-200: #EAAAA5;
+    --color-danger-300: #DC7C75;
+    --color-danger-400: #C9544C;
+    --color-danger-500: #B23A32;
+    --color-danger-600: #962E27;
+    --color-danger-700: #7A251F;
+    --color-danger-800: #5E1C18;
+    --color-danger-900: #441511;
+    --color-danger-950: #280C0A;
 
-    /* Premium — Violet */
-    --color-premium-50: #F5F3FF;
-    --color-premium-100: #EDE9FE;
-    --color-premium-200: #DDD6FE;
-    --color-premium-300: #C4B5FD;
-    --color-premium-400: #A78BFA;
-    --color-premium-500: #8B5CF6;
-    --color-premium-600: #7C3AED;
-    --color-premium-700: #6D28D9;
-    --color-premium-800: #5B21B6;
-    --color-premium-900: #4C1D95;
-    --color-premium-950: #2E1065;
+    /* Warning / Inflation: rust, the colour of what inflation takes */
+    --color-warning-50: #FBEFE9;
+    --color-warning-100: #F5D9CB;
+    --color-warning-200: #EBB59A;
+    --color-warning-300: #DE8C66;
+    --color-warning-400: #CC6A40;
+    --color-warning-500: #B8552C;
+    --color-warning-600: #A3431F;
+    --color-warning-700: #85361A;
+    --color-warning-800: #682A15;
+    --color-warning-900: #4D1F10;
+    --color-warning-950: #2E1209;
+
+    /* Premium: plum */
+    --color-premium-50: #F6F0F8;
+    --color-premium-100: #ECDFF0;
+    --color-premium-200: #D8BFE1;
+    --color-premium-300: #BE97CC;
+    --color-premium-400: #A272B4;
+    --color-premium-500: #8A579C;
+    --color-premium-600: #744684;
+    --color-premium-700: #5E386B;
+    --color-premium-800: #482B52;
+    --color-premium-900: #33203A;
+    --color-premium-950: #1F1323;
+
+    /* Paper is flat: small radii, hairlines instead of soft shadows */
+    --radius-lg: 0.375rem;
+    --radius-xl: 0.375rem;
+    --radius-2xl: 0.5rem;
+    --radius-3xl: 0.75rem;
+    --shadow-sm: 0 0 0 1px var(--color-gray-200);
+    --shadow-md: 0 0 0 1px var(--color-gray-300);
+    --shadow-lg: 0 1px 0 0 var(--color-gray-200), 0 12px 24px -16px rgb(30 26 21 / 0.25);
 
     /* Typography scale */
-    --text-h1: 1.75rem;
-    --text-h1--line-height: 2.25rem;
-    --text-h2: 1.375rem;
-    --text-h2--line-height: 1.875rem;
-    --text-h3: 1.125rem;
+    --text-h1: 2rem;
+    --text-h1--line-height: 2.5rem;
+    --text-h2: 1.5rem;
+    --text-h2--line-height: 2rem;
+    --text-h3: 1.1875rem;
     --text-h3--line-height: 1.625rem;
     --text-caption: 0.875rem;
     --text-caption--line-height: 1.25rem;
     --text-small: 0.75rem;
     --text-small--line-height: 1rem;
-    --text-number-lg: 2rem;
-    --text-number-lg--line-height: 2.5rem;
-    --text-number-md: 1.25rem;
+    --text-number-lg: 2.25rem;
+    --text-number-lg--line-height: 2.625rem;
+    --text-number-md: 1.375rem;
     --text-number-md--line-height: 1.75rem;
 }
 
@@ -100,20 +130,34 @@
     --color-accent: var(--color-primary-600);
 }
 
+@layer base {
+    body {
+        background-color: var(--color-paper);
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
 /* Utility classes for typography */
 @utility text-h1 {
+    font-family: var(--font-serif);
     font-size: var(--text-h1);
     line-height: var(--text-h1--line-height);
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: -0.01em;
 }
 
 @utility text-h2 {
+    font-family: var(--font-serif);
     font-size: var(--text-h2);
     line-height: var(--text-h2--line-height);
     font-weight: 600;
 }
 
 @utility text-h3 {
+    font-family: var(--font-serif);
     font-size: var(--text-h3);
     line-height: var(--text-h3--line-height);
     font-weight: 600;
@@ -130,30 +174,125 @@
 }
 
 @utility text-number-lg {
+    font-family: var(--font-serif);
     font-size: var(--text-number-lg);
     line-height: var(--text-number-lg--line-height);
-    font-weight: 700;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
 }
 
 @utility text-number-md {
+    font-family: var(--font-serif);
     font-size: var(--text-number-md);
     line-height: var(--text-number-md--line-height);
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
 }
 
-/* Income / Expense color shortcuts */
+/* Income / Expense color shortcuts. Expenses are plain ink, losses to inflation are rust. */
 @utility text-income {
-    color: var(--color-success-500);
+    color: var(--color-success-600);
 }
 
 @utility text-expense {
-    color: var(--color-danger-500);
+    color: var(--color-gray-900);
 }
 
 @utility text-inflation {
-    color: var(--color-warning-500);
+    color: var(--color-warning-600);
 }
 
 @utility text-premium {
-    color: var(--color-premium-500);
+    color: var(--color-premium-600);
+}
+
+/* Pen effects: drawn once, never in a loop, and never with reduced motion */
+@utility pen-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: pen-draw 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@utility ink-melt {
+    animation: ink-melt 3.2s ease-in-out infinite alternate;
+}
+
+@utility ink-grow {
+    transform-origin: left;
+    animation: ink-grow 0.9s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@utility ink-rise {
+    transform-origin: bottom;
+    animation: ink-rise 0.9s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@utility ink-fade {
+    opacity: 0;
+    animation: ink-fade 0.9s ease-out forwards;
+}
+
+@utility reveal {
+    @supports (animation-timeline: view()) {
+        animation: ink-appear linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 40%;
+    }
+}
+
+@keyframes pen-draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes ink-melt {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.28;
+    }
+}
+
+@keyframes ink-grow {
+    from {
+        transform: scaleX(0);
+    }
+}
+
+@keyframes ink-rise {
+    from {
+        transform: scaleY(0);
+    }
+}
+
+@keyframes ink-fade {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes ink-appear {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .pen-draw {
+        stroke-dashoffset: 0;
+    }
+
+    .ink-fade {
+        opacity: 1;
+    }
 }
