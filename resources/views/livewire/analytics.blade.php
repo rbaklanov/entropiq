@@ -94,6 +94,7 @@
                             @endphp
                             <div class="flex items-center px-5 py-3">
                                 <div class="flex flex-1 items-center gap-3 min-w-0">
+                                    <span aria-hidden="true" class="h-2.5 w-2.5 shrink-0 rounded-full" style="background-color: var(--color-{{ $categorySwatches[$expense['category_id']] ?? 'gray-300' }})"></span>
                                     <x-category-icon
                                         :icon="$expense['category_icon'] ?? '📦'"
                                         :color="$expense['category_color'] ?? null"

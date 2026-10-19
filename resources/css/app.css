@@ -13,7 +13,7 @@
  * ink blue as the only loud accent, rust reserved for what inflation takes away.
  * Token names are kept from the previous palette so existing utilities follow the new look.
  */
-@theme {
+@theme static {
     /* Typography */
     --font-sans: 'Golos Text', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
