@@ -11,11 +11,6 @@ use Illuminate\Support\Str;
 
 class FakePaymentService implements PaymentServiceInterface
 {
-    private const PRICES = [
-        'monthly' => 9900,
-        'yearly' => 59000,
-    ];
-
     public function charge(User $user, SubscriptionPlan $plan): Payment
     {
         $activeSubscription = $user->subscriptions()
@@ -26,7 +21,7 @@ class FakePaymentService implements PaymentServiceInterface
         return Payment::create([
             'user_id' => $user->id,
             'subscription_id' => $activeSubscription?->id,
-            'amount' => self::PRICES[$plan->value] ?? 0,
+            'amount' => $plan->price(),
             'currency_code' => $user->currency_code,
             'provider' => 'fake',
             'provider_payment_id' => 'fake_'.Str::uuid()->toString(),

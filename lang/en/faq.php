@@ -49,7 +49,7 @@ return [
                 ],
                 [
                     'q' => 'What does Premium offer and how much does it cost?',
-                    'a' => 'Premium costs 99 ₽ a month or 590 ₽ a year. It includes unlimited transactions, up to 10 goals, daily AI tips, analytics for any period, scenario modelling and export to PDF and Excel.',
+                    'a' => 'Premium costs :monthly_price ₽ a month or :yearly_price ₽ a year. It includes unlimited transactions, up to 10 goals, daily AI tips, analytics for any period, scenario modelling and export to PDF and Excel.',
                 ],
                 [
                     'q' => 'How do I cancel the subscription, and can I get a refund?',

@@ -62,17 +62,6 @@ return [
     'comparison_free_plan' => 'Free plan',
     'comparison_no_bank' => 'No bank linking',
 
-    'reviews_title' => 'What users say',
-    'review_1_text' => 'Finally I can see how much I\'m really losing to inflation. Other apps just showed numbers, Entropiq shows the truth.',
-    'review_1_author' => 'Alexey K.',
-    'review_1_role' => 'freelancer',
-    'review_2_text' => 'The inflation calculator was an eye-opener. I thought I was saving, but my money was losing value. Now I plan with reality in mind.',
-    'review_2_author' => 'Maria S.',
-    'review_2_role' => 'marketer',
-    'review_3_text' => 'The AI tips are genuinely useful. It pointed out I was spending more on subscriptions than I thought. Saved 3,000₽ a month.',
-    'review_3_author' => 'Dmitry L.',
-    'review_3_role' => 'developer',
-
     'pricing_title' => 'Simple, honest pricing',
     'pricing_subtitle' => 'Start for free. Upgrade to Premium when you\'re ready.',
     'pricing_free' => 'Free',
@@ -86,7 +75,8 @@ return [
     'pricing_no_export' => 'PDF/Excel export',
     'pricing_free_cta' => 'Start for free',
     'pricing_premium' => 'Premium',
-    'pricing_premium_price' => '99 ₽',
+    'pricing_premium_price' => ':monthly_price ₽',
+    'pricing_premium_yearly' => 'or :yearly_price ₽ a year',
     'pricing_month' => 'mo',
     'pricing_premium_transactions' => 'Unlimited transactions',
     'pricing_premium_goals' => 'Up to 10 goals',
@@ -107,5 +97,6 @@ return [
     'faq_title' => 'FAQ',
     'faq_support' => 'Did not find an answer? Write to',
 
+    'footer_seller' => ':name, TIN :inn, professional income tax (NPD) payer',
     'footer_support' => 'Support',
 ];

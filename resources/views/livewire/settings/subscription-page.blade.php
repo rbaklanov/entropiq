@@ -88,7 +88,7 @@
                     {{ $selectedPlan === 'monthly' ? 'border-premium-500 bg-premium-50' : 'border-gray-200 bg-white hover:border-gray-300' }}"
             >
                 <p class="text-sm font-medium text-gray-500">{{ __('subscription.plan_monthly') }}</p>
-                <p class="mt-1 text-2xl font-bold text-gray-900">{{ __('subscription.price_monthly') }}</p>
+                <p class="mt-1 text-2xl font-bold text-gray-900">{{ __('subscription.price_monthly', App\Enums\SubscriptionPlan::priceReplacements()) }}</p>
             </button>
 
             {{-- Yearly --}}
@@ -101,8 +101,8 @@
                     {{ __('subscription.recommended') }}
                 </span>
                 <p class="text-sm font-medium text-gray-500">{{ __('subscription.plan_yearly') }}</p>
-                <p class="mt-1 text-2xl font-bold text-gray-900">{{ __('subscription.price_yearly') }}</p>
-                <p class="mt-1 text-xs font-medium text-success-600">{{ __('subscription.yearly_savings') }}</p>
+                <p class="mt-1 text-2xl font-bold text-gray-900">{{ __('subscription.price_yearly', App\Enums\SubscriptionPlan::priceReplacements()) }}</p>
+                <p class="mt-1 text-xs font-medium text-success-600">{{ __('subscription.yearly_savings', App\Enums\SubscriptionPlan::priceReplacements()) }}</p>
             </button>
 
         </div>

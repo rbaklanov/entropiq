@@ -8,9 +8,9 @@ return [
     'plan_monthly' => 'Месячная',
     'plan_yearly' => 'Годовая',
 
-    'price_monthly' => '99 ₽/мес',
-    'price_yearly' => '590 ₽/год',
-    'yearly_savings' => 'Экономия 50%',
+    'price_monthly' => ':monthly_price ₽/мес',
+    'price_yearly' => ':yearly_price ₽/год',
+    'yearly_savings' => 'Экономия :yearly_savings%',
     'recommended' => 'Рекомендуем',
 
     'current_plan' => 'Текущий план',

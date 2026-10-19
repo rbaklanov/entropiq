@@ -66,7 +66,10 @@
                     <h4 class="text-sm font-semibold text-gray-900">{{ __('landing.footer_support') }}</h4>
                     <nav class="mt-3 flex flex-col gap-2">
                         <a href="{{ route('faq') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ __('landing.footer_faq') }}</a>
-                        <a href="mailto:support@entropiq.ru" class="text-sm text-gray-500 transition hover:text-gray-700">support@entropiq.ru</a>
+                        <a href="mailto:{{ config('app.seller.email') }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ config('app.seller.email') }}</a>
+                        @if(filled(config('app.seller.phone')))
+                            <a href="tel:{{ preg_replace('/[^+\d]/', '', config('app.seller.phone')) }}" class="text-sm text-gray-500 transition hover:text-gray-700">{{ config('app.seller.phone') }}</a>
+                        @endif
                     </nav>
                 </div>
                 <div>
@@ -77,7 +80,10 @@
                     </nav>
                 </div>
             </div>
-            <div class="mt-8 border-t border-gray-200 pt-6 text-center">
+            <div class="mt-8 space-y-2 border-t border-gray-200 pt-6 text-center">
+                @if(filled(config('app.seller.name')) && filled(config('app.seller.inn')))
+                    <p class="text-sm text-gray-500">{{ __('landing.footer_seller', ['name' => config('app.seller.name'), 'inn' => config('app.seller.inn')]) }}</p>
+                @endif
                 <p class="text-sm text-gray-400">&copy; {{ date('Y') }} Entropiq. All rights reserved.</p>
             </div>
         </div>

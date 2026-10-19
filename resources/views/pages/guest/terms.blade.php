@@ -21,7 +21,7 @@
             <h2>{{ __('legal.terms_plans_title') }}</h2>
             <ul>
                 <li>{{ __('legal.terms_plans_free') }}</li>
-                <li>{{ __('legal.terms_plans_premium') }}</li>
+                <li>{{ __('legal.terms_plans_premium', App\Enums\SubscriptionPlan::priceReplacements()) }}</li>
                 <li>{{ __('legal.terms_plans_refund') }}</li>
             </ul>
 
