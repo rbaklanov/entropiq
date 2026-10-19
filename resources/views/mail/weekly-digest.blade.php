@@ -6,7 +6,7 @@
 | | |
 |---|---:|
 | **{{ __('digest.income') }}** | **+{{ number_format($digest['total_income'] / 100, 2, ',', ' ') }} ₽** |
-| **{{ __('digest.expense') }}** | **-{{ number_format($digest['total_expense'] / 100, 2, ',', ' ') }} ₽** |
+| **{{ __('digest.expense') }}** | **−{{ number_format($digest['total_expense'] / 100, 2, ',', ' ') }} ₽** |
 | **{{ __('digest.balance') }}** | **{{ number_format($digest['balance'] / 100, 2, ',', ' ') }} ₽** |
 
 {{ __('digest.transactions_count', ['count' => $digest['transactions_count']]) }}
