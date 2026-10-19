@@ -16,34 +16,33 @@
 
     {{-- Summary card --}}
     @if($hasGoals)
-        <div class="rounded-2xl p-5 text-white shadow-lg" style="background: linear-gradient(135deg, #6366F1, #9333EA)">
-            <p class="text-sm font-medium" style="color: rgba(255,255,255,0.8)">{{ __('goals.total_saved') }}</p>
-            <p class="mt-1 text-2xl font-bold tracking-tight">
+        <section class="rounded-md border border-gray-200 bg-white p-6">
+            <p class="text-sm text-gray-500">{{ __('goals.total_saved') }}</p>
+            <p class="mt-1 font-serif text-3xl font-semibold tabular-nums">
                 {{ number_format($totalCurrent / 100, 0, '.', ' ') }} ₽
-                <span class="text-base font-normal" style="color: rgba(255,255,255,0.7)">
+                <span class="font-sans text-base font-normal text-gray-500">
                     / {{ number_format($totalTarget / 100, 0, '.', ' ') }} ₽
                 </span>
             </p>
-            <div class="mt-3">
-                <div class="flex items-center justify-between text-xs" style="color: rgba(255,255,255,0.7)">
+            <div class="mt-4">
+                <div class="flex items-center justify-between text-xs text-gray-500">
                     <span>{{ __('goals.progress') }}</span>
                     <span>{{ $overallProgress }}%</span>
                 </div>
-                <div class="mt-1 h-2 overflow-hidden rounded-full bg-white/20">
+                <div class="mt-1.5 h-2 overflow-hidden rounded-sm bg-gray-100">
                     <div
-                        class="h-full rounded-full bg-white transition-all duration-700"
+                        class="ink-grow h-full rounded-sm bg-primary-600"
                         style="width: {{ min(100, $overallProgress) }}%"
                     ></div>
                 </div>
             </div>
-        </div>
+        </section>
     @endif
 
     {{-- Upsell: goal limit --}}
     @if(!$canCreateGoal)
         <x-upsell-banner
             :message="__('goals.limit_upsell')"
-            icon="🎯"
         />
     @endif
 
@@ -52,10 +51,10 @@
         @foreach(['active' => __('goals.filter_active'), 'achieved' => __('goals.filter_achieved'), 'all' => __('goals.filter_all')] as $key => $label)
             <button
                 wire:click="setFilter('{{ $key }}')"
-                class="rounded-full px-4 py-1.5 text-sm font-medium transition
+                class="min-h-10 rounded-md border px-4 text-sm transition-colors
                     {{ $filter === $key
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+                        ? 'border-gray-900 bg-gray-900 text-white'
+                        : 'border-gray-200 text-gray-900 hover:border-gray-900' }}"
             >
                 {{ $label }}
             </button>
@@ -65,7 +64,6 @@
     {{-- Goals grid --}}
     @if($goalData->isEmpty())
         <x-empty-state
-            icon="🎯"
             :title="__('goals.no_goals')"
             :description="__('goals.no_goals_description')"
             :actionUrl="route('goals.create')"

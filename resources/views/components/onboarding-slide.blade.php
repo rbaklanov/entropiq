@@ -7,7 +7,7 @@
 ])
 
 <div class="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-8 lg:min-h-screen lg:bg-gray-100">
-    <div class="w-full max-w-md lg:rounded-2xl lg:bg-white lg:p-10 lg:shadow-xl">
+    <div class="w-full max-w-md lg:rounded-md lg:border lg:border-gray-200 lg:bg-white lg:p-10">
         <div class="flex flex-col items-center text-center">
 
             {{-- Illustration --}}
@@ -16,7 +16,7 @@
             </div>
 
             {{-- Title --}}
-            <h1 class="text-2xl font-bold tracking-tight text-gray-900">{{ $title }}</h1>
+            <h1 class="font-serif text-[1.75rem] font-semibold leading-tight text-gray-900">{{ $title }}</h1>
 
             {{-- Description --}}
             <p class="mt-3 text-base leading-relaxed text-gray-500">{{ $text }}</p>
@@ -31,7 +31,7 @@
                 @for($i = 1; $i <= $totalSteps; $i++)
                     <span @class([
                         'h-2 rounded-full transition-all duration-300',
-                        'w-6 bg-indigo-600' => $i === $step,
+                        'w-6 bg-primary-600' => $i === $step,
                         'w-2 bg-gray-300' => $i !== $step,
                     ])></span>
                 @endfor

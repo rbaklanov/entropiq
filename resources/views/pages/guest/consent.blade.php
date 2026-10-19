@@ -8,7 +8,7 @@
     <section class="py-20 sm:py-24">
         <article class="prose prose-gray mx-auto max-w-3xl px-4 sm:px-6">
             <h1>{{ __('consent.title') }}</h1>
-            <p class="text-sm text-gray-400">{{ __('consent.last_updated', ['date' => $version]) }}</p>
+            <p class="text-sm text-gray-500">{{ __('consent.last_updated', ['date' => $version]) }}</p>
 
             <p>{{ __('consent.intro', $replacements) }}</p>
 

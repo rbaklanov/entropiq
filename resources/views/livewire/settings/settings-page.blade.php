@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="mx-auto max-w-2xl space-y-6">
 
     {{-- Header --}}
     <div>
@@ -7,21 +7,25 @@
 
     {{-- Flash messages --}}
     @if(session('success'))
-        <div class="rounded-xl bg-success-50 p-4 text-sm font-medium text-success-700">
+        <div class="rounded-md border border-success-200 bg-success-50 p-4 text-sm font-medium text-success-700" role="status">
             {{ session('success') }}
         </div>
     @endif
 
     {{-- Profile card --}}
-    <a href="{{ route('settings.profile') }}" class="block rounded-xl bg-white p-5 shadow-sm transition hover:shadow-md">
+    <a href="{{ route('settings.profile') }}" class="block rounded-md border border-gray-200 bg-white p-5 transition-colors hover:border-gray-400">
         <div class="flex items-center gap-4">
             @php
                 $initials = $user->name
                     ? collect(explode(' ', $user->name))->map(fn($w) => mb_strtoupper(mb_substr($w, 0, 1)))->take(2)->join('')
-                    : '👤';
+                    : null;
             @endphp
-            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-lg font-bold text-primary-600">
-                {{ $initials }}
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-900 font-serif text-lg font-semibold text-white" aria-hidden="true">
+                @if($initials)
+                    {{ $initials }}
+                @else
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg>
+                @endif
             </div>
             <div class="flex-1">
                 <p class="text-sm font-semibold text-gray-900">{{ $user->name ?? __('settings.no_name') }}</p>
@@ -34,11 +38,15 @@
     </a>
 
     {{-- Subscription --}}
-    <a href="{{ route('settings.subscription') }}" class="block rounded-xl bg-white p-5 shadow-sm transition hover:shadow-md">
+    <a href="{{ route('settings.subscription') }}" class="block rounded-md border border-gray-200 bg-white p-5 transition-colors hover:border-gray-400">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-premium-100 text-xl">
-                    {{ $currentPlan->value === 'free' ? '⭐' : '👑' }}
+                <span @class([
+                    'flex h-10 w-10 items-center justify-center rounded-md',
+                    'bg-gray-100 text-gray-500' => $currentPlan->value === 'free',
+                    'bg-primary-600 text-white' => $currentPlan->value !== 'free',
+                ]) aria-hidden="true">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z" /></svg>
                 </span>
                 <div>
                     <p class="text-sm font-semibold text-gray-900">{{ __('common.settings_subscription') }}</p>
@@ -55,13 +63,13 @@
 
     {{-- Notifications --}}
     <div class="rounded-xl bg-white p-5 shadow-sm">
-        <h2 class="mb-4 text-sm font-semibold text-gray-900">{{ __('common.settings_notifications') }}</h2>
+        <h2 class="mb-4 text-[15px] font-semibold text-gray-900">{{ __('common.settings_notifications') }}</h2>
 
         <div class="space-y-4">
             @if($user->hasVerifiedEmail())
                 <label class="flex items-center justify-between">
-                    <span class="text-sm text-gray-700">{{ __('settings.email_weekly') }}</span>
-                    <input type="checkbox" wire:model.live="emailWeekly" class="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                    <span class="text-[15px] text-gray-900">{{ __('settings.email_weekly') }}</span>
+                    <input type="checkbox" wire:model.live="emailWeekly" class="h-5 w-5 rounded border-gray-300 accent-primary-600">
                 </label>
             @else
                 <div class="text-sm text-gray-500" data-testid="email-weekly-hint">
@@ -71,29 +79,29 @@
             @endif
 
             <label class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">{{ __('settings.push_goals') }}</span>
-                <input type="checkbox" wire:model.live="pushGoals" class="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                <span class="text-[15px] text-gray-900">{{ __('settings.push_goals') }}</span>
+                <input type="checkbox" wire:model.live="pushGoals" class="h-5 w-5 rounded border-gray-300 accent-primary-600">
             </label>
 
             <label class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">{{ __('settings.push_ai_advice') }}</span>
-                <input type="checkbox" wire:model.live="pushAiAdvice" class="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                <span class="text-[15px] text-gray-900">{{ __('settings.push_ai_advice') }}</span>
+                <input type="checkbox" wire:model.live="pushAiAdvice" class="h-5 w-5 rounded border-gray-300 accent-primary-600">
             </label>
         </div>
     </div>
 
     {{-- Language & Currency --}}
     <div class="rounded-xl bg-white p-5 shadow-sm">
-        <h2 class="mb-4 text-sm font-semibold text-gray-900">{{ __('settings.preferences') }}</h2>
+        <h2 class="mb-4 text-[15px] font-semibold text-gray-900">{{ __('settings.preferences') }}</h2>
 
         <div class="space-y-4">
             {{-- Language --}}
             <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">{{ __('common.settings_language') }}</span>
+                <span class="text-[15px] text-gray-900">{{ __('common.settings_language') }}</span>
                 <select
                     wire:model="locale"
                     wire:change="updateLocale"
-                    class="rounded-xl border-2 border-gray-200 bg-gray-50 py-2 pl-3 pr-8 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                    class="rounded-md border border-gray-300 bg-white py-2 pl-3 pr-8 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                 >
                     <option value="ru">Русский</option>
                     <option value="en">English</option>
@@ -102,11 +110,11 @@
 
             {{-- Currency --}}
             <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">{{ __('common.settings_currency') }}</span>
+                <span class="text-[15px] text-gray-900">{{ __('common.settings_currency') }}</span>
                 <select
                     wire:model="currencyCode"
                     wire:change="updateCurrency"
-                    class="rounded-xl border-2 border-gray-200 bg-gray-50 py-2 pl-3 pr-8 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                    class="rounded-md border border-gray-300 bg-white py-2 pl-3 pr-8 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                 >
                     @forelse($currencies as $currency)
                         <option value="{{ $currency->code }}">{{ $currency->code }} ({{ $currency->symbol }})</option>
@@ -120,31 +128,31 @@
 
     {{-- Data --}}
     <div class="rounded-xl bg-white p-5 shadow-sm">
-        <h2 class="mb-4 text-sm font-semibold text-gray-900">{{ __('common.settings_data') }}</h2>
+        <h2 class="mb-4 text-[15px] font-semibold text-gray-900">{{ __('common.settings_data') }}</h2>
 
         <div class="space-y-3">
             <button
                 wire:click="exportCsv"
-                class="flex w-full items-center justify-between rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
+                class="flex min-h-12 w-full items-center justify-between rounded-md border border-gray-200 px-4 text-sm text-gray-900 transition-colors hover:border-gray-900"
             >
                 <span>{{ __('common.settings_export_csv') }}</span>
-                <span class="text-gray-400">↓</span>
+                <span class="text-gray-500" aria-hidden="true">↓</span>
             </button>
 
             <button
                 wire:click="deleteAccount"
                 wire:confirm="{{ __('settings.delete_confirm') }}"
-                class="flex w-full items-center justify-between rounded-lg border border-danger-200 px-4 py-3 text-sm text-danger-600 transition hover:bg-danger-50"
+                class="flex min-h-12 w-full items-center justify-between rounded-md border border-danger-200 px-4 text-sm text-danger-600 transition-colors hover:bg-danger-50"
             >
                 <span>{{ __('common.settings_delete_account') }}</span>
-                <span class="text-danger-400">✕</span>
+                <span class="text-danger-600" aria-hidden="true">✕</span>
             </button>
         </div>
     </div>
 
     {{-- About --}}
     <div class="rounded-xl bg-white p-5 shadow-sm">
-        <h2 class="mb-4 text-sm font-semibold text-gray-900">{{ __('common.settings_about') }}</h2>
+        <h2 class="mb-4 text-[15px] font-semibold text-gray-900">{{ __('common.settings_about') }}</h2>
 
         <div class="space-y-2 text-sm text-gray-500">
             <p>{{ __('settings.version', ['version' => config('app.version', '1.0.0')]) }}</p>
@@ -155,7 +163,7 @@
     {{-- Logout --}}
     <form action="{{ route('auth.logout') }}" method="POST">
         @csrf
-        <button type="submit" class="w-full rounded-xl border border-gray-200 bg-white py-3.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50">
+        <button type="submit" class="min-h-12 w-full rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-900 transition-colors hover:border-gray-900">
             {{ __('settings.logout') }}
         </button>
     </form>

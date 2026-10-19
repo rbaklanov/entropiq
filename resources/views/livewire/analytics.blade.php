@@ -9,10 +9,10 @@
                 <a
                     href="{{ auth()->user()->isPremium() ? route('analytics.export', $exportParams + ['format' => $format]) : route('settings.subscription') }}"
                     @unless(auth()->user()->isPremium()) title="{{ __('subscription.premium_lock') }}" @endunless
-                    class="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                    class="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-gray-200 px-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-900"
                 >
                     @unless(auth()->user()->isPremium())
-                        <span aria-hidden="true">🔒</span>
+                        <svg data-testid="export-lock" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="1.5" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
                     @endunless
                     {{ __("analytics.{$labelKey}") }}
                 </a>
@@ -21,11 +21,13 @@
     </div>
 
     {{-- Tabs --}}
-    <div class="flex gap-1 rounded-xl bg-gray-100 p-1">
+    <div class="flex gap-1 rounded-md bg-gray-100 p-1">
         @foreach(['categories' => 'tab_categories', 'balance' => 'tab_balance', 'inflation' => 'tab_inflation'] as $tabKey => $labelKey)
             <button
+                type="button"
                 wire:click="setTab('{{ $tabKey }}')"
-                class="flex-1 rounded-lg px-3 py-2 text-sm font-medium transition {{ $tab === $tabKey ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}"
+                aria-pressed="{{ $tab === $tabKey ? 'true' : 'false' }}"
+                class="min-h-10 flex-1 rounded px-3 text-sm transition-colors {{ $tab === $tabKey ? 'bg-white font-semibold text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900' }}"
             >
                 {{ __("analytics.{$labelKey}") }}
             </button>
@@ -36,8 +38,10 @@
     <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         @foreach(['week', 'month', 'quarter', 'year', 'all'] as $p)
             <button
+                type="button"
                 wire:click="setPeriod('{{ $p }}')"
-                class="whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition {{ $period === $p ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+                aria-pressed="{{ $period === $p ? 'true' : 'false' }}"
+                class="min-h-10 whitespace-nowrap rounded-md border px-4 text-sm transition-colors {{ $period === $p ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-200 text-gray-900 hover:border-gray-900' }}"
             >
                 {{ __("analytics.period_{$p}") }}
             </button>
@@ -47,7 +51,6 @@
     @if($periodLocked)
         <x-premium-lock>
             <div class="rounded-xl bg-white p-8 text-center">
-                <p class="text-2xl">📊</p>
                 <p class="mt-2 text-sm font-medium text-gray-900">{{ __('subscription.period_limit') }}</p>
             </div>
         </x-premium-lock>
@@ -62,7 +65,6 @@
         @if($tab === 'categories')
             @if(empty($expenses))
                 <x-empty-state
-                    icon="📊"
                     :title="__('analytics.no_data')"
                     :description="__('analytics.no_data_hint')"
                 />
@@ -94,7 +96,7 @@
                                 <div class="flex flex-1 items-center gap-3 min-w-0">
                                     <x-category-icon
                                         :icon="$expense['category_icon'] ?? '📦'"
-                                        :color="$expense['category_color'] ?? '#6366F1'"
+                                        :color="$expense['category_color'] ?? null"
                                         size="sm"
                                     />
                                     <span class="text-sm font-medium text-gray-900 truncate">
@@ -110,13 +112,13 @@
                                     </span>
                                     <span class="sm:w-20 text-right text-caption">
                                         @if($direction === 'up')
-                                            <span class="text-danger-500">↑{{ abs($changePercent) }}%</span>
+                                            <span class="text-danger-600">↑{{ abs($changePercent) }}%</span>
                                         @elseif($direction === 'down')
-                                            <span class="text-success-500">↓{{ abs($changePercent) }}%</span>
+                                            <span class="text-success-600">↓{{ abs($changePercent) }}%</span>
                                         @elseif($direction === 'new')
-                                            <span class="text-primary-400 text-small">new</span>
+                                            <span class="text-small text-primary-600">new</span>
                                         @else
-                                            <span class="text-gray-300">—</span>
+                                            <span class="text-gray-400">—</span>
                                         @endif
                                     </span>
                                 </div>
@@ -132,7 +134,6 @@
         @elseif($tab === 'balance')
             @if(empty($dynamics))
                 <x-empty-state
-                    icon="📈"
                     :title="__('analytics.no_data')"
                     :description="__('analytics.no_data_hint')"
                 />
@@ -152,10 +153,9 @@
                     @endif
 
                     @if($inflationLoss > 0)
-                        <div class="rounded-xl bg-warning-50 border border-warning-100 p-4">
+                        <div class="rounded-md border border-warning-200 bg-warning-50 p-4">
                             <div class="flex items-start gap-3">
-                                <span class="mt-0.5 text-lg">⚠️</span>
-                                <p class="text-sm text-warning-800">
+                                <p class="text-[15px] text-warning-800">
                                     {{ __('analytics.inflation_loss', ['amount' => number_format($inflationLoss / 100, 0, '.', ' ') . ' ₽']) }}
                                 </p>
                             </div>
@@ -172,7 +172,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="rounded-xl bg-white p-5 shadow-sm text-center">
                         <p class="text-small text-gray-500 mb-2">{{ __('analytics.personal_inflation') }}</p>
-                        <p class="text-number-lg {{ $personalRate > $officialRate ? 'text-danger-500' : 'text-success-500' }}">
+                        <p class="text-number-lg {{ $personalRate > $officialRate ? 'text-warning-600' : 'text-success-600' }}">
                             {{ number_format($personalRate * 100, 1) }}%
                         </p>
                     </div>
@@ -206,7 +206,7 @@
                         @foreach($breakdown as $row)
                             <div class="flex items-center px-5 py-3">
                                 <div class="flex flex-1 items-center gap-3 min-w-0">
-                                    <span class="text-base">{{ $row['category_icon'] ?? '📦' }}</span>
+                                    <span class="text-base" aria-hidden="true">{{ $row['category_icon'] ?? '📦' }}</span>
                                     <span class="text-sm text-gray-900 truncate">{{ $row['category_name'][$locale] ?? '—' }}</span>
                                 </div>
                                 <div class="flex items-center gap-0">
@@ -216,7 +216,7 @@
                                     <span class="w-32 text-right text-caption text-gray-600">
                                         {{ number_format($row['category_cpi'] * 100, 1) }}%
                                     </span>
-                                    <span class="w-28 text-right text-caption font-medium {{ $row['contribution'] > 0 ? 'text-danger-500' : 'text-gray-600' }}">
+                                    <span class="w-28 text-right text-caption font-medium {{ $row['contribution'] > 0 ? 'text-warning-600' : 'text-gray-500' }}">
                                         {{ number_format($row['contribution'] * 100, 2) }}%
                                     </span>
                                 </div>

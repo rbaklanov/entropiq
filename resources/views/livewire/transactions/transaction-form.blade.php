@@ -2,7 +2,7 @@
 
     {{-- Header --}}
     <div class="flex items-center gap-3">
-        <a href="{{ route('transactions.index') }}" class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100">
+        <a href="{{ route('transactions.index') }}" class="flex h-11 w-11 items-center justify-center rounded-md text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
             </svg>
@@ -20,9 +20,9 @@
                 type="button"
                 wire:click="setType('expense')"
                 @class([
-                    'flex-1 rounded-xl py-3 text-center text-sm font-semibold transition-all duration-200',
-                    'bg-danger-500 text-white shadow-md' => $type === 'expense',
-                    'bg-white text-gray-600 hover:bg-gray-50' => $type !== 'expense',
+                    'min-h-12 flex-1 rounded-md border text-center text-sm font-semibold transition-colors',
+                    'border-gray-900 bg-gray-900 text-white' => $type === 'expense',
+                    'border-gray-200 bg-white text-gray-900 hover:border-gray-900' => $type !== 'expense',
                 ])
             >
                 {{ __('transactions.expense') }}
@@ -31,9 +31,9 @@
                 type="button"
                 wire:click="setType('income')"
                 @class([
-                    'flex-1 rounded-xl py-3 text-center text-sm font-semibold transition-all duration-200',
-                    'bg-success-500 text-white shadow-md' => $type === 'income',
-                    'bg-white text-gray-600 hover:bg-gray-50' => $type !== 'income',
+                    'min-h-12 flex-1 rounded-md border text-center text-sm font-semibold transition-colors',
+                    'border-success-600 bg-success-600 text-white' => $type === 'income',
+                    'border-gray-200 bg-white text-gray-900 hover:border-gray-900' => $type !== 'income',
                 ])
             >
                 {{ __('transactions.income') }}
@@ -48,12 +48,12 @@
                     inputmode="decimal"
                     wire:model.live="amountDisplay"
                     placeholder="0"
-                    class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 py-5 text-center text-number-lg outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md {{ $type === 'income' ? 'text-success-500' : 'text-danger-500' }}"
+                    class="w-full rounded-md border border-gray-300 bg-white py-5 text-center text-number-lg outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30 {{ $type === 'income' ? 'text-success-600' : 'text-gray-900' }}"
                 />
-                <span class="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 text-2xl font-semibold text-gray-400">₽</span>
+                <span class="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 font-serif text-2xl font-semibold text-gray-500" aria-hidden="true">₽</span>
             </div>
             @error('amount')
-                <p class="mt-1 text-center text-sm text-danger-500">{{ $message }}</p>
+                <p class="mt-1 text-center text-sm text-danger-600">{{ $message }}</p>
             @enderror
         </div>
 
@@ -64,7 +64,7 @@
             </label>
             <x-category-grid :categories="$categories" :selected="$categoryId" />
             @error('categoryId')
-                <p class="mt-1 text-sm text-danger-500">{{ $message }}</p>
+                <p class="mt-1 text-sm text-danger-600">{{ $message }}</p>
             @enderror
         </div>
 
@@ -116,14 +116,14 @@
                     type="text"
                     x-ref="dateDisplay"
                     readonly
-                    class="w-full cursor-pointer rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 pl-10 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                    class="w-full cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-3 pl-10 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none absolute left-3 top-3 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                 </svg>
             </div>
             @error('date')
-                <p class="mt-1 text-sm text-danger-500">{{ $message }}</p>
+                <p class="mt-1 text-sm text-danger-600">{{ $message }}</p>
             @enderror
         </div>
 
@@ -146,7 +146,7 @@
                         wire:model="comment"
                         rows="2"
                         placeholder="{{ __('transactions.comment') }}"
-                        class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 pr-10 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                        class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 pr-10 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                     ></textarea>
                     <button
                         type="button"
@@ -176,7 +176,7 @@
                         {{ __('transactions.make_recurring') }}
                     </button>
                 @else
-                    <div class="space-y-3 rounded-xl bg-white p-4">
+                    <div class="space-y-3 rounded-md border border-gray-200 bg-white p-4">
                         <label class="flex items-center gap-3">
                             <input
                                 type="checkbox"
@@ -189,7 +189,7 @@
                         @if($isRecurring)
                             <select
                                 wire:model="recurringInterval"
-                                class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                                class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                             >
                                 @foreach($intervals as $interval)
                                     <option value="{{ $interval->value }}">
