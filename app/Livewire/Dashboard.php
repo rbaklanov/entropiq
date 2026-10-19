@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Contracts\AnalyticsServiceInterface;
 use App\Contracts\InflationServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
 use App\Enums\TransactionType;
@@ -112,6 +113,9 @@ class Dashboard extends Component
             ];
         });
 
+        $savingsTrend = app(AnalyticsServiceInterface::class)
+            ->getBalanceDynamics($userId, $yearStart->copy(), Carbon::now(), 'month');
+
         $dailyAdvice = AiAdvice::where('user_id', $userId)
             ->unread()
             ->orderByDesc('generated_at')
@@ -119,6 +123,7 @@ class Dashboard extends Component
 
         return view('livewire.dashboard', [
             'monthlySummary' => $monthlySummary,
+            'savingsTrend' => $savingsTrend,
             'recentTransactions' => $recentTransactions,
             'topCategories' => $topCategories,
             'totalExpense' => $totalExpense,

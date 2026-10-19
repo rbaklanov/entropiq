@@ -38,6 +38,9 @@
         </dl>
     </section>
 
+    {{-- Savings since January: the inflation gap over the year, the month card alone barely shows it --}}
+    <x-savings-trend :dynamics="$savingsTrend" />
+
     <div @class(['grid gap-6', 'lg:grid-cols-2' => (bool) $dailyAdvice])>
         {{-- Inflation widget --}}
         <x-inflation-widget
