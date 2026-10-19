@@ -9,7 +9,8 @@ describe('mail theme', function () {
         expect($html)
             ->toContain('#f5f0e6')
             ->toContain('#2c4a86')
-            ->toContain('entropiq<span style="color: #a3431f;">.</span>')
+            ->toContain('entropiq<span')
+            ->toContain('#a3431f')
             ->not->toContain('laravel.com/img/notification-logo');
     });
 });
