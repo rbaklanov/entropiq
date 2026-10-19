@@ -16,6 +16,10 @@ return [
     'push_goals' => 'Уведомления о целях',
     'push_ai_advice' => 'Уведомления об AI-советах',
 
+    'appearance' => 'Оформление',
+    'appearance_system' => 'Как в системе',
+    'appearance_light' => 'Светлое',
+    'appearance_dark' => 'Тёмное',
     'preferences' => 'Предпочтения',
 
     'delete_confirm' => 'Вы уверены? Все ваши данные будут удалены без возможности восстановления.',

@@ -13,6 +13,7 @@
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
+    @fluxAppearance
 </head>
 <body class="min-h-screen bg-paper font-sans text-gray-900 antialiased lg:bg-gray-100">
 
