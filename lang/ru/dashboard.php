@@ -8,7 +8,7 @@ return [
 
     'income' => 'Доходы',
     'expenses' => 'Расходы',
-    'savings_rate' => 'Экономия',
+    'savings_rate' => 'Осталось от дохода',
 
     'goals' => 'Цели',
     'goals_empty' => 'Создайте первую цель',

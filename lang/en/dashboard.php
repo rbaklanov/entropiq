@@ -8,7 +8,7 @@ return [
 
     'income' => 'Income',
     'expenses' => 'Expenses',
-    'savings_rate' => 'Savings',
+    'savings_rate' => 'Left from income',
 
     'goals' => 'Goals',
     'goals_empty' => 'Create your first goal',

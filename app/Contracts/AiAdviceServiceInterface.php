@@ -12,4 +12,6 @@ interface AiAdviceServiceInterface
      * @return Collection<int, AiAdvice>
      */
     public function generateForUser(User $user): Collection;
+
+    public function isRuleMuted(User $user, string $ruleKey): bool;
 }

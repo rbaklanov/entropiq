@@ -28,7 +28,7 @@ class AiAdviceFactory extends Factory
         ]);
     }
 
-    public function rated(int $rating = 5): static
+    public function rated(int $rating = AiAdvice::RATING_HELPFUL): static
     {
         return $this->state(fn () => [
             'rating' => $rating,
