@@ -13,7 +13,7 @@
     </div>
 
     {{-- Summary cards --}}
-    <div class="grid grid-cols-3 gap-3">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div class="rounded-xl bg-white p-4 shadow-sm">
             <p class="text-small text-gray-500">{{ __('transactions.summary_income') }}</p>
             <x-money-display :amount="$summary['income']" type="income" size="md" />
@@ -32,7 +32,6 @@
     @if($transactionsRemaining !== null && $transactionsRemaining <= 10)
         <x-upsell-banner
             :message="__('transactions.limit_warning', ['count' => $transactionsRemaining]) . ' ' . __('transactions.limit_upgrade')"
-            icon="📊"
         />
     @endif
 
@@ -43,11 +42,13 @@
         <div class="flex gap-2">
             @foreach(['' => __('transactions.filter_all'), 'income' => __('transactions.filter_income'), 'expense' => __('transactions.filter_expense')] as $key => $label)
                 <button
+                    type="button"
                     wire:click="setType('{{ $key }}')"
-                    class="rounded-full px-4 py-1.5 text-sm font-medium transition
+                    aria-pressed="{{ $type === $key ? 'true' : 'false' }}"
+                    class="min-h-10 rounded-md border px-4 text-sm transition-colors
                         {{ $type === $key
-                            ? 'bg-primary-600 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+                            ? 'border-gray-900 bg-gray-900 text-white'
+                            : 'border-gray-200 text-gray-900 hover:border-gray-900' }}"
                 >
                     {{ $label }}
                 </button>
@@ -58,7 +59,7 @@
         <div class="flex flex-wrap items-center gap-3">
             <select
                 wire:model.live="period"
-                class="rounded-xl border-2 border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
             >
                 <option value="week">{{ __('transactions.filter_week') }}</option>
                 <option value="month">{{ __('transactions.filter_month') }}</option>
@@ -68,7 +69,7 @@
 
             <select
                 wire:model.live="categoryId"
-                class="rounded-xl border-2 border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
             >
                 <option value="0">{{ __('transactions.category') }}</option>
                 @foreach($categories as $cat)
@@ -81,7 +82,7 @@
                     type="text"
                     wire:model.live.debounce.300ms="search"
                     placeholder="{{ __('transactions.search_placeholder') }}"
-                    class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-3 py-2 pl-9 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                    class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 pl-9 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
@@ -94,18 +95,18 @@
             <div class="flex items-center justify-center gap-4">
                 <button
                     wire:click="prevPeriod"
-                    class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100"
+                    class="flex h-11 w-11 items-center justify-center rounded-md text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                     </svg>
                 </button>
-                <span class="min-w-[160px] text-center text-sm font-semibold text-gray-700 capitalize">
+                <span class="min-w-[160px] text-center font-serif text-lg font-semibold capitalize text-gray-900">
                     {{ $periodLabel }}
                 </span>
                 <button
                     wire:click="nextPeriod"
-                    class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100"
+                    class="flex h-11 w-11 items-center justify-center rounded-md text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
@@ -122,7 +123,7 @@
                     fpFrom: null,
                     fpTo: null,
                     init() {
-                        const inputClass = 'w-full cursor-pointer rounded-xl border-2 border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md';
+                        const inputClass = 'w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30';
 
                         this.fpFrom = flatpickr(this.$refs.customFrom, {
                             dateFormat: 'd-m-Y',
@@ -175,7 +176,7 @@
                         x-ref="customFrom"
                         readonly
                         placeholder="{{ __('transactions.filter_from') }}"
-                        class="w-full cursor-pointer rounded-xl border-2 border-gray-200 bg-gray-50 px-3 py-2 pl-9 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                        class="w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 pl-9 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                     />
                     <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
@@ -188,7 +189,7 @@
                         x-ref="customTo"
                         readonly
                         placeholder="{{ __('transactions.filter_to') }}"
-                        class="w-full cursor-pointer rounded-xl border-2 border-gray-200 bg-gray-50 px-3 py-2 pl-9 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md"
+                        class="w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 pl-9 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                     />
                     <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
@@ -201,7 +202,6 @@
     {{-- Transactions list grouped by date --}}
     @if($grouped->isEmpty())
         <x-empty-state
-            icon="📝"
             :title="__('transactions.no_transactions')"
             :description="__('transactions.no_transactions_cta')"
             :actionUrl="route('transactions.create')"
@@ -211,8 +211,8 @@
         <div class="space-y-6">
             @foreach($grouped as $dateLabel => $transactions)
                 <div>
-                    <h3 class="mb-2 text-caption font-medium text-gray-500">{{ $dateLabel }}</h3>
-                    <div class="space-y-1">
+                    <h3 class="border-b border-gray-900 pb-1.5 text-caption font-semibold text-gray-900">{{ $dateLabel }}</h3>
+                    <div class="divide-y divide-gray-200 border-b border-gray-200">
                         @foreach($transactions as $transaction)
                             <x-transaction-row :transaction="$transaction" />
                         @endforeach
@@ -234,7 +234,7 @@
             </div>
         @endif
 
-        <p class="text-center text-small text-gray-400">
+        <p class="text-center text-small text-gray-500">
             {{ __('transactions.all_transactions') }}: {{ $total }}
         </p>
     @endif

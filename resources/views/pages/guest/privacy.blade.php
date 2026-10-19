@@ -3,7 +3,7 @@
     <section class="py-20 sm:py-24">
         <article class="prose prose-gray mx-auto max-w-3xl px-4 sm:px-6">
             <h1>{{ __('legal.privacy_title') }}</h1>
-            <p class="text-sm text-gray-400">{{ __('legal.privacy_last_updated', ['date' => '19.10.2026']) }}</p>
+            <p class="text-sm text-gray-500">{{ __('legal.privacy_last_updated', ['date' => '19.10.2026']) }}</p>
 
             <h2>{{ __('legal.privacy_intro_title') }}</h2>
             <p>{{ __('legal.privacy_intro_text', App\Support\Seller::replacements()) }}</p>

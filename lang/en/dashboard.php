@@ -21,6 +21,9 @@ return [
 
     'inflation_loss' => 'due to inflation',
     'real_balance' => 'Real balance (in current prices)',
+    'amounts_toggle' => 'Show amounts',
+    'show_nominal' => 'Nominal',
+    'show_real' => 'Real',
 
     'personal_inflation' => 'Your inflation',
     'personal_inflation_tooltip' => 'Calculated based on your spending structure and CPI data by category.',

@@ -1,6 +1,6 @@
 <div class="mx-auto max-w-md px-4 py-20">
-    <div class="rounded-2xl bg-white p-8 shadow-sm">
-        <h1 class="text-center text-h2">{{ __('auth.verify_title') }}</h1>
+    <div class="rounded-md border border-gray-200 bg-white p-8">
+        <h1 class="text-center text-h1">{{ __('auth.verify_title') }}</h1>
         <p class="mt-2 text-center text-caption text-gray-500">
             {{ __('auth.verify_subtitle', ['phone' => $maskedPhone]) }}
         </p>
@@ -77,8 +77,8 @@
                             @paste="onPaste($event)"
                             @if($i === 0) autofocus @endif
                             @class([
-                                'h-14 w-14 rounded-xl border-2 text-center text-xl font-semibold outline-none transition-all duration-200',
-                                'border-gray-200 bg-gray-50 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:shadow-md' => !$errors->has('code'),
+                                'h-14 w-14 rounded-md border text-center font-serif text-2xl font-semibold outline-none transition-colors duration-200',
+                                'border-gray-300 bg-white focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30' => !$errors->has('code'),
                                 'border-danger-400 bg-danger-50 focus:border-danger-500 focus:ring-2 focus:ring-danger-500/20' => $errors->has('code'),
                             ])
                         />
@@ -86,14 +86,14 @@
                 </div>
 
                 @error('code')
-                    <p class="mt-2 text-center text-sm text-danger-500">{{ $message }}</p>
+                    <p class="mt-2 text-center text-sm text-danger-600">{{ $message }}</p>
                 @enderror
             </div>
 
             <button
                 type="submit"
                 wire:loading.attr="disabled"
-                class="mt-6 w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-primary-700 disabled:opacity-50"
+                class="mt-6 w-full min-h-12 rounded-md bg-primary-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
             >
                 <span wire:loading.remove wire:target="verify">{{ __('auth.verify_button') }}</span>
                 <span wire:loading wire:target="verify" class="inline-flex items-center gap-2">
@@ -124,7 +124,7 @@
             class="mt-4 text-center"
         >
             <template x-if="seconds > 0">
-                <p class="text-caption text-gray-400">
+                <p class="text-caption text-gray-500">
                     {{ __('auth.resend_timer_prefix') }} <span x-text="seconds"></span> {{ __('auth.resend_timer_suffix') }}
                 </p>
             </template>

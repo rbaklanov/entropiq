@@ -1,93 +1,77 @@
 <div class="space-y-6">
     <div>
-        <label for="calc-amount" class="mb-2 block text-left text-sm font-medium text-gray-700">
+        <label for="calc-amount" class="block text-sm text-gray-500">
             {{ __('landing.calculator_amount') }}
         </label>
-        <div class="relative">
+        <div class="mt-1.5 flex items-baseline gap-2 border-b-2 border-gray-900 pb-1.5">
             <input
                 id="calc-amount"
                 type="text"
                 inputmode="numeric"
                 wire:model.live.debounce.400ms="amountInput"
-                class="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3.5 pr-10 text-lg font-semibold text-gray-900 transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                class="min-w-0 flex-1 border-0 bg-transparent p-0 font-serif text-3xl font-semibold text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4 focus-visible:ring-offset-white sm:text-4xl"
                 placeholder="{{ __('landing.calculator_amount_placeholder') }}"
             />
-            <span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg text-gray-400">₽</span>
+            <span class="font-serif text-2xl text-gray-500 sm:text-[1.75rem]" aria-hidden="true">₽</span>
         </div>
     </div>
 
-    <div>
-        <label class="mb-2 block text-left text-sm font-medium text-gray-700">
-            {{ __('landing.calculator_when') }}
-        </label>
-        <div class="flex gap-3">
-            <button
-                wire:click="setPeriod('1y')"
-                @class([
-                    'flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition',
-                    'border-primary-500 bg-primary-50 text-primary-700' => $period === '1y',
-                    'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50' => $period !== '1y',
-                ])
-            >
-                {{ __('landing.calculator_1y') }}
-            </button>
-            <button
-                wire:click="setPeriod('2y')"
-                @class([
-                    'flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition',
-                    'border-primary-500 bg-primary-50 text-primary-700' => $period === '2y',
-                    'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50' => $period !== '2y',
-                ])
-            >
-                {{ __('landing.calculator_2y') }}
-            </button>
-            <button
-                wire:click="setPeriod('5y')"
-                @class([
-                    'flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition',
-                    'border-primary-500 bg-primary-50 text-primary-700' => $period === '5y',
-                    'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50' => $period !== '5y',
-                ])
-            >
-                {{ __('landing.calculator_5y') }}
-            </button>
+    <fieldset>
+        <legend class="text-sm text-gray-500">{{ __('landing.calculator_when') }}</legend>
+        <div class="mt-2.5 grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
+            @foreach(['1y', '2y', '5y'] as $option)
+                <button
+                    type="button"
+                    wire:click="setPeriod('{{ $option }}')"
+                    aria-pressed="{{ $period === $option ? 'true' : 'false' }}"
+                    @class([
+                        'min-h-11 rounded-md border px-4 text-[15px] transition-colors',
+                        'border-gray-900 bg-gray-900 text-white' => $period === $option,
+                        'border-gray-200 text-gray-900 hover:border-gray-900' => $period !== $option,
+                    ])
+                >
+                    {{ __("landing.calculator_{$option}") }}
+                </button>
+            @endforeach
         </div>
-    </div>
+    </fieldset>
 
     @if($realValue !== null)
-        <div
-            class="rounded-xl bg-gradient-to-r from-warning-50 to-danger-50 p-6 transition-all duration-500"
-            wire:transition
-        >
-            <div class="flex items-center justify-between">
-                <div class="text-left">
+        @php
+            $melted = $loss > 0 ? max(1, min(10, (int) round((100 - $percentage) / 10))) : 0;
+        @endphp
+        <div>
+            <div class="grid gap-5 sm:grid-cols-2">
+                <div>
                     <p class="text-sm text-gray-500">{{ __('landing.calculator_result_now') }}</p>
-                    <p class="text-2xl font-bold text-gray-900">
+                    <p class="font-serif text-[1.875rem] font-semibold text-primary-600 tabular-nums">
                         {{ number_format($realValue / 100, 0, '', ' ') }} ₽
                     </p>
                 </div>
-                <div class="text-right">
+                <div>
                     <p class="text-sm text-gray-500">{{ __('landing.calculator_result_lost') }}</p>
-                    <p class="text-2xl font-bold text-danger-600">
+                    <p class="font-serif text-[1.875rem] font-semibold text-warning-600 tabular-nums">
                         −{{ number_format($loss / 100, 0, '', ' ') }} ₽
                     </p>
                 </div>
             </div>
 
-            <div class="mt-4 h-3 overflow-hidden rounded-full bg-gray-200">
-                <div
-                    class="h-full rounded-full bg-gradient-to-r from-success-500 to-warning-500 transition-all duration-700 ease-out"
-                    style="width: {{ $percentage }}%"
-                ></div>
+            <div aria-hidden="true" class="mt-5 grid grid-cols-10 gap-1.5">
+                @for($i = 0; $i < 10; $i++)
+                    <span @class([
+                        'h-7 rounded-sm transition-colors duration-700',
+                        'bg-primary-600' => $i < 10 - $melted,
+                        'ink-melt bg-warning-600' => $i >= 10 - $melted,
+                    ])></span>
+                @endfor
             </div>
 
-            <div class="mt-2 flex justify-between text-xs text-gray-400">
-                <span>{{ __('landing.calculator_bar_kept') }}</span>
-                <span>{{ $percentage }}%</span>
-            </div>
+            <p class="mt-2 text-[13px] text-gray-500">
+                {{ __('landing.calculator_bar_kept') }} {{ $percentage }}%
+            </p>
 
             @if($cpiPublishedMonth)
-                <p class="mt-3 text-left text-xs text-gray-400" data-testid="cpi-estimate-note">
+                <p class="mt-3 text-xs text-gray-500" data-testid="cpi-estimate-note">
                     {{ __('analytics.cpi_estimate_note', ['month' => $cpiPublishedMonth]) }}
                 </p>
             @endif

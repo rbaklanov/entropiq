@@ -1,30 +1,34 @@
 <div class="space-y-3">
-    <h2 class="text-base font-semibold text-gray-900">{{ __('goals.scenarios') }}</h2>
-    <div class="grid grid-cols-3 gap-3">
+    <h2 class="text-[15px] font-semibold text-gray-900">{{ __('goals.scenarios') }}</h2>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
         @php
             $scenarioConfig = [
-                'optimistic' => ['label' => __('goals.scenario_optimistic'), 'border' => '#BBF7D0', 'bg' => '#F0FDF4', 'text' => '#15803D'],
-                'baseline' => ['label' => __('goals.scenario_base'), 'border' => '#BFDBFE', 'bg' => '#EFF6FF', 'text' => '#1D4ED8'],
-                'pessimistic' => ['label' => __('goals.scenario_pessimistic'), 'border' => '#FED7AA', 'bg' => '#FFF7ED', 'text' => '#C2410C'],
+                'optimistic' => ['label' => __('goals.scenario_optimistic'), 'class' => 'text-success-600'],
+                'baseline' => ['label' => __('goals.scenario_base'), 'class' => 'text-primary-600'],
+                'pessimistic' => ['label' => __('goals.scenario_pessimistic'), 'class' => 'text-warning-600'],
             ];
         @endphp
 
         @foreach($scenarios as $key => $scenario)
             @php $cfg = $scenarioConfig[$key]; @endphp
-            <div class="rounded-xl p-3 text-center" style="border: 1px solid {{ $cfg['border'] }}; background-color: {{ $cfg['bg'] }}">
-                <p class="text-xs font-medium" style="color: {{ $cfg['text'] }}">{{ $cfg['label'] }}</p>
-                <p class="mt-2 text-sm font-bold text-gray-900">
+            <div @class([
+                'rounded-md border bg-white p-4',
+                'border-gray-900' => $key === 'baseline',
+                'border-gray-200' => $key !== 'baseline',
+            ])>
+                <p class="text-sm font-semibold {{ $cfg['class'] }}">{{ $cfg['label'] }}</p>
+                <p class="mt-2 font-serif text-xl font-semibold text-gray-900 tabular-nums">
                     {{ number_format($scenario['monthly_payment'] / 100, 0, '.', ' ') }} ₽
+                    <span class="font-sans text-xs font-normal text-gray-500">/ {{ __('goals.per_month') }}</span>
                 </p>
-                <p class="text-xs text-gray-500">/ {{ __('goals.per_month') }}</p>
-                @if($scenario['completion_date'])
-                    <p class="mt-1 text-xs text-gray-500">
-                        {{ \Illuminate\Support\Carbon::parse($scenario['completion_date'])->translatedFormat('M Y') }}
-                    </p>
-                @endif
-                <p class="mt-1 text-xs text-gray-400">
-                    {{ number_format($scenario['inflation'] * 100, 1) }}%
-                </p>
+                <div class="mt-2 flex justify-between text-xs text-gray-500">
+                    <span>
+                        @if($scenario['completion_date'])
+                            {{ \Illuminate\Support\Carbon::parse($scenario['completion_date'])->translatedFormat('M Y') }}
+                        @endif
+                    </span>
+                    <span>{{ number_format($scenario['inflation'] * 100, 1) }}%</span>
+                </div>
             </div>
         @endforeach
     </div>

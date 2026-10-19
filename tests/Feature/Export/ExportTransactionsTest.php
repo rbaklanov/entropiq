@@ -199,7 +199,7 @@ describe('export buttons on the analytics page', function () {
         $this->actingAs($free)
             ->get(route('analytics'))
             ->assertOk()
-            ->assertSee('🔒')
+            ->assertSee('data-testid="export-lock"', false)
             ->assertSee(route('settings.subscription'))
             ->assertDontSee('format=pdf', false);
     });
@@ -212,6 +212,6 @@ describe('export buttons on the analytics page', function () {
             ->assertOk()
             ->assertSee('format=pdf', false)
             ->assertSee('format=xlsx', false)
-            ->assertDontSee('🔒');
+            ->assertDontSee('data-testid="export-lock"', false);
     });
 });

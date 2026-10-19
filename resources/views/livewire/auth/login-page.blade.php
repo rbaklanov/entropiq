@@ -1,6 +1,6 @@
 <div class="mx-auto max-w-md px-4 py-20">
-    <div class="rounded-2xl bg-white p-8 shadow-sm">
-        <h1 class="text-center text-h2">{{ __('auth.login_title') }}</h1>
+    <div class="rounded-md border border-gray-200 bg-white p-8">
+        <h1 class="text-center text-h1">{{ __('auth.login_title') }}</h1>
         <p class="mt-2 text-center text-caption text-gray-500">
             {{ __('auth.login_subtitle') }}
         </p>
@@ -35,7 +35,7 @@
                     'border-gray-300 focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500' => !$errors->has('phone'),
                     'border-danger-500 focus-within:border-danger-500 focus-within:ring-1 focus-within:ring-danger-500' => $errors->has('phone'),
                 ])>
-                    <span class="flex h-12 items-center bg-gray-50 px-3 text-sm font-medium text-gray-500">+7</span>
+                    <span class="flex h-12 items-center bg-gray-100 px-3 text-sm font-medium text-gray-500">+7</span>
 
                     <input
                         type="tel"
@@ -51,15 +51,15 @@
                 </div>
 
                 @error('phone')
-                    <p class="mt-1 text-sm text-danger-500">{{ $message }}</p>
+                    <p class="mt-1 text-sm text-danger-600">{{ $message }}</p>
                 @enderror
 
-                <label for="consent" class="mt-5 flex items-start gap-3 text-sm text-gray-600">
+                <label for="consent" class="mt-5 flex items-start gap-3 text-sm text-gray-900">
                     <input
                         type="checkbox"
                         id="consent"
                         wire:model="consent"
-                        class="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        class="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-300 accent-primary-600"
                     />
                     <span>
                         {{ __('auth.consent_label') }}
@@ -68,13 +68,13 @@
                 </label>
 
                 @error('consent')
-                    <p class="mt-1 text-sm text-danger-500">{{ $message }}</p>
+                    <p class="mt-1 text-sm text-danger-600">{{ $message }}</p>
                 @enderror
 
                 <button
                     type="submit"
                     x-bind:disabled="!isComplete || $wire.isSubmitting"
-                    class="mt-6 w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-primary-700 disabled:opacity-50"
+                    class="mt-6 w-full min-h-12 rounded-md bg-primary-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
                 >
                     <span wire:loading.remove wire:target="sendCode">{{ __('auth.send_code') }}</span>
                     <span wire:loading wire:target="sendCode" class="inline-flex items-center gap-2">
@@ -88,7 +88,7 @@
             </div>
         </form>
 
-        <p class="mt-4 text-center text-small text-gray-400">
+        <p class="mt-4 text-center text-small text-gray-500">
             {{ __('auth.terms_agreement') }}
             <a href="{{ route('terms') }}" class="underline" target="_blank">{{ __('auth.terms_link') }}</a>
             {{ __('auth.and') }}

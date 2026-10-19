@@ -19,7 +19,7 @@
                 chart: {
                     type: 'donut',
                     height: {{ $height }},
-                    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+                    fontFamily: 'Golos Text, ui-sans-serif, system-ui, sans-serif',
                 },
                 series: {{ Js::from($data) }},
                 labels: {{ Js::from($labels) }},
@@ -35,7 +35,7 @@
                                     label: '{{ __('analytics.total') }}',
                                     fontWeight: 600,
                                     fontSize: '14px',
-                                    color: '#6B7280',
+                                    color: window.themeColor('gray-500'),
                                     formatter: (w) => {
                                         const total = w.globals.series.reduce((a, b) => a + b, 0);
                                         return new Intl.NumberFormat(locale).format(Math.round(total / 100)) + ' ₽';
@@ -44,7 +44,7 @@
                                 value: {
                                     fontWeight: 700,
                                     fontSize: '18px',
-                                    color: '#111827',
+                                    color: window.themeColor('gray-900'),
                                     formatter: (val) => new Intl.NumberFormat(locale).format(Math.round(val / 100)) + ' ₽',
                                 },
                             },
@@ -59,7 +59,7 @@
                 },
                 stroke: {
                     width: 2,
-                    colors: ['#ffffff'],
+                    colors: [window.themeColor('white')],
                 },
                 tooltip: {
                     y: {
