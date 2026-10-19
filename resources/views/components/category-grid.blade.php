@@ -3,19 +3,21 @@
     'selected' => 0,
 ])
 
-<div class="grid grid-cols-4 gap-2 sm:grid-cols-5">
+<div class="grid grid-cols-3 gap-2 sm:grid-cols-5">
     @foreach($categories as $category)
+        @php $isSelected = $selected === $category->id; @endphp
         <button
             type="button"
             wire:click="selectCategory({{ $category->id }})"
+            aria-pressed="{{ $isSelected ? 'true' : 'false' }}"
             @class([
-                'flex flex-col items-center gap-1 rounded-xl p-3 transition-all duration-200',
-                'bg-primary-50 ring-2 ring-primary-500' => $selected === $category->id,
-                'bg-white hover:bg-gray-50' => $selected !== $category->id,
+                'flex min-h-24 flex-col items-center justify-center gap-2 rounded-md border p-3 transition-colors',
+                'border-gray-900 bg-gray-900 text-white' => $isSelected,
+                'border-gray-200 bg-white text-gray-900 hover:border-gray-900' => ! $isSelected,
             ])
         >
-            <x-category-icon :icon="$category->icon" :color="$category->color" size="md" />
-            <span class="text-center text-small leading-tight text-gray-700">
+            <x-category-icon :icon="$category->icon" size="md" :inverse="$isSelected" />
+            <span class="text-center text-small leading-tight">
                 {{ $category->localizedName() }}
             </span>
         </button>
