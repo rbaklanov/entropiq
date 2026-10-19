@@ -22,8 +22,12 @@
     <div class="flex gap-1.5">
         @for($i = 1; $i <= $totalSteps; $i++)
             <div
-                class="h-1.5 flex-1 rounded-full transition-all duration-300"
-                style="background-color: {{ $i < $step ? '#6366F1' : ($i === $step ? 'rgba(99,102,241,0.45)' : '#E5E7EB') }};{{ $i < $step ? ' cursor: pointer;' : '' }}"
+                @class([
+                    'h-1.5 flex-1 rounded-sm transition-colors duration-300',
+                    'cursor-pointer bg-primary-600' => $i < $step,
+                    'bg-primary-300' => $i === $step,
+                    'bg-gray-200' => $i > $step,
+                ])
                 @if($i < $step) wire:click="goToStep({{ $i }})" @endif
             ></div>
         @endfor
@@ -32,37 +36,28 @@
     {{-- Step 1: Type --}}
     @if($step === 1)
         <div class="space-y-4">
-            <h2 class="text-lg font-semibold text-gray-900">{{ __('goals.step_type') }}</h2>
+            <h2 class="font-serif text-xl font-semibold text-gray-900">{{ __('goals.step_type') }}</h2>
 
             <div class="grid grid-cols-2 gap-3">
-                @php
-                    $typeIcons = [
-                        'safety_net' => '🛡️',
-                        'large_purchase' => '🛒',
-                        'travel' => '✈️',
-                        'car' => '🚗',
-                        'apartment' => '🏠',
-                        'education' => '🎓',
-                        'other' => '🎯',
-                    ];
-                @endphp
-
                 @foreach($goalTypes as $goalType)
                     <button
+                        type="button"
                         wire:click="selectType('{{ $goalType->value }}')"
-                        class="flex items-center gap-3 rounded-xl border-2 p-4 text-left transition
-                            {{ $type === $goalType->value
-                                ? 'border-primary-500 bg-primary-50'
-                                : 'border-gray-200 bg-white hover:border-gray-300' }}"
+                        aria-pressed="{{ $type === $goalType->value ? 'true' : 'false' }}"
+                        @class([
+                            'flex min-h-14 items-center gap-3 rounded-md border p-4 text-left transition-colors',
+                            'border-gray-900 bg-gray-900 text-white' => $type === $goalType->value,
+                            'border-gray-200 bg-white text-gray-900 hover:border-gray-900' => $type !== $goalType->value,
+                        ])
                     >
-                        <span class="text-2xl">{{ $typeIcons[$goalType->value] ?? '🎯' }}</span>
-                        <span class="text-sm font-medium text-gray-900">{{ __("goals.type_{$goalType->value}") }}</span>
+                        <x-goal-type-icon :type="$goalType->value" class="h-6 w-6 shrink-0" />
+                        <span class="text-sm font-medium">{{ __("goals.type_{$goalType->value}") }}</span>
                     </button>
                 @endforeach
             </div>
 
             @error('type')
-                <p class="text-sm text-red-500">{{ $message }}</p>
+                <p class="text-sm text-danger-600">{{ $message }}</p>
             @enderror
         </div>
     @endif
@@ -70,18 +65,18 @@
     {{-- Step 2: Name --}}
     @if($step === 2)
         <div class="space-y-4">
-            <h2 class="text-lg font-semibold text-gray-900">{{ __('goals.step_name') }}</h2>
+            <h2 class="font-serif text-xl font-semibold text-gray-900">{{ __('goals.step_name') }}</h2>
 
             <input
                 type="text"
                 wire:model="name"
                 placeholder="{{ __('goals.name_placeholder') }}"
                 autofocus
-                class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20"
+                class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-base text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
             />
 
             @error('name')
-                <p class="text-sm text-red-500">{{ $message }}</p>
+                <p class="text-sm text-danger-600">{{ $message }}</p>
             @enderror
 
             <button
@@ -96,7 +91,7 @@
     {{-- Step 3: Amounts --}}
     @if($step === 3)
         <div class="space-y-6">
-            <h2 class="text-lg font-semibold text-gray-900">{{ __('goals.step_amount') }}</h2>
+            <h2 class="font-serif text-xl font-semibold text-gray-900">{{ __('goals.step_amount') }}</h2>
 
             <div class="space-y-1">
                 <label class="text-sm font-medium text-gray-600">{{ __('goals.target_amount') }}</label>
@@ -107,12 +102,12 @@
                         wire:model.live="targetAmountDisplay"
                         placeholder="0"
                         autofocus
-                        class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 pr-14 text-xl font-bold text-gray-900 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20"
+                        class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 pr-14 font-serif text-2xl font-semibold text-gray-900 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                     />
-                    <span class="absolute right-5 top-1/2 -translate-y-1/2 text-lg text-gray-400">₽</span>
+                    <span class="absolute right-5 top-1/2 -translate-y-1/2 text-lg text-gray-500" aria-hidden="true">₽</span>
                 </div>
                 @error('targetAmount')
-                    <p class="text-sm text-red-500">{{ $message }}</p>
+                    <p class="text-sm text-danger-600">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -124,9 +119,9 @@
                         inputmode="decimal"
                         wire:model.live="initialAmountDisplay"
                         placeholder="0"
-                        class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 pr-14 text-base text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20"
+                        class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 pr-14 text-base text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                     />
-                    <span class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400">₽</span>
+                    <span class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500" aria-hidden="true">₽</span>
                 </div>
             </div>
 
@@ -142,7 +137,7 @@
     {{-- Step 4: Deadline + Summary --}}
     @if($step === 4)
         <div class="space-y-5">
-            <h2 class="text-lg font-semibold text-gray-900">{{ __('goals.step_deadline') }}</h2>
+            <h2 class="font-serif text-xl font-semibold text-gray-900">{{ __('goals.step_deadline') }}</h2>
 
             {{-- Preset buttons --}}
             <div class="flex flex-wrap gap-2">
@@ -196,23 +191,23 @@
                         x-ref="dateInput"
                         readonly
                         placeholder="{{ __('goals.date_placeholder') }}"
-                        class="mt-1 w-full cursor-pointer rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-700 outline-none transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20"
+                        class="mt-1 w-full cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-3 text-base text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                     />
                 </div>
             </div>
 
             {{-- Monthly payment preview --}}
             @if($monthlyPayment > 0)
-                <div class="rounded-xl p-4" style="margin-top: 1.25rem; border: 1px solid #C7D2FE; background-color: #EEF2FF">
-                    <p class="text-sm text-gray-600">{{ __('goals.monthly_contribution') }}</p>
-                    <p class="mt-1 text-xl font-bold" style="color: #6366F1">
+                <div class="mt-5 rounded-md border border-primary-200 bg-primary-50 p-4">
+                    <p class="text-sm text-gray-500">{{ __('goals.monthly_contribution') }}</p>
+                    <p class="mt-1 font-serif text-2xl font-semibold text-primary-600 tabular-nums">
                         {{ number_format($monthlyPayment / 100, 0, '.', ' ') }} ₽/{{ __('goals.per_month') }}
                     </p>
                 </div>
             @endif
 
             {{-- Summary --}}
-            <div class="rounded-xl bg-gray-50 p-4 space-y-2">
+            <div class="space-y-2 rounded-md border border-gray-200 bg-white p-4">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-500">{{ __('goals.type') }}</span>
                     <span class="font-medium text-gray-900">{{ __("goals.type_{$type}") }}</span>

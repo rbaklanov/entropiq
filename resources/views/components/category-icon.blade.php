@@ -1,6 +1,6 @@
 @props([
     'icon' => '📦',
-    'color' => '#6366F1',
+    'color' => null,
     'size' => 'md',
 ])
 
@@ -12,11 +12,14 @@
         'xs' => 'h-6 w-6 text-xs',
         default => 'h-10 w-10 text-lg',
     };
+
+    $tint = $color ?: 'var(--color-gray-500)';
 @endphp
 
 <span
-    {{ $attributes->merge(['class' => "inline-flex items-center justify-center rounded-xl {$dimensions}"]) }}
-    style="background-color: {{ $color }}1A;"
+    {{ $attributes->merge(['class' => "inline-flex shrink-0 items-center justify-center rounded-md {$dimensions}"]) }}
+    style="background-color: color-mix(in srgb, {{ $tint }} 14%, transparent);"
+    aria-hidden="true"
 >
     {{ $icon }}
 </span>

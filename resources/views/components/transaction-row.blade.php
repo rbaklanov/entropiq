@@ -14,12 +14,12 @@
 >
     <a
         href="{{ route('transactions.edit', $transaction) }}"
-        class="flex items-center gap-3 rounded-xl bg-white px-4 py-3 transition-transform duration-200 hover:bg-gray-50"
+        class="flex items-center gap-3 px-1 py-3 transition-transform duration-200 hover:bg-gray-100"
         :class="showActions ? '-translate-x-20' : 'translate-x-0'"
     >
         <x-category-icon
             :icon="$transaction->category?->icon ?? '📦'"
-            :color="$transaction->category?->color ?? '#6366F1'"
+            :color="$transaction->category?->color"
             size="md"
         />
 

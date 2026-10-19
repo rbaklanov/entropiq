@@ -30,6 +30,19 @@ describe('balance-card', function () {
     });
 });
 
+describe('charts', function () {
+    it('keeps the whole chart script inside the x-data attribute', function (string $component) {
+        $html = Blade::render($component);
+
+        preg_match('/x-data="([^"]*)"/', $html, $matches);
+
+        expect($matches[1] ?? '')->toContain('this.chart.render()');
+    })->with([
+        'line chart' => ['<x-line-chart :series="[]" :categories="[]" />'],
+        'donut chart' => ['<x-donut-chart :data="[1]" :labels="[\'a\']" :colors="[\'#000000\']" />'],
+    ]);
+});
+
 describe('advice basis', function () {
     beforeEach(function () {
         $this->user = User::factory()->onboarded()->premium()->create(['phone_verified_at' => now()]);

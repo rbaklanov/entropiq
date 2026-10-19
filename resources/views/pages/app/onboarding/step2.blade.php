@@ -6,45 +6,20 @@
         :text="__('onboarding.step2_text')"
     >
         <x-slot:illustration>
-            <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full w-full">
-                {{-- Progress bar background --}}
-                <rect x="20" y="65" width="160" height="14" rx="7" fill="#E5E7EB"/>
+            <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full w-full font-sans" aria-hidden="true">
+                <text x="100" y="52" text-anchor="middle" font-size="22" font-weight="600" class="fill-gray-900 font-serif">65%</text>
 
-                {{-- Progress bar fill (65%) --}}
-                <rect x="20" y="65" width="104" height="14" rx="7" fill="url(#goalGradient)"/>
+                <rect x="20" y="66" width="160" height="10" rx="2" class="fill-gray-100" />
+                <rect x="20" y="66" width="104" height="10" rx="2" class="ink-grow fill-primary-600" />
 
-                {{-- Progress bar shine --}}
-                <rect x="20" y="65" width="104" height="7" rx="5" fill="white" fill-opacity="0.2"/>
+                <line x1="180" y1="44" x2="180" y2="66" class="stroke-gray-900" stroke-width="1.5" />
+                <polygon points="180,44 180,54 169,49" class="fill-warning-600" />
 
-                {{-- Percentage text --}}
-                <text x="100" y="58" text-anchor="middle" font-size="14" font-weight="600" fill="#4F46E5" font-family="Inter, sans-serif">65%</text>
+                <text x="20" y="94" font-size="10" class="fill-gray-500">0 ₽</text>
+                <text x="180" y="94" text-anchor="end" font-size="10" class="fill-gray-500">200 000 ₽</text>
 
-                {{-- Amount labels --}}
-                <text x="20" y="98" font-size="10" fill="#9CA3AF" font-family="Inter, sans-serif">0 ₽</text>
-                <text x="180" y="98" text-anchor="end" font-size="10" fill="#9CA3AF" font-family="Inter, sans-serif">200 000 ₽</text>
-
-                {{-- Flag at the end --}}
-                <line x1="180" y1="42" x2="180" y2="65" stroke="#4F46E5" stroke-width="2"/>
-                <polygon points="180,42 180,52 168,47" fill="#4F46E5"/>
-
-                {{-- Current position marker --}}
-                <circle cx="124" cy="72" r="5" fill="white" stroke="#4F46E5" stroke-width="2"/>
-
-                {{-- Sparkles --}}
-                <circle cx="40" cy="45" r="2" fill="#FCD34D"/>
-                <circle cx="70" cy="40" r="1.5" fill="#FCD34D"/>
-                <circle cx="110" cy="38" r="2.5" fill="#FCD34D"/>
-
-                {{-- Monthly payment hint --}}
-                <rect x="50" y="110" width="100" height="28" rx="8" fill="#F0F0FF"/>
-                <text x="100" y="128" text-anchor="middle" font-size="10" fill="#4F46E5" font-family="Inter, sans-serif">{{ __('onboarding.step2_hint') }}</text>
-
-                <defs>
-                    <linearGradient id="goalGradient" x1="20" y1="72" x2="124" y2="72">
-                        <stop offset="0%" stop-color="#818CF8"/>
-                        <stop offset="100%" stop-color="#4F46E5"/>
-                    </linearGradient>
-                </defs>
+                <path pathLength="1" d="M52 132 C 80 126, 120 138, 148 130" class="pen-draw stroke-warning-600 [animation-delay:.8s]" stroke-width="2" stroke-linecap="round" fill="none" />
+                <text x="100" y="122" text-anchor="middle" font-size="10" class="fill-gray-900">{{ __('onboarding.step2_hint') }}</text>
             </svg>
         </x-slot:illustration>
 
@@ -52,12 +27,12 @@
             @csrf
             <input type="hidden" name="redirect" value="goals.create">
             <button type="submit"
-                    class="w-full inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    class="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-primary-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2">
                 {{ __('onboarding.step2_cta') }}
             </button>
         </form>
 
-        <a href="{{ route('onboarding.step', 3) }}" class="text-sm text-gray-400 transition hover:text-gray-600">
+        <a href="{{ route('onboarding.step', 3) }}" class="inline-flex min-h-11 items-center justify-center text-sm text-gray-500 transition-colors hover:text-gray-900">
             {{ __('onboarding.later') }}
         </a>
     </x-onboarding-slide>

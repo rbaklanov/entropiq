@@ -19,7 +19,7 @@
                 chart: {
                     type: 'donut',
                     height: {{ $height }},
-                    fontFamily: "'Golos Text', ui-sans-serif, system-ui, sans-serif",
+                    fontFamily: 'Golos Text, ui-sans-serif, system-ui, sans-serif',
                 },
                 series: {{ Js::from($data) }},
                 labels: {{ Js::from($labels) }},

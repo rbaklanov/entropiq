@@ -24,7 +24,7 @@
                 chart: {
                     type: 'area',
                     height: {{ $height }},
-                    fontFamily: "'Golos Text', ui-sans-serif, system-ui, sans-serif",
+                    fontFamily: 'Golos Text, ui-sans-serif, system-ui, sans-serif',
                     animations: { enabled: ! window.prefersReducedMotion(), speed: 900 },
                     toolbar: { show: false },
                     zoom: { enabled: false },
