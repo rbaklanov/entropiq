@@ -163,3 +163,79 @@ describe('FakeLlmService money formatting', function () {
         'category spike' => ['category_spike', ['category_name' => 'Кафе', 'current_total' => 1425600, 'avg_monthly' => 732000, 'growth_percent' => 95], ['14 256 ₽', '7 320 ₽/мес']],
     ]);
 });
+
+describe('muted rules', function () {
+    beforeEach(function () {
+        Carbon::setTestNow('2026-04-15');
+
+        $expenseCategory = Category::factory()->expense()->system()->create();
+        $incomeCategory = Category::factory()->income()->system()->create();
+
+        Transaction::factory()->for($this->user)->income()->create([
+            'category_id' => $incomeCategory->id,
+            'amount' => 50000,
+            'date' => Carbon::create(2026, 4, 5),
+        ]);
+        Transaction::factory()->for($this->user)->expense()->create([
+            'category_id' => $expenseCategory->id,
+            'amount' => 80000,
+            'date' => Carbon::create(2026, 4, 5),
+        ]);
+
+        $this->rateOverspending = function (array $ratings, int $lastDaysAgo) {
+            foreach (array_values($ratings) as $offset => $rating) {
+                AiAdvice::factory()->for($this->user)->create([
+                    'basis_data' => ['rule' => 'overspending'],
+                    'rating' => $rating,
+                    'generated_at' => Carbon::today()->subDays($lastDaysAgo + $offset),
+                ]);
+            }
+        };
+    });
+
+    afterEach(function () {
+        Carbon::setTestNow();
+    });
+
+    it('skips a rule rated unhelpful twice in a row within the cooldown', function () {
+        ($this->rateOverspending)([AiAdvice::RATING_UNHELPFUL, AiAdvice::RATING_UNHELPFUL], 3);
+
+        expect($this->service->isRuleMuted($this->user, 'overspending'))->toBeTrue();
+        expect($this->service->generateForUser($this->user))->toHaveCount(0);
+    });
+
+    it('shows a muted rule again once the cooldown has passed', function () {
+        ($this->rateOverspending)([AiAdvice::RATING_UNHELPFUL, AiAdvice::RATING_UNHELPFUL], 14);
+
+        expect($this->service->generateForUser($this->user))->toHaveCount(1);
+    });
+
+    it('lifts the mute after a helpful rating', function () {
+        ($this->rateOverspending)([AiAdvice::RATING_HELPFUL, AiAdvice::RATING_UNHELPFUL, AiAdvice::RATING_UNHELPFUL], 1);
+
+        expect($this->service->isRuleMuted($this->user, 'overspending'))->toBeFalse();
+        expect($this->service->generateForUser($this->user))->toHaveCount(1);
+    });
+
+    it('does not mute after a single unhelpful rating', function () {
+        ($this->rateOverspending)([AiAdvice::RATING_UNHELPFUL], 1);
+
+        expect($this->service->isRuleMuted($this->user, 'overspending'))->toBeFalse();
+        expect($this->service->generateForUser($this->user))->toHaveCount(1);
+    });
+
+    it('ignores unrated advice between ratings', function () {
+        ($this->rateOverspending)([null, AiAdvice::RATING_UNHELPFUL, null, AiAdvice::RATING_UNHELPFUL], 1);
+
+        expect($this->service->isRuleMuted($this->user, 'overspending'))->toBeTrue();
+    });
+
+    it('mutes only the rated rule and only for that user', function () {
+        ($this->rateOverspending)([AiAdvice::RATING_UNHELPFUL, AiAdvice::RATING_UNHELPFUL], 1);
+
+        $otherUser = User::factory()->create();
+
+        expect($this->service->isRuleMuted($this->user, 'category_spike'))->toBeFalse();
+        expect($this->service->isRuleMuted($otherUser, 'overspending'))->toBeFalse();
+    });
+});

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
+ * @property ?array<string, mixed> $basis_data
  * @property Carbon $generated_at
  * @property ?int $rating
  */
@@ -17,6 +18,10 @@ class AiAdvice extends Model
 {
     /** @use HasFactory<AiAdviceFactory> */
     use HasFactory;
+
+    public const int RATING_HELPFUL = 1;
+
+    public const int RATING_UNHELPFUL = -1;
 
     protected $table = 'ai_advices';
 
@@ -57,6 +62,12 @@ class AiAdvice extends Model
     public function scopeRated(Builder $query): void
     {
         $query->whereNotNull('rating');
+    }
+
+    /** @param Builder<self> $query */
+    public function scopeForRule(Builder $query, string $ruleKey): void
+    {
+        $query->whereJsonContains('basis_data->rule', $ruleKey);
     }
 
     public function markAsRead(): void
