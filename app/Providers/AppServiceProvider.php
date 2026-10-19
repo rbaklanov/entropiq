@@ -10,10 +10,11 @@ use App\Contracts\ExportServiceInterface;
 use App\Contracts\GoalCalculationServiceInterface;
 use App\Contracts\InflationServiceInterface;
 use App\Contracts\LlmServiceInterface;
-use App\Contracts\PaymentServiceInterface;
+use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\SmsServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
 use App\Integrations\Emiss\EmissConnector;
+use App\Integrations\Robokassa\RobokassaCredentials;
 use App\Integrations\Rosstat\RosstatConnector;
 use App\Integrations\SmsAero\SmsAeroConnector;
 use App\Models\User;
@@ -24,11 +25,12 @@ use App\Services\ChainedCpiProvider;
 use App\Services\EmissCpiService;
 use App\Services\ExportService;
 use App\Services\FakeLlmService;
-use App\Services\FakePaymentService;
 use App\Services\GigaChatService;
 use App\Services\GoalCalculationService;
 use App\Services\InflationService;
 use App\Services\LogSmsService;
+use App\Services\Payments\FakePaymentGateway;
+use App\Services\Payments\RobokassaGateway;
 use App\Services\RosstatCpiService;
 use App\Services\SmsAeroService;
 use App\Services\SubscriptionService;
@@ -47,7 +49,6 @@ class AppServiceProvider extends ServiceProvider
         InflationServiceInterface::class => InflationService::class,
         GoalCalculationServiceInterface::class => GoalCalculationService::class,
         AiAdviceServiceInterface::class => AiAdviceService::class,
-        PaymentServiceInterface::class => FakePaymentService::class,
         SubscriptionServiceInterface::class => SubscriptionService::class,
         ExportServiceInterface::class => ExportService::class,
         AnalyticsServiceInterface::class => AnalyticsService::class,
@@ -119,6 +120,23 @@ class AppServiceProvider extends ServiceProvider
                 'gigachat' => $app->make(GigaChatService::class),
                 default => $app->make(FakeLlmService::class),
             };
+        });
+
+        $this->app->bind(RobokassaCredentials::class, fn (): RobokassaCredentials => new RobokassaCredentials(
+            merchantLogin: (string) config('services.robokassa.merchant_login'),
+            password1: (string) config('services.robokassa.password1'),
+            password2: (string) config('services.robokassa.password2'),
+            password3: (string) config('services.robokassa.password3'),
+            testPassword1: (string) config('services.robokassa.test_password1'),
+            testPassword2: (string) config('services.robokassa.test_password2'),
+            testMode: config('services.robokassa.test_mode') === true,
+            hashAlgorithm: (string) (config('services.robokassa.hash_algorithm') ?: 'md5'),
+            sendReceipt: config('services.robokassa.send_receipt') === true,
+        ));
+
+        $this->app->bind(PaymentGatewayInterface::class, fn (Container $app): PaymentGatewayInterface => match (config('services.payments.driver')) {
+            'robokassa' => $app->make(RobokassaGateway::class),
+            default => $app->make(FakePaymentGateway::class),
         });
 
         $this->app->bind(SmsAeroConnector::class, function (): SmsAeroConnector {

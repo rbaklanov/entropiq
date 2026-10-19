@@ -36,6 +36,7 @@ describe('validation messages follow the locale', function () {
 
         Livewire::test(LoginPage::class)
             ->set('phone', '7900')
+            ->set('consent', true)
             ->call('sendCode')
             ->assertSee('Введите номер телефона полностью.');
     });

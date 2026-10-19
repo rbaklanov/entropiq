@@ -35,6 +35,7 @@ describe('Livewire LoginPage (send code)', function () {
     it('sends verification code for valid phone', function () {
         Livewire::test(LoginPage::class)
             ->set('phone', '79001234567')
+            ->set('consent', true)
             ->call('sendCode')
             ->assertRedirect(route('auth.verify'));
 
@@ -47,6 +48,7 @@ describe('Livewire LoginPage (send code)', function () {
     it('rejects invalid phone format', function () {
         Livewire::test(LoginPage::class)
             ->set('phone', '12345')
+            ->set('consent', true)
             ->call('sendCode')
             ->assertHasErrors(['phone']);
     });
@@ -60,11 +62,13 @@ describe('Livewire LoginPage (send code)', function () {
     it('rate limits code sending', function () {
         Livewire::test(LoginPage::class)
             ->set('phone', '79001234567')
+            ->set('consent', true)
             ->call('sendCode')
             ->assertRedirect(route('auth.verify'));
 
         Livewire::test(LoginPage::class)
             ->set('phone', '79001234567')
+            ->set('consent', true)
             ->call('sendCode')
             ->assertHasErrors(['phone']);
     });
@@ -76,6 +80,7 @@ describe('Livewire LoginPage (send code)', function () {
 
         Livewire::test(LoginPage::class)
             ->set('phone', '79001234567')
+            ->set('consent', true)
             ->call('sendCode');
 
         expect(VerificationCode::where('phone', '79001234567')->count())->toBe(1);

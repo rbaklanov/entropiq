@@ -50,7 +50,7 @@ describe('privacy policy page', function () {
     });
 
     it('shows the new last updated date', function () {
-        $this->get('/privacy')->assertOk()->assertSee('06.10.2026');
+        $this->get('/privacy')->assertOk()->assertSee('19.10.2026');
     });
 
     it('has the same policy keys in Russian and English', function () {

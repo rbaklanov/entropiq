@@ -123,4 +123,22 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Seller
+    |--------------------------------------------------------------------------
+    |
+    | The person who sells Premium (self-employed, NPD). Shown in the site
+    | footer and legal pages. The seller block stays hidden until name and
+    | INN are filled.
+    |
+    */
+
+    'seller' => [
+        'name' => env('SELLER_NAME'),
+        'inn' => env('SELLER_INN'),
+        'phone' => env('SELLER_PHONE'),
+        'email' => env('SELLER_EMAIL', 'support@entropiq.ru'),
+    ],
+
 ];

@@ -8,17 +8,15 @@ return [
     'plan_monthly' => 'Месячная',
     'plan_yearly' => 'Годовая',
 
-    'price_monthly' => '99 ₽/мес',
-    'price_yearly' => '590 ₽/год',
-    'yearly_savings' => 'Экономия 50%',
+    'price_monthly' => ':monthly_price ₽/мес',
+    'price_yearly' => ':yearly_price ₽/год',
+    'yearly_savings' => 'Экономия :yearly_savings%',
     'recommended' => 'Рекомендуем',
 
     'current_plan' => 'Текущий план',
     'expires_at' => 'Действует до :date',
     'upgrade' => 'Перейти на Premium',
     'manage' => 'Управление подпиской',
-    'cancel' => 'Отменить подписку',
-    'cancel_confirm' => 'Вы уверены? Доступ к Premium-функциям сохранится до конца оплаченного периода.',
 
     'guarantee' => '7 дней — возврат без вопросов',
     'subscribe' => 'Оформить подписку',
@@ -41,5 +39,4 @@ return [
     'period_limit' => 'На бесплатном плане доступна аналитика только за последний месяц.',
 
     'upgraded' => 'Подписка оформлена! Добро пожаловать в Premium.',
-    'cancelled' => 'Подписка отменена.',
 ];

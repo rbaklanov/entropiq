@@ -253,12 +253,12 @@ describe('subscribe', function () {
     });
 });
 
-describe('cancel', function () {
+describe('revoke', function () {
     it('reverts user to free plan', function () {
         $user = User::factory()->premium()->create();
         $this->service->subscribe($user, SubscriptionPlan::Monthly);
 
-        $this->service->cancel($user);
+        $this->service->revoke($user);
         $user->refresh();
 
         expect($user->subscription_plan)->toBe(SubscriptionPlan::Free);
@@ -268,12 +268,12 @@ describe('cancel', function () {
         $user = User::factory()->create();
         $subscription = $this->service->subscribe($user, SubscriptionPlan::Monthly);
 
-        $this->service->cancel($user);
+        $this->service->revoke($user);
 
         expect($subscription->fresh()->status)->toBe(SubscriptionStatus::Cancelled);
     });
 
-    it('restores limits after cancelling', function () {
+    it('restores limits after revoking', function () {
         $user = User::factory()->create();
         Goal::factory()->for($user)->create(['status' => GoalStatus::Active]);
 
@@ -281,7 +281,7 @@ describe('cancel', function () {
         $user->refresh();
         expect($this->service->canCreateGoal($user))->toBeTrue();
 
-        $this->service->cancel($user);
+        $this->service->revoke($user);
         $user->refresh();
         expect($this->service->canCreateGoal($user))->toBeFalse();
     });

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\RecordConsent;
 use App\Actions\SendVerificationCode;
 use App\Actions\VerifyCode;
+use App\Enums\ConsentType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SendCodeRequest;
 use App\Http\Requests\VerifyCodeRequest;
@@ -32,12 +34,14 @@ class AuthController extends Controller
     /**
      * @throws ValidationException
      */
-    public function verifyCode(VerifyCodeRequest $request, VerifyCode $action): JsonResponse
+    public function verifyCode(VerifyCodeRequest $request, VerifyCode $action, RecordConsent $recordConsent): JsonResponse
     {
         $user = $action->execute(
             $request->validated('phone'),
             $request->validated('code'),
         );
+
+        $recordConsent->execute($user, ConsentType::PersonalData, $request->ip(), $request->userAgent());
 
         $token = $user->createToken('api')->plainTextToken;
 

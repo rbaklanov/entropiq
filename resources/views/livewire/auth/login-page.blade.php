@@ -54,6 +54,23 @@
                     <p class="mt-1 text-sm text-danger-500">{{ $message }}</p>
                 @enderror
 
+                <label for="consent" class="mt-5 flex items-start gap-3 text-sm text-gray-600">
+                    <input
+                        type="checkbox"
+                        id="consent"
+                        wire:model="consent"
+                        class="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span>
+                        {{ __('auth.consent_label') }}
+                        <a href="{{ route('consent') }}" class="underline" target="_blank">{{ __('auth.consent_link') }}</a>
+                    </span>
+                </label>
+
+                @error('consent')
+                    <p class="mt-1 text-sm text-danger-500">{{ $message }}</p>
+                @enderror
+
                 <button
                     type="submit"
                     x-bind:disabled="!isComplete || $wire.isSubmitting"

@@ -245,41 +245,6 @@
         </div>
     </section>
 
-    {{-- Reviews --}}
-    <section class="bg-white py-20 sm:py-24">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6">
-            <h2 class="text-center text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                {{ __('landing.reviews_title') }}
-            </h2>
-
-            <div class="mt-14 grid gap-6 sm:grid-cols-3">
-                @for($i = 1; $i <= 3; $i++)
-                    <div class="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
-                        <div class="flex gap-1 text-warning-400">
-                            @for($s = 0; $s < 5; $s++)
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                            @endfor
-                        </div>
-                        <p class="mt-4 text-sm leading-relaxed text-gray-600">
-                            &laquo;{{ __("landing.review_{$i}_text") }}&raquo;
-                        </p>
-                        <div class="mt-5 flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-600">
-                                {{ mb_substr(__("landing.review_{$i}_author"), 0, 1) }}
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900">{{ __("landing.review_{$i}_author") }}</p>
-                                <p class="text-xs text-gray-500">{{ __("landing.review_{$i}_role") }}</p>
-                            </div>
-                        </div>
-                    </div>
-                @endfor
-            </div>
-        </div>
-    </section>
-
     {{-- Pricing --}}
     <section id="pricing" class="bg-gray-50 py-20 sm:py-24">
         <div class="mx-auto max-w-5xl px-4 sm:px-6">
@@ -340,9 +305,10 @@
                     </span>
                     <h3 class="text-lg font-bold text-gray-900">{{ __('landing.pricing_premium') }}</h3>
                     <div class="mt-2 flex items-baseline gap-1">
-                        <span class="text-4xl font-extrabold text-gray-900">{{ __('landing.pricing_premium_price') }}</span>
+                        <span class="text-4xl font-extrabold text-gray-900">{{ __('landing.pricing_premium_price', App\Enums\SubscriptionPlan::priceReplacements()) }}</span>
                         <span class="text-sm text-gray-500">/ {{ __('landing.pricing_month') }}</span>
                     </div>
+                    <p class="mt-1 text-sm text-gray-500">{{ __('landing.pricing_premium_yearly', App\Enums\SubscriptionPlan::priceReplacements()) }}</p>
                     <ul class="mt-8 space-y-4 text-sm text-gray-600">
                         <li class="flex items-center gap-3">
                             <span class="flex h-5 w-5 items-center justify-center rounded-full bg-premium-100 text-xs text-premium-600">✓</span>

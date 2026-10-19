@@ -51,6 +51,22 @@ return [
         'driver' => env('LLM_DRIVER', 'fake'),
     ],
 
+    'payments' => [
+        'driver' => env('PAYMENT_DRIVER', 'fake'),
+    ],
+
+    'robokassa' => [
+        'merchant_login' => env('ROBOKASSA_MERCHANT_LOGIN'),
+        'password1' => env('ROBOKASSA_PASSWORD1'),
+        'password2' => env('ROBOKASSA_PASSWORD2'),
+        'password3' => env('ROBOKASSA_PASSWORD3'),
+        'test_password1' => env('ROBOKASSA_TEST_PASSWORD1'),
+        'test_password2' => env('ROBOKASSA_TEST_PASSWORD2'),
+        'test_mode' => filter_var(env('ROBOKASSA_TEST_MODE', true), FILTER_VALIDATE_BOOLEAN),
+        'hash_algorithm' => env('ROBOKASSA_HASH_ALGORITHM', 'md5'),
+        'send_receipt' => filter_var(env('ROBOKASSA_SEND_RECEIPT', false), FILTER_VALIDATE_BOOLEAN),
+    ],
+
     'cpi' => [
         'provider' => env('CPI_PROVIDER', 'auto'),
     ],
