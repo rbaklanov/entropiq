@@ -496,7 +496,7 @@ class DemoSeeder extends Seeder
                 'body' => 'В этом месяце вы потратили на кафе и рестораны значительно больше, чем в прошлом. Средний чек вырос с 1 100 ₽ до 1 500 ₽, а количество визитов увеличилось. Попробуйте установить лимит на эту категорию или чередовать обеды в кафе с домашней едой.',
                 'basis_data' => ['rule' => 'category_spike', 'category' => 'dining', 'growth_percent' => 35],
                 'is_read' => true,
-                'rating' => 4,
+                'rating' => AiAdvice::RATING_HELPFUL,
                 'days_ago' => 3,
             ],
             [
@@ -504,7 +504,7 @@ class DemoSeeder extends Seeder
                 'body' => 'За последний месяц расходы составили 108% от доходов. Дефицит покрывается из накоплений. Рекомендуем пересмотреть необязательные траты: подписки, развлечения и кафе составляют 28% всех расходов.',
                 'basis_data' => ['rule' => 'overspending', 'expense_ratio' => 1.08],
                 'is_read' => true,
-                'rating' => 5,
+                'rating' => AiAdvice::RATING_HELPFUL,
                 'days_ago' => 7,
             ],
             [
@@ -536,13 +536,13 @@ class DemoSeeder extends Seeder
                 'body' => 'Расходы на транспорт за последние 3 месяца держатся в диапазоне 7 000–8 500 ₽. Это хороший показатель контроля. Если перейти на проездной за 2 900 ₽, экономия составит до 5 000 ₽/мес.',
                 'basis_data' => ['rule' => 'savings_optimization', 'category' => 'transport', 'potential_savings' => 500000],
                 'is_read' => true,
-                'rating' => 3,
+                'rating' => AiAdvice::RATING_UNHELPFUL,
                 'days_ago' => 14,
             ],
             [
-                'title' => 'Продукты подорожали на 12% за год',
-                'body' => 'Ваши расходы на продукты растут быстрее официальной инфляции (9,5%). Это может быть связано как с ростом цен, так и с увеличением объёма покупок. Сравните чеки за разные месяцы.',
-                'basis_data' => ['rule' => 'category_spike', 'category' => 'groceries', 'growth_percent' => 12],
+                'title' => 'Расходы на продукты выросли на 12%',
+                'body' => 'В этом месяце вы потратили на продукты 24 300 ₽, в среднем за три предыдущих месяца 21 700 ₽. Это может быть связано как с ростом цен, так и с увеличением объёма покупок. Сравните чеки за разные месяцы.',
+                'basis_data' => ['rule' => 'category_spike', 'category_name' => 'Продукты', 'current_total' => 2430000, 'avg_monthly' => 2170000, 'growth_percent' => 12],
                 'is_read' => false,
                 'rating' => null,
                 'days_ago' => 18,
@@ -552,7 +552,7 @@ class DemoSeeder extends Seeder
                 'body' => 'За последние 3 месяца вы стабильно откладываете около 15% от дохода. Это выше среднего по России (10%). Продолжайте в том же духе! При текущем темпе цель "Подушка безопасности" будет достигнута через 8 месяцев.',
                 'basis_data' => ['rule' => 'savings_optimization', 'savings_rate' => 0.15],
                 'is_read' => true,
-                'rating' => 5,
+                'rating' => AiAdvice::RATING_HELPFUL,
                 'days_ago' => 21,
             ],
             [
@@ -568,7 +568,7 @@ class DemoSeeder extends Seeder
                 'body' => 'Вы накопили 60 000 ₽ из 200 000 ₽. При текущем темпе (15 000 ₽/мес) цель будет достигнута вовремя. Учтите, что с учётом инфляции (~0,8%/мес) реальная стоимость поездки может вырасти на 6–8%.',
                 'basis_data' => ['rule' => 'goal_behind_schedule', 'goal' => 'Отпуск в Турцию', 'progress' => 30],
                 'is_read' => true,
-                'rating' => 4,
+                'rating' => AiAdvice::RATING_HELPFUL,
                 'days_ago' => 30,
             ],
         ];

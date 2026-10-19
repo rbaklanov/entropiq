@@ -36,6 +36,14 @@ class AdviceDetail extends Component
 
     public function rate(int $rating): void
     {
+        if ($this->locked) {
+            return;
+        }
+
+        if (! in_array($rating, [AiAdvice::RATING_HELPFUL, AiAdvice::RATING_UNHELPFUL], true)) {
+            return;
+        }
+
         $this->advice->update(['rating' => $rating]);
     }
 
