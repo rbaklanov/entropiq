@@ -14,7 +14,7 @@ beforeEach(function () {
 
 describe('POST /api/v1/auth/send-code', function () {
     it('sends verification code and returns success', function () {
-        $this->postJson('/api/v1/auth/send-code', ['phone' => '79001234567'])
+        $this->postJson('/api/v1/auth/send-code', ['phone' => '79001234567', 'consent' => true])
             ->assertOk()
             ->assertJsonStructure(['message']);
 
@@ -24,16 +24,16 @@ describe('POST /api/v1/auth/send-code', function () {
     });
 
     it('rejects invalid phone with 422', function () {
-        $this->postJson('/api/v1/auth/send-code', ['phone' => '123'])
+        $this->postJson('/api/v1/auth/send-code', ['phone' => '123', 'consent' => true])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('phone');
     });
 
     it('rate limits code sending', function () {
-        $this->postJson('/api/v1/auth/send-code', ['phone' => '79001234567'])
+        $this->postJson('/api/v1/auth/send-code', ['phone' => '79001234567', 'consent' => true])
             ->assertOk();
 
-        $this->postJson('/api/v1/auth/send-code', ['phone' => '79001234567'])
+        $this->postJson('/api/v1/auth/send-code', ['phone' => '79001234567', 'consent' => true])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('phone');
     });
@@ -49,6 +49,7 @@ describe('POST /api/v1/auth/verify-code', function () {
         $this->postJson('/api/v1/auth/verify-code', [
             'phone' => '79001234567',
             'code' => '1234',
+            'consent' => true,
         ])
             ->assertOk()
             ->assertJsonStructure(['token', 'user' => ['id', 'phone', 'name']]);
@@ -63,6 +64,7 @@ describe('POST /api/v1/auth/verify-code', function () {
         $this->postJson('/api/v1/auth/verify-code', [
             'phone' => '79009999999',
             'code' => '5678',
+            'consent' => true,
         ])->assertOk();
 
         expect(User::where('phone', '79009999999')->exists())->toBeTrue();
@@ -77,6 +79,7 @@ describe('POST /api/v1/auth/verify-code', function () {
         $this->postJson('/api/v1/auth/verify-code', [
             'phone' => '79001234567',
             'code' => '9999',
+            'consent' => true,
         ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('code');
@@ -91,6 +94,7 @@ describe('POST /api/v1/auth/verify-code', function () {
         $this->postJson('/api/v1/auth/verify-code', [
             'phone' => '79001234567',
             'code' => '1234',
+            'consent' => true,
         ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('code');
@@ -105,6 +109,7 @@ describe('POST /api/v1/auth/verify-code', function () {
         $this->postJson('/api/v1/auth/verify-code', [
             'phone' => '79001234567',
             'code' => '1234',
+            'consent' => true,
         ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('code');

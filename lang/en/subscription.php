@@ -8,17 +8,15 @@ return [
     'plan_monthly' => 'Monthly',
     'plan_yearly' => 'Yearly',
 
-    'price_monthly' => '99 ₽/mo',
-    'price_yearly' => '590 ₽/yr',
-    'yearly_savings' => 'Save 50%',
+    'price_monthly' => ':monthly_price ₽/mo',
+    'price_yearly' => ':yearly_price ₽/yr',
+    'yearly_savings' => 'Save :yearly_savings%',
     'recommended' => 'Recommended',
 
     'current_plan' => 'Current plan',
     'expires_at' => 'Active until :date',
     'upgrade' => 'Upgrade to Premium',
     'manage' => 'Manage subscription',
-    'cancel' => 'Cancel subscription',
-    'cancel_confirm' => 'Are you sure? Premium access will remain until the end of the paid period.',
 
     'guarantee' => '7-day money-back guarantee',
     'subscribe' => 'Subscribe',
@@ -41,5 +39,4 @@ return [
     'period_limit' => 'Free plan analytics is limited to the last month.',
 
     'upgraded' => 'Subscription activated! Welcome to Premium.',
-    'cancelled' => 'Subscription cancelled.',
 ];

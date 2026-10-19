@@ -17,6 +17,8 @@ use Illuminate\Support\Carbon;
  * @property SubscriptionStatus $status
  * @property Carbon $starts_at
  * @property ?Carbon $ends_at
+ * @property bool $auto_renew
+ * @property ?Carbon $renewal_reminder_sent_at
  */
 class Subscription extends Model
 {
@@ -27,8 +29,10 @@ class Subscription extends Model
         'user_id',
         'plan',
         'status',
+        'auto_renew',
         'starts_at',
         'ends_at',
+        'renewal_reminder_sent_at',
     ];
 
     /** @return array<string, string> */
@@ -37,8 +41,10 @@ class Subscription extends Model
         return [
             'plan' => SubscriptionPlan::class,
             'status' => SubscriptionStatus::class,
+            'auto_renew' => 'boolean',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'renewal_reminder_sent_at' => 'datetime',
         ];
     }
 

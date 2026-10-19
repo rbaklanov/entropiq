@@ -99,7 +99,7 @@ class SubscriptionService implements SubscriptionServiceInterface
         return max(0, self::FREE_GOAL_LIMIT - $count);
     }
 
-    public function subscribe(User $user, SubscriptionPlan $plan): Subscription
+    public function subscribe(User $user, SubscriptionPlan $plan, bool $autoRenew = false): Subscription
     {
         $this->cancelActiveSubscriptions($user);
 
@@ -107,10 +107,9 @@ class SubscriptionService implements SubscriptionServiceInterface
             'user_id' => $user->id,
             'plan' => $plan,
             'status' => SubscriptionStatus::Active,
+            'auto_renew' => $autoRenew,
             'starts_at' => Carbon::now(),
-            'ends_at' => $plan === SubscriptionPlan::Yearly
-                ? Carbon::now()->addYear()
-                : Carbon::now()->addMonth(),
+            'ends_at' => $plan->periodEnd(Carbon::now()),
         ]);
 
         $user->update(['subscription_plan' => $plan]);
@@ -118,7 +117,44 @@ class SubscriptionService implements SubscriptionServiceInterface
         return $subscription;
     }
 
-    public function cancel(User $user): void
+    public function renew(Subscription $subscription): Subscription
+    {
+        $periodStart = $subscription->ends_at !== null && $subscription->ends_at->isFuture()
+            ? $subscription->ends_at
+            : Carbon::now();
+
+        $subscription->update([
+            'status' => SubscriptionStatus::Active,
+            'ends_at' => $subscription->plan->periodEnd($periodStart),
+            'renewal_reminder_sent_at' => null,
+        ]);
+
+        $subscription->user->update(['subscription_plan' => $subscription->plan]);
+
+        return $subscription;
+    }
+
+    public function disableAutoRenew(User $user): void
+    {
+        $user->subscriptions()
+            ->where('status', SubscriptionStatus::Active)
+            ->update(['auto_renew' => false]);
+    }
+
+    public function expire(Subscription $subscription): void
+    {
+        $subscription->update(['status' => SubscriptionStatus::Expired]);
+
+        $user = $subscription->user;
+
+        if ($user->subscriptions()->where('status', SubscriptionStatus::Active)->exists()) {
+            return;
+        }
+
+        $user->update(['subscription_plan' => SubscriptionPlan::Free]);
+    }
+
+    public function revoke(User $user): void
     {
         $this->cancelActiveSubscriptions($user);
 

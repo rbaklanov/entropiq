@@ -3,33 +3,41 @@
 return [
     'legal' => 'Legal',
 
+    'seller_requisites' => ':name, TIN :inn, professional income tax (NPD) payer',
+    'seller_pending' => 'a self-employed provider, details to be published before payments start',
+    'seller_inn_pending' => 'to be published before payments start',
+
     'privacy_title' => 'Privacy Policy',
     'privacy_last_updated' => 'Last updated: :date',
 
     'privacy_intro_title' => '1. General Provisions',
-    'privacy_intro_text' => 'This Privacy Policy describes how the Entropiq service (the "Service") collects, processes, and protects personal data. By using the Service, you agree to the terms of this Policy.',
+    'privacy_intro_text' => 'This Privacy Policy describes how personal data of users of the Entropiq service (the "Service") is processed and protected. Personal data operator: :seller. Data is processed on the basis of the user\'s consent to personal data processing and, when paying for Premium, to perform the agreement under the public offer.',
 
     'privacy_data_title' => '2. Data We Collect',
     'privacy_data_phone' => 'Phone number, used for authentication and sign-in.',
     'privacy_data_name' => 'Name, used for interface personalization (optional).',
     'privacy_data_email' => 'Email address, used to send the weekly digest of your finances. It is optional and used only after you confirm it through the link in an email.',
     'privacy_data_financial' => 'Financial data: income, expense, goal, and savings amounts that you enter manually.',
+    'privacy_data_payment' => 'Payment details: amount, date, status and payment ID. Bank card data is entered on the payment service side and is not passed to us.',
     'privacy_data_technical' => 'Technical data: device type, browser version, IP address, and cookies required for Service operation.',
 
     'privacy_purpose_title' => '3. Purpose of Data Processing',
     'privacy_purpose_auth' => 'User authentication and identification.',
     'privacy_purpose_service' => 'Providing Service functionality: finance tracking, analytics, AI advice.',
     'privacy_purpose_notification' => 'Sending emails: confirmation of your email address and the weekly digest. By providing and confirming your address you agree to receive the digest; it is sent only to a confirmed address, and you can turn it off in the settings or by removing the address in your profile.',
+    'privacy_purpose_payment' => 'Paying for the Premium plan, issuing receipts in the "Moy nalog" app and refunds.',
     'privacy_purpose_improvement' => 'Improving Service quality and developing new features.',
 
     'privacy_storage_title' => '4. Data Storage and Protection',
     'privacy_storage_text' => 'Data is stored on secure servers. We use TLS/SSL encryption for data transmission and restrict access to personal data. The Service does not access your bank accounts and does not request bank card information.',
     'privacy_storage_email' => 'Your email address is stored until you remove it in your profile or delete your account.',
+    'privacy_storage_consent' => 'The record of consent to personal data processing (date, document version, IP address) is kept for 3 years after the consent is withdrawn or the account is deleted, to prove that processing was lawful.',
 
     'privacy_sharing_title' => '5. Data Sharing with Third Parties',
     'privacy_sharing_text' => 'We do not sell or trade your personal data. To run the Service, a limited set of data is received by the contractors we use:',
     'privacy_sharing_sms' => 'SMS Aero: your phone number and the text of the sign-in code SMS.',
     'privacy_sharing_ai' => 'GigaChat (Sberbank): anonymized spending figures, categories and goal names, without your phone number or name, to generate AI advice.',
+    'privacy_sharing_payment' => 'Robokassa (payment service): details needed to process the payment and issue the receipt.',
     'privacy_sharing_email' => 'Emails (address confirmation and the digest) are sent from our own infrastructure, no third party email services are used.',
     'privacy_sharing_law' => 'In addition, data may be disclosed where required by the legislation of the Russian Federation.',
 
@@ -38,6 +46,7 @@ return [
     'privacy_rights_edit' => 'Modify or update your personal data, including adding, changing or removing your email address in the profile.',
     'privacy_rights_delete' => 'Delete your account. On deletion we erase your phone number, name and email address, and financial records are kept only in an anonymized form.',
     'privacy_rights_export' => 'Export your data in CSV format.',
+    'privacy_rights_withdraw' => 'Withdraw the consent to personal data processing by emailing :email or deleting the account.',
 
     'privacy_cookies_title' => '7. Cookies',
     'privacy_cookies_text' => 'The Service uses cookies to maintain sessions and remember language preferences. You may disable cookies in your browser settings, but this may affect Service functionality.',
@@ -46,7 +55,7 @@ return [
     'privacy_changes_text' => 'We reserve the right to update this Policy. The current version is always available on this page. By continuing to use the Service after changes are made, you accept the updated terms.',
 
     'privacy_contact_title' => '9. Contact',
-    'privacy_contact_text' => 'For questions related to personal data processing, contact us at support@entropiq.ru.',
+    'privacy_contact_text' => 'For questions related to personal data processing, contact us at :email.',
 
     'terms_title' => 'Terms of Service',
     'terms_last_updated' => 'Last updated: :date',
@@ -64,8 +73,8 @@ return [
 
     'terms_plans_title' => '4. Subscription Plans',
     'terms_plans_free' => 'Free plan with limitations (50 transactions/month, 1 goal).',
-    'terms_plans_premium' => 'Premium plan with extended features (99 ₽/month).',
-    'terms_plans_refund' => 'Premium refunds are available within 7 days of purchase.',
+    'terms_plans_premium' => 'Premium plan with extended features: :monthly_price ₽ a month or :yearly_price ₽ a year. Payment, automatic renewal and cancelling it are governed by the Public offer.',
+    'terms_plans_refund' => 'Refunds: in full within 7 days of the payment, later for the unused days of the paid period. The procedure is described in the Public offer.',
 
     'terms_obligations_title' => '5. User Obligations',
     'terms_obligations_lawful' => 'Use the Service only for lawful purposes.',

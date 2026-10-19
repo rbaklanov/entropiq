@@ -11,6 +11,7 @@ class SendCodeRequest extends FormRequest
     {
         return [
             'phone' => ['required', 'string', 'regex:/^7\d{10}$/'],
+            'consent' => ['accepted'],
         ];
     }
 
@@ -20,6 +21,7 @@ class SendCodeRequest extends FormRequest
         return [
             'phone.required' => __('validation.required', ['attribute' => __('auth.phone_label')]),
             'phone.regex' => __('validation.regex', ['attribute' => __('auth.phone_label')]),
+            'consent.accepted' => __('auth.consent_required'),
         ];
     }
 }

@@ -16,6 +16,9 @@ return [
     'terms_link' => 'terms of service',
     'and' => 'and',
     'privacy_link' => 'privacy policy',
+    'consent_label' => 'I give my',
+    'consent_link' => 'consent to the processing of personal data',
+    'consent_required' => 'To get a code, you need to consent to the processing of personal data.',
 
     'sms_code' => 'SMS code',
     'resend_timer_prefix' => 'Resend in',

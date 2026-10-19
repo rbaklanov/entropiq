@@ -9,6 +9,8 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('recurring:process')->daily();
+Schedule::command('subscriptions:renew')->hourly()->withoutOverlapping()->onOneServer();
+Schedule::command('subscriptions:remind-renewals')->dailyAt('10:00')->onOneServer();
 Schedule::command('advice:generate')->daily();
 Schedule::command('digest:send')->weeklyOn(1, '09:00');
 Schedule::command('cpi:sync')->dailyAt('06:00')->withoutOverlapping()->onOneServer();

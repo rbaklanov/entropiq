@@ -5,7 +5,7 @@
             <h1 class="text-center text-h1">{{ __('landing.faq_title') }}</h1>
 
             <div class="mt-12 space-y-10">
-                @foreach(__('faq.sections') as $section)
+                @foreach(__('faq.sections', App\Enums\SubscriptionPlan::priceReplacements()) as $section)
                     <div>
                         <h2 class="text-h3">{{ $section['title'] }}</h2>
 

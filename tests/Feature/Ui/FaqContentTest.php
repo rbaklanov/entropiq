@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\SubscriptionPlan;
 use App\Models\VerificationCode;
 use App\Services\SubscriptionService;
 
@@ -7,7 +8,7 @@ function faqAnswers(string $locale): array
 {
     $answers = [];
 
-    foreach (trans('faq.sections', [], $locale) as $section) {
+    foreach (trans('faq.sections', SubscriptionPlan::priceReplacements(), $locale) as $section) {
         foreach ($section['items'] as $item) {
             $answers[$item['q']] = $item['a'];
         }
@@ -91,7 +92,7 @@ describe('FAQ facts stay in sync with the product', function () {
             expect($answer)->toContain('99')->toContain('590');
         }
 
-        expect(__('subscription.price_monthly', [], 'ru'))->toContain('99')
-            ->and(__('subscription.price_yearly', [], 'ru'))->toContain('590');
+        expect(__('subscription.price_monthly', SubscriptionPlan::priceReplacements(), 'ru'))->toContain('99')
+            ->and(__('subscription.price_yearly', SubscriptionPlan::priceReplacements(), 'ru'))->toContain('590');
     });
 });

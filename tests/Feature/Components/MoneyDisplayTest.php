@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\SubscriptionPlan;
 use Illuminate\Support\Facades\Blade;
 
 describe('money-display', function () {
@@ -30,8 +31,8 @@ describe('money-display', function () {
 describe('premium price copy', function () {
     it('matches the subscription price in landing and terms', function () {
         foreach (['ru', 'en'] as $locale) {
-            expect(__('landing.pricing_premium_price', [], $locale))->toContain('99')
-                ->and(__('legal.terms_plans_premium', [], $locale))->toContain('99')->not->toContain('299');
+            expect(__('landing.pricing_premium_price', SubscriptionPlan::priceReplacements(), $locale))->toContain('99')
+                ->and(__('legal.terms_plans_premium', SubscriptionPlan::priceReplacements(), $locale))->toContain('99')->toContain('590')->not->toContain('299');
         }
     });
 });
