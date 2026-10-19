@@ -10,6 +10,7 @@ use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Excel as ExcelType;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -64,6 +65,9 @@ class ExportService implements ExportServiceInterface
 
         $income = $transactions->where('type', TransactionType::Income)->sum('amount');
         $expense = $transactions->where('type', TransactionType::Expense)->sum('amount');
+
+        // DomPDF caches metrics of the bundled TTF fonts here; on production storage is a volume that predates the folder.
+        File::ensureDirectoryExists(config('dompdf.options.font_cache', storage_path('fonts')));
 
         $pdf = Pdf::loadView('pdf.transactions', [
             'transactions' => $transactions,

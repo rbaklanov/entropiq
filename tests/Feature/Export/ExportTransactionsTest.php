@@ -139,6 +139,23 @@ describe('GET /analytics/export formats', function () {
             ->and($response->streamedContent())->toStartWith('%PDF');
     });
 
+    it('embeds the brand fonts even when the font cache folder is missing', function () {
+        $fontCache = sys_get_temp_dir().'/entropiq-fonts-'.uniqid();
+        config(['dompdf.options.font_dir' => $fontCache, 'dompdf.options.font_cache' => $fontCache]);
+
+        $pdf = $this->actingAs($this->user)
+            ->get('/analytics/export?format=pdf')
+            ->assertOk()
+            ->streamedContent();
+
+        expect($pdf)
+            ->toContain('/BaseFont /Literata-SemiBold')
+            ->toContain('/BaseFont /GolosText-Regular')
+            ->and(is_dir($fontCache))->toBeTrue();
+
+        \Illuminate\Support\Facades\File::deleteDirectory($fontCache);
+    });
+
     it('downloads an Excel workbook with the transaction rows', function () {
         $response = $this->actingAs($this->user)
             ->get('/analytics/export?format=xlsx&from=2026-03-01&to=2026-03-31')
