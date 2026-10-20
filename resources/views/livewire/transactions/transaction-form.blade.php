@@ -189,7 +189,7 @@
                         @if($isRecurring)
                             <select
                                 wire:model="recurringInterval"
-                                class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
+                                class="w-full rounded-md border border-gray-300 bg-white py-3 pl-4 pr-10 text-sm text-gray-900 outline-none transition-colors hover:border-gray-900 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                             >
                                 @foreach($intervals as $interval)
                                     <option value="{{ $interval->value }}">
