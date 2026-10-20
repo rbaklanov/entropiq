@@ -1,10 +1,10 @@
 <div class="space-y-6">
 
     {{-- Header --}}
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-h1">{{ __('transactions.title') }}</h1>
         <a href="{{ route('transactions.create') }}"
-           class="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-700">
+           class="inline-flex min-h-10 items-center gap-1.5 whitespace-nowrap rounded-md bg-primary-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
             </svg>
@@ -59,7 +59,7 @@
         <div class="flex flex-wrap items-center gap-3">
             <select
                 wire:model.live="period"
-                class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
+                class="min-h-10 min-w-0 flex-1 rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm text-gray-900 sm:flex-none outline-none transition-colors hover:border-gray-900 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
             >
                 <option value="week">{{ __('transactions.filter_week') }}</option>
                 <option value="month">{{ __('transactions.filter_month') }}</option>
@@ -69,7 +69,7 @@
 
             <select
                 wire:model.live="categoryId"
-                class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
+                class="min-h-10 min-w-0 flex-1 rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm text-gray-900 sm:flex-none outline-none transition-colors hover:border-gray-900 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
             >
                 <option value="0">{{ __('transactions.category') }}</option>
                 @foreach($categories as $cat)
@@ -77,7 +77,7 @@
                 @endforeach
             </select>
 
-            <div class="relative flex-1">
+            <div class="relative min-w-0 basis-full sm:basis-auto sm:flex-1">
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"

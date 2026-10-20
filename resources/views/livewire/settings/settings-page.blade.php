@@ -117,7 +117,7 @@
                 <select
                     wire:model="locale"
                     wire:change="updateLocale"
-                    class="rounded-md border border-gray-300 bg-white py-2 pl-3 pr-8 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
+                    class="min-h-10 rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm text-gray-900 outline-none transition-colors hover:border-gray-900 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                 >
                     <option value="ru">Русский</option>
                     <option value="en">English</option>
@@ -130,7 +130,7 @@
                 <select
                     wire:model="currencyCode"
                     wire:change="updateCurrency"
-                    class="rounded-md border border-gray-300 bg-white py-2 pl-3 pr-8 text-sm text-gray-700 outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
+                    class="min-h-10 rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm text-gray-900 outline-none transition-colors hover:border-gray-900 focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30"
                 >
                     @forelse($currencies as $currency)
                         <option value="{{ $currency->code }}">{{ $currency->code }} ({{ $currency->symbol }})</option>
