@@ -29,10 +29,6 @@ class StartCheckout
 
         $autoRenew = $autoRenew && RecurringPayments::enabled();
 
-        if ($autoRenew) {
-            $this->recordConsent->execute($user, ConsentType::RecurringPayments, $ipAddress, $userAgent);
-        }
-
         $payment = Payment::create([
             'user_id' => $user->id,
             'plan' => $plan,
@@ -42,6 +38,10 @@ class StartCheckout
             'provider' => $this->gateway->provider(),
             'status' => PaymentStatus::Pending,
         ]);
+
+        if ($autoRenew) {
+            $this->recordConsent->execute($user, ConsentType::RecurringPayments, $ipAddress, $userAgent, payment: $payment);
+        }
 
         return $this->gateway->checkoutUrl($payment);
     }

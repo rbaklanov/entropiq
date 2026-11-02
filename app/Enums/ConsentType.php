@@ -11,7 +11,7 @@ enum ConsentType: string
     {
         return match ($this) {
             self::PersonalData => '2026-10-19',
-            self::RecurringPayments => '2026-10-19',
+            self::RecurringPayments => '2026-11-02',
         };
     }
 }

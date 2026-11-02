@@ -62,11 +62,61 @@ function failingGateway(): PaymentGatewayInterface
             throw new PaymentGatewayException('card declined');
         }
 
+        public function paymentState(Payment $payment): PaymentStatus
+        {
+            throw new PaymentGatewayException('status unavailable');
+        }
+
         public function refund(Payment $payment, int $amount): string
         {
             throw new PaymentGatewayException('refund failed');
         }
     };
+}
+
+function gatewayReporting(PaymentStatus $state): PaymentGatewayInterface
+{
+    return new class($state) implements PaymentGatewayInterface
+    {
+        public function __construct(private readonly PaymentStatus $state) {}
+
+        public function provider(): string
+        {
+            return 'robokassa';
+        }
+
+        public function checkoutUrl(Payment $payment): string
+        {
+            return 'https://example.com';
+        }
+
+        public function chargeRecurring(Payment $payment): void {}
+
+        public function paymentState(Payment $payment): PaymentStatus
+        {
+            return $this->state;
+        }
+
+        public function refund(Payment $payment, int $amount): string
+        {
+            return 'req-1';
+        }
+    };
+}
+
+/** @return array{User, Subscription, Payment} */
+function pendingRenewal(): array
+{
+    [$user, $subscription, $parent] = paidSubscription();
+
+    $renewal = Payment::factory()->for($user)->pending()->create([
+        'subscription_id' => $subscription->id,
+        'parent_payment_id' => $parent->id,
+        'amount' => 9900,
+        'created_at' => now()->subHour(),
+    ]);
+
+    return [$user, $subscription, $renewal];
 }
 
 describe('renewal of ended subscriptions', function () {
@@ -130,6 +180,33 @@ describe('renewal of ended subscriptions', function () {
         expect(app(SubscriptionRenewalService::class)->processDue())->toBe(['charged' => 0, 'expired' => 1, 'waiting' => 0])
             ->and($pending->fresh()->status)->toBe(PaymentStatus::Failed)
             ->and($user->fresh()->subscription_plan)->toBe(SubscriptionPlan::Free);
+    });
+
+    it('ends the subscription at once when the provider reports a cancelled renewal', function () {
+        $this->app->instance(PaymentGatewayInterface::class, gatewayReporting(PaymentStatus::Failed));
+        [$user, , $renewal] = pendingRenewal();
+
+        expect(app(SubscriptionRenewalService::class)->processDue())->toBe(['charged' => 0, 'expired' => 1, 'waiting' => 0])
+            ->and($renewal->fresh()->status)->toBe(PaymentStatus::Failed)
+            ->and($user->fresh()->subscription_plan)->toBe(SubscriptionPlan::Free);
+    });
+
+    it('completes a renewal the provider has paid when the notification was lost', function () {
+        $this->app->instance(PaymentGatewayInterface::class, gatewayReporting(PaymentStatus::Completed));
+        [$user, $subscription, $renewal] = pendingRenewal();
+
+        expect(app(SubscriptionRenewalService::class)->processDue())->toBe(['charged' => 1, 'expired' => 0, 'waiting' => 0])
+            ->and($renewal->fresh()->status)->toBe(PaymentStatus::Completed)
+            ->and($subscription->fresh()->ends_at->toDateString())->toBe('2026-11-19')
+            ->and($user->fresh()->isPremium())->toBeTrue();
+    });
+
+    it('keeps waiting when the status request fails', function () {
+        $this->app->instance(PaymentGatewayInterface::class, failingGateway());
+        [, , $renewal] = pendingRenewal();
+
+        expect(app(SubscriptionRenewalService::class)->processDue())->toBe(['charged' => 0, 'expired' => 0, 'waiting' => 1])
+            ->and($renewal->fresh()->status)->toBe(PaymentStatus::Pending);
     });
 
     it('expires when there is no payment with consent to recurring charges', function () {

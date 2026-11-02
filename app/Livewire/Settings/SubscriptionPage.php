@@ -28,13 +28,9 @@ class SubscriptionPage extends Component
 
     public function subscribe(StartCheckout $startCheckout): void
     {
-        $plan = $this->selectedPlan === 'yearly'
-            ? SubscriptionPlan::Yearly
-            : SubscriptionPlan::Monthly;
-
         $url = $startCheckout->execute(
             auth()->user(),
-            $plan,
+            $this->plan(),
             $this->autoRenew,
             request()->ip(),
             request()->userAgent(),
@@ -73,7 +69,18 @@ class SubscriptionPage extends Component
             'renewsSoon' => $renewsSoon,
             'autoRenewOn' => $autoRenewOn,
             'recurringEnabled' => RecurringPayments::enabled(),
+            'autoRenewTerms' => [
+                'amount' => Money::amount($this->plan()->price()),
+                'period' => __("payments.auto_renew_period_{$this->plan()->value}"),
+            ],
             'renewalAmount' => $activeSubscription === null ? null : Money::amount($activeSubscription->plan->price()),
         ]);
+    }
+
+    private function plan(): SubscriptionPlan
+    {
+        return $this->selectedPlan === 'yearly'
+            ? SubscriptionPlan::Yearly
+            : SubscriptionPlan::Monthly;
     }
 }

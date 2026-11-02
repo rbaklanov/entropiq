@@ -4,6 +4,7 @@ namespace App\Services\Payments;
 
 use App\Actions\CompletePayment;
 use App\Contracts\PaymentGatewayInterface;
+use App\Enums\PaymentStatus;
 use App\Models\Payment;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -25,6 +26,11 @@ class FakePaymentGateway implements PaymentGatewayInterface
     public function chargeRecurring(Payment $payment): void
     {
         $this->completePayment->execute($payment);
+    }
+
+    public function paymentState(Payment $payment): PaymentStatus
+    {
+        return $payment->status;
     }
 
     public function refund(Payment $payment, int $amount): string

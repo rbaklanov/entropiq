@@ -14,7 +14,9 @@ class Consent extends Model
         'version',
         'ip_address',
         'user_agent',
+        'payment_id',
         'accepted_at',
+        'revoked_at',
     ];
 
     /** @return array<string, string> */
@@ -23,6 +25,7 @@ class Consent extends Model
         return [
             'type' => ConsentType::class,
             'accepted_at' => 'datetime',
+            'revoked_at' => 'datetime',
         ];
     }
 
@@ -30,5 +33,11 @@ class Consent extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return BelongsTo<Payment, $this> */
+    public function payment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class);
     }
 }

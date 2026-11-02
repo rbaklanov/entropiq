@@ -74,8 +74,32 @@ describe('starting a payment', function () {
             ->set('autoRenew', true)
             ->call('subscribe');
 
-        expect(Payment::sole()->is_recurring)->toBeTrue()
-            ->and($user->consents()->where('type', ConsentType::RecurringPayments)->exists())->toBeTrue();
+        $payment = Payment::sole();
+        $consent = $user->consents()->where('type', ConsentType::RecurringPayments)->sole();
+
+        expect($payment->is_recurring)->toBeTrue()
+            ->and($consent->payment_id)->toBe($payment->id)
+            ->and($consent->version)->toBe(ConsentType::RecurringPayments->currentVersion());
+    });
+
+    it('keeps every consent to recurring charges as history', function () {
+        $user = User::factory()->create(['phone_verified_at' => now()]);
+
+        $page = Livewire::actingAs($user)->test(SubscriptionPage::class)->set('autoRenew', true);
+        $page->call('subscribe');
+        $page->call('subscribe');
+
+        expect($user->consents()->where('type', ConsentType::RecurringPayments)->count())->toBe(2);
+    });
+
+    it('names the amount and the period of automatic charges for the chosen plan', function () {
+        app()->setLocale('ru');
+
+        Livewire::actingAs(User::factory()->create(['phone_verified_at' => now()]))
+            ->test(SubscriptionPage::class)
+            ->assertSee('Я согласен на автоматические списания 99 ₽ раз в месяц согласно условиям')
+            ->call('selectPlan', 'yearly')
+            ->assertSee('Я согласен на автоматические списания 590 ₽ раз в год согласно условиям');
     });
 
     it('shows the unticked auto renewal checkbox and a link to the offer', function () {
@@ -294,6 +318,7 @@ describe('managing auto renewal', function () {
     it('turns off auto renewal and keeps Premium until the end of the period', function () {
         $user = User::factory()->create(['subscription_plan' => SubscriptionPlan::Monthly, 'phone_verified_at' => now()]);
         $subscription = Subscription::factory()->for($user)->create(['auto_renew' => true, 'ends_at' => now()->addDays(20)]);
+        $user->consents()->create(['type' => ConsentType::RecurringPayments, 'version' => '2026-11-02', 'accepted_at' => now()->subDays(10)]);
 
         Livewire::actingAs($user)
             ->test(SubscriptionPage::class)
@@ -301,6 +326,7 @@ describe('managing auto renewal', function () {
             ->call('disableAutoRenew');
 
         expect($subscription->fresh()->auto_renew)->toBeFalse()
+            ->and($user->consents()->where('type', ConsentType::RecurringPayments)->sole()->revoked_at)->not->toBeNull()
             ->and($subscription->fresh()->status)->toBe(SubscriptionStatus::Active)
             ->and($user->fresh()->isPremium())->toBeTrue();
     });

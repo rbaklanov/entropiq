@@ -2,6 +2,7 @@
 
 namespace App\Contracts;
 
+use App\Enums\PaymentStatus;
 use App\Exceptions\PaymentGatewayException;
 use App\Models\Payment;
 
@@ -18,6 +19,14 @@ interface PaymentGatewayInterface
      * @throws PaymentGatewayException
      */
     public function chargeRecurring(Payment $payment): void;
+
+    /**
+     * Asks the provider how a started charge ended: Completed, Failed or still Pending.
+     * Needed for renewals, because the provider notifies only about successful charges.
+     *
+     * @throws PaymentGatewayException
+     */
+    public function paymentState(Payment $payment): PaymentStatus;
 
     /**
      * @return string refund request id at the provider

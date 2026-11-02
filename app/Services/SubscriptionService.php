@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\SubscriptionServiceInterface;
+use App\Enums\ConsentType;
 use App\Enums\SubscriptionPlan;
 use App\Enums\SubscriptionStatus;
 use App\Models\AiAdvice;
@@ -139,6 +140,11 @@ class SubscriptionService implements SubscriptionServiceInterface
         $user->subscriptions()
             ->where('status', SubscriptionStatus::Active)
             ->update(['auto_renew' => false]);
+
+        $user->consents()
+            ->where('type', ConsentType::RecurringPayments)
+            ->whereNull('revoked_at')
+            ->update(['revoked_at' => now()]);
     }
 
     public function expire(Subscription $subscription): void
