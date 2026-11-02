@@ -54,13 +54,13 @@ function checkoutQuery(string $url): array
     return $query;
 }
 
-function operationStateXml(int $resultCode = 0, string $opKey = 'op-key-123'): string
+function operationStateXml(int $resultCode = 0, string $opKey = 'op-key-123', int $stateCode = 100): string
 {
     return <<<XML
         <?xml version="1.0" encoding="utf-8"?>
         <OperationStateResponse xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://merchant.roboxchange.com/WebService/">
           <Result><Code>{$resultCode}</Code></Result>
-          <State><Code>100</Code><RequestDate>2026-10-19T12:00:00+03:00</RequestDate><StateDate>2026-10-19T11:00:00+03:00</StateDate></State>
+          <State><Code>{$stateCode}</Code><RequestDate>2026-10-19T12:00:00+03:00</RequestDate><StateDate>2026-10-19T11:00:00+03:00</StateDate></State>
           <Info><IncCurrLabel>BankCardPSR</IncCurrLabel><IncSum>99.00</IncSum><IncAccount>220000******0000</IncAccount><PaymentMethod><Code>BankCard</Code><Description>Банковская карта</Description></PaymentMethod><OutCurrLabel>BankCardPSR</OutCurrLabel><OutSum>96.00</OutSum><OpKey>{$opKey}</OpKey><BankCardRRN>123456789012</BankCardRRN></Info>
         </OperationStateResponse>
         XML;
@@ -185,6 +185,33 @@ describe('recurring charge', function () {
 
         robokassaGateway(new MockClient([]))->chargeRecurring($child);
     })->throws(PaymentGatewayException::class, 'has no parent payment');
+});
+
+describe('payment state', function () {
+    it('maps OpStateExt state codes to payment statuses', function (int $stateCode, PaymentStatus $expected) {
+        $payment = Payment::factory()->for(User::factory())->create();
+
+        $mockClient = new MockClient([
+            OperationStateRequest::class => MockResponse::make(operationStateXml(stateCode: $stateCode), 200, ['Content-Type' => 'text/xml']),
+        ]);
+
+        expect(robokassaGateway($mockClient)->paymentState($payment))->toBe($expected);
+    })->with([
+        'paid' => [100, PaymentStatus::Completed],
+        'cancelled' => [10, PaymentStatus::Failed],
+        'refunded' => [60, PaymentStatus::Failed],
+        'in progress' => [50, PaymentStatus::Pending],
+    ]);
+
+    it('treats an invoice Robokassa does not know yet as pending', function () {
+        $payment = Payment::factory()->for(User::factory())->create();
+
+        $mockClient = new MockClient([
+            OperationStateRequest::class => MockResponse::make(operationStateXml(resultCode: 3, opKey: '', stateCode: 0), 200),
+        ]);
+
+        expect(robokassaGateway($mockClient)->paymentState($payment))->toBe(PaymentStatus::Pending);
+    });
 });
 
 describe('refund', function () {

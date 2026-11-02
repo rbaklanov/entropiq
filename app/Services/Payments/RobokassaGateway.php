@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Contracts\PaymentGatewayInterface;
+use App\Enums\PaymentStatus;
 use App\Exceptions\PaymentGatewayException;
 use App\Integrations\Robokassa\Requests\CreateRefundRequest;
 use App\Integrations\Robokassa\Requests\OperationStateRequest;
@@ -117,6 +118,34 @@ class RobokassaGateway implements PaymentGatewayInterface
      */
     public function operationKey(Payment $payment): string
     {
+        $opKey = (string) $this->operationState($payment)->Info->OpKey;
+
+        if ($opKey === '') {
+            throw new PaymentGatewayException("Robokassa returned no operation key for payment #{$payment->id}.");
+        }
+
+        $payment->update(['provider_payment_id' => $opKey]);
+
+        return $opKey;
+    }
+
+    /**
+     * State codes from the OpStateExt reference: 100 paid, 10 cancelled, 60 refunded, anything else is in progress.
+     * An invoice Robokassa does not know yet (result code 3) is still pending.
+     */
+    public function paymentState(Payment $payment): PaymentStatus
+    {
+        $xml = $this->operationState($payment, allowUnknown: true);
+
+        return match ((string) $xml->State->Code) {
+            '100' => PaymentStatus::Completed,
+            '10', '60' => PaymentStatus::Failed,
+            default => PaymentStatus::Pending,
+        };
+    }
+
+    private function operationState(Payment $payment, bool $allowUnknown = false): SimpleXMLElement
+    {
         $request = new OperationStateRequest(
             merchantLogin: $this->credentials->merchantLogin,
             invoiceId: $payment->id,
@@ -130,19 +159,16 @@ class RobokassaGateway implements PaymentGatewayInterface
         }
 
         $resultCode = (string) $xml->Result->Code;
-        $opKey = (string) $xml->Info->OpKey;
+
+        if ($resultCode === '3' && $allowUnknown) {
+            return $xml;
+        }
 
         if ($resultCode !== '0') {
             throw new PaymentGatewayException("Robokassa status request for payment #{$payment->id} failed with result code {$resultCode}.");
         }
 
-        if ($opKey === '') {
-            throw new PaymentGatewayException("Robokassa returned no operation key for payment #{$payment->id}.");
-        }
-
-        $payment->update(['provider_payment_id' => $opKey]);
-
-        return $opKey;
+        return $xml;
     }
 
     /**
