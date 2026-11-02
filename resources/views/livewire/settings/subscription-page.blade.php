@@ -123,18 +123,20 @@
         </div>
 
         {{-- Auto renewal consent --}}
-        <label for="auto-renew" class="flex items-start gap-3 text-sm text-gray-900">
-            <input
-                type="checkbox"
-                id="auto-renew"
-                wire:model="autoRenew"
-                class="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-300 accent-primary-600"
-            />
-            <span>
-                {{ __('payments.auto_renew_label') }}
-                <a href="{{ route('offer') }}" class="underline" target="_blank">{{ __('payments.auto_renew_offer_link') }}</a>.
-            </span>
-        </label>
+        @if($recurringEnabled)
+            <label for="auto-renew" class="flex items-start gap-3 text-sm text-gray-900">
+                <input
+                    type="checkbox"
+                    id="auto-renew"
+                    wire:model="autoRenew"
+                    class="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-300 accent-primary-600"
+                />
+                <span>
+                    {{ __('payments.auto_renew_label') }}
+                    <a href="{{ route('offer') }}" class="underline" target="_blank">{{ __('payments.auto_renew_offer_link') }}</a>.
+                </span>
+            </label>
+        @endif
 
         {{-- Guarantee --}}
         <p class="text-center text-sm text-gray-500">{{ __('subscription.guarantee') }}</p>
@@ -156,7 +158,7 @@
     @elseif($activeSubscription)
         {{-- Auto renewal for premium users --}}
         <div class="rounded-md border border-gray-200 bg-white p-5">
-            @if($activeSubscription->auto_renew)
+            @if($autoRenewOn)
                 <p class="text-sm text-gray-900">
                     {{ __('payments.auto_renew_on', ['date' => $activeSubscription->ends_at->translatedFormat('j F Y'), 'amount' => $renewalAmount]) }}
                 </p>

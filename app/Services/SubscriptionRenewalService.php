@@ -10,6 +10,7 @@ use App\Exceptions\PaymentGatewayException;
 use App\Mail\RenewalReminderMail;
 use App\Models\Payment;
 use App\Models\Subscription;
+use App\Support\RecurringPayments;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -45,6 +46,10 @@ class SubscriptionRenewalService
 
     public function sendReminders(): int
     {
+        if (! RecurringPayments::enabled()) {
+            return 0;
+        }
+
         $sent = 0;
 
         Subscription::query()
@@ -69,6 +74,10 @@ class SubscriptionRenewalService
     private function processSubscription(Subscription $subscription): string
     {
         if (! $subscription->auto_renew) {
+            return $this->expire($subscription);
+        }
+
+        if (! RecurringPayments::enabled()) {
             return $this->expire($subscription);
         }
 

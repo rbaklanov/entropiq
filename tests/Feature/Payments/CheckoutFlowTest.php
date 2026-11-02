@@ -15,6 +15,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     config()->set('services.payments.driver', 'robokassa');
+    config()->set('services.payments.recurring', true);
     config()->set('services.robokassa', [
         'merchant_login' => 'entropiq',
         'password1' => 'live-pass-1',
@@ -83,6 +84,47 @@ describe('starting a payment', function () {
             ->assertSet('autoRenew', false)
             ->assertSeeHtml('wire:model="autoRenew"')
             ->assertSeeHtml(route('offer'));
+    });
+});
+
+describe('while recurring payments are off', function () {
+    beforeEach(function () {
+        config()->set('services.payments.recurring', false);
+    });
+
+    it('hides the auto renewal checkbox', function () {
+        Livewire::actingAs(User::factory()->create(['phone_verified_at' => now()]))
+            ->test(SubscriptionPage::class)
+            ->assertDontSeeHtml('wire:model="autoRenew"')
+            ->assertSee(__('subscription.subscribe'));
+    });
+
+    it('starts a one time payment without consent even when auto renewal is sent', function () {
+        $user = User::factory()->create(['phone_verified_at' => now()]);
+
+        $component = Livewire::actingAs($user)
+            ->test(SubscriptionPage::class)
+            ->set('autoRenew', true)
+            ->call('subscribe');
+
+        expect(Payment::sole()->is_recurring)->toBeFalse()
+            ->and($user->consents()->where('type', ConsentType::RecurringPayments)->exists())->toBeFalse();
+
+        $redirect = $component->effects['redirect'];
+
+        expect($redirect)->not->toContain('Recurring=');
+    });
+
+    it('shows an older subscription with auto renewal as ending with its period', function () {
+        app()->setLocale('ru');
+        $user = User::factory()->create(['subscription_plan' => SubscriptionPlan::Monthly, 'phone_verified_at' => now()]);
+        Subscription::factory()->for($user)->create(['auto_renew' => true, 'ends_at' => now()->addDays(2)]);
+
+        Livewire::actingAs($user)
+            ->test(SubscriptionPage::class)
+            ->assertDontSee('Через несколько дней подписка продлится автоматически')
+            ->assertDontSee(__('payments.disable_auto_renew'))
+            ->assertSee('Автопродление выключено');
     });
 });
 
@@ -218,7 +260,7 @@ describe('return pages', function () {
         $this->actingAs(User::factory()->create())
             ->post('/payments/fail', ['InvId' => 1])
             ->assertRedirect(route('settings.subscription'))
-            ->assertSessionHas('error', __('payments.failed'));
+            ->assertSessionHas('error', __('payments.failed', ['email' => 'support@entropiq.ru']));
     });
 });
 

@@ -49,7 +49,13 @@ class RefundPaymentCommand extends Command
             return self::FAILURE;
         }
 
-        $this->comment("Refund requested, provider request id {$payment->refund_request_id}. Cancel the receipt in Moy nalog if the provider does not do it.");
+        $this->comment("Refund requested, provider request id {$payment->refund_request_id}.");
+
+        if ($amount < $payment->amount) {
+            $kept = Money::amount($payment->amount - $amount);
+
+            $this->warn("Robochecks cancel the whole receipt in Moy nalog on any refund. Issue a new receipt for the kept {$kept} ₽ there by hand.");
+        }
 
         return self::SUCCESS;
     }
