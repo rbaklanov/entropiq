@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Actions\CompletePayment;
 use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\SubscriptionServiceInterface;
 use App\Enums\PaymentStatus;
@@ -26,6 +27,7 @@ class SubscriptionRenewalService
     public function __construct(
         private readonly PaymentGatewayInterface $gateway,
         private readonly SubscriptionServiceInterface $subscriptions,
+        private readonly CompletePayment $completePayment,
     ) {}
 
     /** @return array{charged: int, expired: int, waiting: int} */
@@ -88,6 +90,20 @@ class SubscriptionRenewalService
         }
 
         if ($renewal?->status === PaymentStatus::Pending) {
+            $providerStatus = $this->providerStatus($renewal);
+
+            if ($providerStatus === PaymentStatus::Completed) {
+                $this->completePayment->execute($renewal);
+
+                return 'charged';
+            }
+
+            if ($providerStatus === PaymentStatus::Failed) {
+                $renewal->update(['status' => PaymentStatus::Failed]);
+
+                return $this->expire($subscription);
+            }
+
             if ($renewal->created_at?->gt(now()->subHours(self::PENDING_GRACE_HOURS))) {
                 return 'waiting';
             }
@@ -153,6 +169,24 @@ class SubscriptionRenewalService
             ->where('status', PaymentStatus::Completed)
             ->latest('id')
             ->first();
+    }
+
+    /**
+     * Robokassa sends ResultURL only for a successful charge, so a declined renewal is visible only through the status
+     * interface. A failed status request leaves the renewal waiting for the next run.
+     */
+    private function providerStatus(Payment $renewal): PaymentStatus
+    {
+        try {
+            return $this->gateway->paymentState($renewal);
+        } catch (PaymentGatewayException $exception) {
+            Log::warning('Renewal payment status request failed', [
+                'payment_id' => $renewal->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return PaymentStatus::Pending;
+        }
     }
 
     private function expire(Subscription $subscription): string

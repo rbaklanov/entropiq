@@ -132,7 +132,7 @@
                     class="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-300 accent-primary-600"
                 />
                 <span>
-                    {{ __('payments.auto_renew_label') }}
+                    {{ __('payments.auto_renew_label', $autoRenewTerms) }}
                     <a href="{{ route('offer') }}" class="underline" target="_blank">{{ __('payments.auto_renew_offer_link') }}</a>.
                 </span>
             </label>

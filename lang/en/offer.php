@@ -36,7 +36,7 @@ return [
             'title' => '4. Automatic renewal',
             'items' => [
                 'When paying, the Customer may separately agree to automatic renewal by ticking the corresponding box on the payment page. Without this consent the subscription is not renewed automatically.',
-                'With automatic renewal on, the subscription is renewed for the same period when the paid period ends. The renewal price under the current plan is charged to the bank card used for payment on the day the period ends.',
+                'With automatic renewal on, the subscription is renewed for the same period when the paid period ends. The renewal price under the current plan is charged automatically to the bank card or other payment method used for the first payment within an hour after the paid period ends, that is on the day the period ends at about the same time of day (Moscow time) as the period was paid.',
                 'At least 3 days before the charge the Provider sends a reminder to the Customer\'s confirmed email address, if one is set in the profile, and shows a notice in the "Subscription" section.',
                 'If the charge fails, the subscription is not renewed: the account moves to the free plan and the Customer\'s data is kept.',
             ],

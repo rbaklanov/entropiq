@@ -8,7 +8,9 @@ return [
     'processing' => 'Payment is being processed. Premium turns on as soon as the payment service confirms it.',
     'failed' => 'The payment was not completed and Premium is not active. If money was taken from your card anyway, write to :email and we will refund it or activate Premium.',
 
-    'auto_renew_label' => 'Renew the subscription automatically. I agree to the price of the next period being charged to my card under the',
+    'auto_renew_label' => 'I agree to automatic charges of :amount ₽ :period under the terms of the',
+    'auto_renew_period_monthly' => 'once a month',
+    'auto_renew_period_yearly' => 'once a year',
     'auto_renew_offer_link' => 'public offer',
     'offer_acceptance' => 'By tapping "Subscribe", you accept the',
     'offer_link' => 'public offer',
