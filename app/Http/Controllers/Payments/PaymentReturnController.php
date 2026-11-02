@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Payments;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
+use App\Support\Seller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -27,6 +28,6 @@ class PaymentReturnController extends Controller
 
     public function fail(): RedirectResponse
     {
-        return redirect()->route('settings.subscription')->with('error', __('payments.failed'));
+        return redirect()->route('settings.subscription')->with('error', __('payments.failed', ['email' => Seller::email()]));
     }
 }

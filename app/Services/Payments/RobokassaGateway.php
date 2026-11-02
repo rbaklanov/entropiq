@@ -87,10 +87,11 @@ class RobokassaGateway implements PaymentGatewayInterface
 
     public function refund(Payment $payment, int $amount): string
     {
-        $payload = [
-            'OpKey' => $payment->provider_payment_id ?: $this->operationKey($payment),
-            'RefundSum' => round($amount / 100, 2),
-        ];
+        $payload = ['OpKey' => $payment->provider_payment_id ?: $this->operationKey($payment)];
+
+        if ($amount !== $payment->amount) {
+            $payload['RefundSum'] = round($amount / 100, 2);
+        }
 
         $response = json_decode($this->send($this->refundConnector, new CreateRefundRequest($this->jwt($payload))), true);
 
@@ -100,6 +101,10 @@ class RobokassaGateway implements PaymentGatewayInterface
 
         if (($response['success'] ?? false) !== true || ! is_string($response['requestId'] ?? null)) {
             $message = is_string($response['message'] ?? null) ? $response['message'] : 'unknown error';
+
+            if ($this->isShortOfFunds($message)) {
+                $message .= '. The shop balance in Robokassa is probably lower than the refund: the commission is not returned, and paid out money is gone from the balance. Top up the balance or refund a smaller amount';
+            }
 
             throw new PaymentGatewayException("Robokassa refund for payment #{$payment->id} failed: {$message}");
         }
@@ -138,6 +143,15 @@ class RobokassaGateway implements PaymentGatewayInterface
         $payment->update(['provider_payment_id' => $opKey]);
 
         return $opKey;
+    }
+
+    /**
+     * The documented error is NotEnoughOperationFunds, but on 2 November 2026 a refund above the shop balance came back
+     * as "Support, Refund error 8401".
+     */
+    private function isShortOfFunds(string $message): bool
+    {
+        return str_contains($message, 'NotEnoughOperationFunds') || str_contains($message, '8401');
     }
 
     private function paymentSignature(string $outSum, int $invoiceId, ?string $receipt, string $password): string

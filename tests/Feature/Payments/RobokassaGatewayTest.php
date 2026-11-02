@@ -231,6 +231,32 @@ describe('refund', function () {
         $mockClient->assertSentCount(1);
     });
 
+    it('leaves out the refund sum when the whole payment is refunded', function () {
+        $payment = Payment::factory()->for(User::factory())->create(['amount' => 9900, 'provider_payment_id' => 'stored-key']);
+
+        $mockClient = new MockClient([
+            CreateRefundRequest::class => MockResponse::make(['success' => true, 'message' => null, 'requestId' => 'req-1']),
+        ]);
+
+        robokassaGateway($mockClient)->refund($payment, 9900);
+
+        $mockClient->assertSent(function (CreateRefundRequest $request) {
+            $payload = explode('.', $request->jwt)[1];
+
+            return json_decode(base64_decode(strtr($payload, '-_', '+/')), true) === ['OpKey' => 'stored-key'];
+        });
+    });
+
+    it('explains a refund above the shop balance', function () {
+        $payment = Payment::factory()->for(User::factory())->create(['provider_payment_id' => 'stored-key']);
+
+        $mockClient = new MockClient([
+            CreateRefundRequest::class => MockResponse::make(['success' => false, 'message' => 'Support, Refund error 8401', 'requestId' => null], 200),
+        ]);
+
+        robokassaGateway($mockClient)->refund($payment, 9900);
+    })->throws(PaymentGatewayException::class, 'shop balance in Robokassa is probably lower than the refund');
+
     it('fails when the refund API rejects the request', function () {
         $payment = Payment::factory()->for(User::factory())->create(['provider_payment_id' => 'stored-key']);
 
