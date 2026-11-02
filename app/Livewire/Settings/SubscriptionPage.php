@@ -9,6 +9,7 @@ use App\Enums\SubscriptionStatus;
 use App\Models\Subscription;
 use App\Services\SubscriptionRenewalService;
 use App\Support\Money;
+use App\Support\RecurringPayments;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -59,7 +60,9 @@ class SubscriptionPage extends Component
             ->latest()
             ->first();
 
-        $renewsSoon = $activeSubscription?->auto_renew === true
+        $autoRenewOn = RecurringPayments::enabled() && $activeSubscription?->auto_renew === true;
+
+        $renewsSoon = $autoRenewOn
             && $activeSubscription->ends_at !== null
             && $activeSubscription->ends_at->lte(now()->addDays(SubscriptionRenewalService::REMINDER_DAYS));
 
@@ -68,6 +71,8 @@ class SubscriptionPage extends Component
             'currentPlan' => $user->subscription_plan,
             'activeSubscription' => $activeSubscription,
             'renewsSoon' => $renewsSoon,
+            'autoRenewOn' => $autoRenewOn,
+            'recurringEnabled' => RecurringPayments::enabled(),
             'renewalAmount' => $activeSubscription === null ? null : Money::amount($activeSubscription->plan->price()),
         ]);
     }

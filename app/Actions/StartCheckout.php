@@ -8,6 +8,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\SubscriptionPlan;
 use App\Models\Payment;
 use App\Models\User;
+use App\Support\RecurringPayments;
 use InvalidArgumentException;
 
 class StartCheckout
@@ -25,6 +26,8 @@ class StartCheckout
         if ($plan === SubscriptionPlan::Free) {
             throw new InvalidArgumentException('The free plan has nothing to pay for.');
         }
+
+        $autoRenew = $autoRenew && RecurringPayments::enabled();
 
         if ($autoRenew) {
             $this->recordConsent->execute($user, ConsentType::RecurringPayments, $ipAddress, $userAgent);

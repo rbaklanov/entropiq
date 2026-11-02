@@ -18,6 +18,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     config()->set('services.payments.driver', 'fake');
+    config()->set('services.payments.recurring', true);
     $this->travelTo(now()->setDateTime(2026, 10, 19, 12, 0));
 });
 
@@ -142,6 +143,31 @@ describe('renewal of ended subscriptions', function () {
     });
 });
 
+describe('while recurring payments are off', function () {
+    beforeEach(function () {
+        config()->set('services.payments.recurring', false);
+    });
+
+    it('ends a subscription with auto renewal without charging', function () {
+        [$user, $subscription] = paidSubscription();
+
+        $this->artisan('subscriptions:renew')->assertSuccessful();
+
+        expect($subscription->fresh()->status)->toBe(SubscriptionStatus::Expired)
+            ->and($user->fresh()->subscription_plan)->toBe(SubscriptionPlan::Free)
+            ->and(Payment::count())->toBe(1);
+    });
+
+    it('sends no renewal reminders', function () {
+        Mail::fake();
+        paidSubscription(endsAt: '2026-10-21 12:00', user: User::factory()->withVerifiedEmail('buyer@example.com')->create());
+
+        $this->artisan('subscriptions:remind-renewals')->assertSuccessful();
+
+        Mail::assertNothingSent();
+    });
+});
+
 describe('renewal reminders', function () {
     it('emails a confirmed address three days before the charge, once', function () {
         Mail::fake();
@@ -228,9 +254,20 @@ describe('refunding a payment', function () {
     it('takes a manual amount in rubles', function () {
         [, , $payment] = paidSubscription(endsAt: '2026-11-15 12:00');
 
-        $this->artisan('payments:refund', ['payment' => $payment->id, '--amount' => '50,50', '--force' => true])->assertSuccessful();
+        $this->artisan('payments:refund', ['payment' => $payment->id, '--amount' => '50,50', '--force' => true])
+            ->expectsOutputToContain('Issue a new receipt for the kept 48,50 ₽')
+            ->assertSuccessful();
 
         expect($payment->fresh()->refunded_amount)->toBe(5050);
+    });
+
+    it('does not ask for a new receipt after a full refund', function () {
+        [, , $payment] = paidSubscription(endsAt: '2026-11-15 12:00');
+        $payment->update(['paid_at' => now()->subDay()]);
+
+        $this->artisan('payments:refund', ['payment' => $payment->id, '--force' => true])
+            ->doesntExpectOutputToContain('Issue a new receipt')
+            ->assertSuccessful();
     });
 
     it('keeps the payment and Premium when the gateway fails', function () {

@@ -53,6 +53,7 @@ return [
 
     'payments' => [
         'driver' => env('PAYMENT_DRIVER', 'fake'),
+        'recurring' => filter_var(env('PAYMENT_RECURRING_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
     ],
 
     'robokassa' => [
@@ -64,7 +65,7 @@ return [
         'test_password2' => env('ROBOKASSA_TEST_PASSWORD2'),
         'test_mode' => filter_var(env('ROBOKASSA_TEST_MODE', true), FILTER_VALIDATE_BOOLEAN),
         'hash_algorithm' => env('ROBOKASSA_HASH_ALGORITHM', 'md5'),
-        'send_receipt' => filter_var(env('ROBOKASSA_SEND_RECEIPT', false), FILTER_VALIDATE_BOOLEAN),
+        'send_receipt' => filter_var(env('ROBOKASSA_SEND_RECEIPT', true), FILTER_VALIDATE_BOOLEAN),
     ],
 
     'cpi' => [
