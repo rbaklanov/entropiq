@@ -98,6 +98,29 @@ class InflationService implements InflationServiceInterface
     }
 
     /**
+     * Several CPI groups can map to one app category (e.g. food overall and its
+     * subgroups). Only the broadest groups count: a group whose parent maps to the
+     * same app category is skipped. When several broad groups remain (medicines and
+     * medical services for «Health»), their rates are averaged.
+     *
+     * @return array<int, float>
+     */
+    public function getAppCategoryRates(): array
+    {
+        return CpiCategory::whereNotNull('mapping_to_app_category_id')
+            ->orderBy('code')
+            ->get()
+            ->groupBy('mapping_to_app_category_id')
+            ->map(function (Collection $group) {
+                $codes = $group->pluck('code');
+                $broadest = $group->reject(fn (CpiCategory $cpi) => $codes->contains($cpi->parent_code));
+
+                return $broadest->avg(fn (CpiCategory $cpi) => $this->getCurrentCategoryCpi($cpi->code));
+            })
+            ->all();
+    }
+
+    /**
      * Convert nominal amount to real value (adjusted for inflation).
      *
      * Real = Nominal / compound_index. Months after the latest published CPI
@@ -154,19 +177,16 @@ class InflationService implements InflationServiceInterface
             return $this->getCurrentCpi();
         }
 
-        $categoryMappings = CpiCategory::whereNotNull('mapping_to_app_category_id')
-            ->get()
-            ->keyBy('mapping_to_app_category_id');
+        $categoryRates = $this->getAppCategoryRates();
 
         $weightedInflation = 0.0;
         $mappedShare = 0.0;
 
         foreach ($expenses as $expense) {
             $share = (float) $expense->getAttribute('total') / $totalExpense;
-            $cpiCategory = $categoryMappings->get($expense->category_id);
+            $categoryInflation = $categoryRates[$expense->category_id] ?? null;
 
-            if ($cpiCategory) {
-                $categoryInflation = $this->getCurrentCategoryCpi($cpiCategory->code);
+            if ($categoryInflation !== null) {
                 $weightedInflation += $share * $categoryInflation;
                 $mappedShare += $share;
             }

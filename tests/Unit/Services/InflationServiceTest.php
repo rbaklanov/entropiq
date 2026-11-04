@@ -620,3 +620,49 @@ describe('calculatePersonalInflation over different periods', function () {
         expect($rate)->toEqualWithDelta($expected, 0.00001);
     });
 });
+
+describe('getAppCategoryRates', function () {
+    it('uses the broadest CPI group when its subgroups map to the same category', function () {
+        seedMonthlyTotalCpi(array_fill(0, 12, 100.50), 2025);
+        seedCategoryCpi('FOOD', array_fill(0, 12, 100.40), 2025);
+        seedCategoryCpi('FOOD_FRUIT', array_fill(0, 12, 102.00), 2025);
+        $groceries = Category::factory()->expense()->system()->create(['name' => ['ru' => 'Продукты', 'en' => 'Groceries']]);
+        CpiCategory::create(['code' => 'FOOD_FRUIT', 'name' => 'Плодоовощная продукция', 'parent_code' => 'FOOD', 'mapping_to_app_category_id' => $groceries->id]);
+        CpiCategory::create(['code' => 'FOOD', 'name' => 'Продовольственные товары', 'parent_code' => 'TOTAL', 'mapping_to_app_category_id' => $groceries->id]);
+
+        $rates = $this->service->getAppCategoryRates();
+
+        expect($rates[$groceries->id])->toEqualWithDelta(1.004 ** 12 - 1, 0.00001);
+    });
+
+    it('averages broad CPI groups that map to the same category', function () {
+        seedMonthlyTotalCpi(array_fill(0, 12, 100.50), 2025);
+        seedCategoryCpi('NON_FOOD_MEDICINE', array_fill(0, 12, 100.20), 2025);
+        seedCategoryCpi('SERVICES_HEALTH', array_fill(0, 12, 101.00), 2025);
+        $health = Category::factory()->expense()->system()->create(['name' => ['ru' => 'Здоровье', 'en' => 'Health']]);
+        CpiCategory::create(['code' => 'NON_FOOD_MEDICINE', 'name' => 'Медикаменты', 'parent_code' => 'NON_FOOD', 'mapping_to_app_category_id' => $health->id]);
+        CpiCategory::create(['code' => 'SERVICES_HEALTH', 'name' => 'Медицинские услуги', 'parent_code' => 'SERVICES', 'mapping_to_app_category_id' => $health->id]);
+
+        $rates = $this->service->getAppCategoryRates();
+
+        expect($rates[$health->id])->toEqualWithDelta(((1.002 ** 12 - 1) + (1.01 ** 12 - 1)) / 2, 0.00001);
+    });
+
+    it('feeds the broadest group into personal inflation', function () {
+        seedMonthlyTotalCpi(array_fill(0, 12, 100.50), 2025);
+        seedCategoryCpi('FOOD', array_fill(0, 12, 100.40), 2025);
+        seedCategoryCpi('FOOD_FRUIT', array_fill(0, 12, 102.00), 2025);
+        $groceries = Category::factory()->expense()->system()->create(['name' => ['ru' => 'Продукты', 'en' => 'Groceries']]);
+        CpiCategory::create(['code' => 'FOOD', 'name' => 'Продовольственные товары', 'parent_code' => 'TOTAL', 'mapping_to_app_category_id' => $groceries->id]);
+        CpiCategory::create(['code' => 'FOOD_FRUIT', 'name' => 'Плодоовощная продукция', 'parent_code' => 'FOOD', 'mapping_to_app_category_id' => $groceries->id]);
+        Transaction::factory()->for($this->user)->expense()->create([
+            'category_id' => $groceries->id,
+            'amount' => 500000,
+            'date' => Carbon::create(2025, 6, 15),
+        ]);
+
+        $personal = $this->service->calculatePersonalInflation($this->user->id, Carbon::create(2025, 1, 1), Carbon::create(2025, 12, 31));
+
+        expect($personal)->toEqualWithDelta(1.004 ** 12 - 1, 0.00001);
+    });
+});

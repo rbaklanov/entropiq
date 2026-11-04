@@ -27,7 +27,7 @@ class SavingsOptimizationRule implements AdviceRuleInterface
     private const DISCRETIONARY_CATEGORIES = [
         'Кафе и рестораны',
         'Развлечения',
-        'Одежда и обувь',
+        'Одежда',
         'Подписки',
     ];
 
