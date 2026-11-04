@@ -94,4 +94,12 @@ describe('seller details in footer', function () {
             ->assertDontSee('tel:', false)
             ->assertSee('mailto:support@entropiq.ru', false);
     });
+
+    it('links the Telegram channel in the footer support section', function () {
+        app()->setLocale('ru');
+
+        $this->get('/')->assertOk()
+            ->assertSee('href="https://t.me/entropiq_channel"', false)
+            ->assertSee('Telegram-канал');
+    });
 });

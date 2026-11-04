@@ -68,6 +68,7 @@
                     <nav class="mt-3 flex flex-col gap-2">
                         <a href="{{ route('faq') }}" class="text-sm text-gray-500 transition-colors hover:text-gray-900">{{ __('landing.footer_faq') }}</a>
                         <a href="mailto:{{ App\Support\Seller::email() }}" class="text-sm text-gray-500 transition-colors hover:text-gray-900">{{ App\Support\Seller::email() }}</a>
+                        <a href="https://t.me/entropiq_channel" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 transition-colors hover:text-gray-900">{{ __('landing.footer_telegram') }}</a>
                         @if(filled(config('app.seller.phone')))
                             <a href="tel:{{ preg_replace('/[^+\d]/', '', config('app.seller.phone')) }}" class="text-sm text-gray-500 transition-colors hover:text-gray-900">{{ config('app.seller.phone') }}</a>
                         @endif
