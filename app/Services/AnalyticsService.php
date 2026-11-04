@@ -6,7 +6,6 @@ use App\Contracts\AnalyticsServiceInterface;
 use App\Contracts\InflationServiceInterface;
 use App\Enums\TransactionType;
 use App\Models\Category;
-use App\Models\CpiCategory;
 use App\Models\Transaction;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -126,18 +125,13 @@ readonly class AnalyticsService implements AnalyticsServiceInterface
         $categoryIds = $expenses->pluck('category_id')->all();
         $categories = Category::whereIn('id', $categoryIds)->get()->keyBy('id');
 
-        $categoryMappings = CpiCategory::whereNotNull('mapping_to_app_category_id')
-            ->get()
-            ->keyBy('mapping_to_app_category_id');
+        $categoryRates = $this->inflationService->getAppCategoryRates();
 
-        $breakdown = $expenses->map(function (Transaction $expense) use ($categories, $categoryMappings, $totalExpense, $officialRate) {
+        $breakdown = $expenses->map(function (Transaction $expense) use ($categories, $categoryRates, $totalExpense, $officialRate) {
             $category = $categories->get($expense->category_id);
             $share = (float) $expense->getAttribute('total') / $totalExpense;
 
-            $cpiCategory = $categoryMappings->get($expense->category_id);
-            $categoryCpi = $cpiCategory
-                ? $this->inflationService->getCurrentCategoryCpi($cpiCategory->code)
-                : $officialRate;
+            $categoryCpi = $categoryRates[$expense->category_id] ?? $officialRate;
 
             return [
                 'category_id' => (int) $expense->category_id,

@@ -14,6 +14,14 @@ interface InflationServiceInterface
 
     public function getCpiByCategory(string $categoryCode, Carbon $period): ?float;
 
+    /**
+     * Annual inflation rate per app expense category, keyed by category id.
+     * Categories without a mapped CPI group are absent.
+     *
+     * @return array<int, float>
+     */
+    public function getAppCategoryRates(): array;
+
     public function calculateRealValue(int $nominalAmount, Carbon $fromDate, Carbon $toDate): int;
 
     public function latestPublishedPeriod(): ?Carbon;

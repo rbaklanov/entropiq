@@ -10,6 +10,7 @@ use App\Rules\Advice\GoalBehindScheduleRule;
 use App\Rules\Advice\OverspendingRule;
 use App\Rules\Advice\SavingsOptimizationRule;
 use App\Rules\Advice\UnusualTransactionRule;
+use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 
@@ -342,5 +343,28 @@ describe('SavingsOptimizationRule', function () {
         expect($result->body)->toContain('сэкономит ~'.App\Support\Money::amount($result->basisData['monthly_saving']).' ₽/мес');
 
         Carbon::setTestNow();
+    });
+
+    it('counts clothing from the seeded categories as discretionary spending', function () {
+        $this->seed(CategorySeeder::class);
+        $rule = app(SavingsOptimizationRule::class);
+        $clothing = Category::where('name->ru', 'Одежда')->firstOrFail();
+        $utilities = Category::where('name->ru', 'Коммунальные')->firstOrFail();
+
+        Transaction::factory()->for($this->user)->expense()->create([
+            'category_id' => $clothing->id,
+            'amount' => 50000,
+            'date' => now(),
+        ]);
+        Transaction::factory()->for($this->user)->expense()->create([
+            'category_id' => $utilities->id,
+            'amount' => 100000,
+            'date' => now(),
+        ]);
+
+        $result = $rule->evaluate($this->user);
+
+        expect($result)->not->toBeNull();
+        expect($result->basisData['discretionary_total'])->toBe(50000);
     });
 });
