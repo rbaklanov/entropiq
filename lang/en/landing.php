@@ -106,4 +106,5 @@ return [
     'footer_offer' => 'Public offer',
     'footer_consent' => 'Consent to data processing',
     'footer_support' => 'Support',
+    'footer_telegram' => 'Telegram channel',
 ];

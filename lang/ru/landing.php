@@ -103,6 +103,7 @@ return [
     'footer_offer' => 'Публичная оферта',
     'footer_consent' => 'Согласие на обработку данных',
     'footer_support' => 'Поддержка',
+    'footer_telegram' => 'Telegram-канал',
 
     'faq_title' => 'Частые вопросы',
     'faq_support' => 'Не нашли ответ? Напишите нам на',
