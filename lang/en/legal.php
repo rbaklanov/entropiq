@@ -35,7 +35,8 @@ return [
 
     'privacy_sharing_title' => '5. Data Sharing with Third Parties',
     'privacy_sharing_text' => 'We do not sell or trade your personal data. To run the Service, a limited set of data is received by the contractors we use:',
-    'privacy_sharing_sms' => 'SMS Aero: your phone number and the text of the sign-in code SMS.',
+    'privacy_sharing_sms' => 'SMS Aero: your phone number and the sign-in code, sent by SMS or to Telegram.',
+    'privacy_sharing_telegram' => 'Telegram (Telegram Messenger Inc., a foreign company): your phone number and the sign-in code when the code is sent to Telegram. This is a cross-border data transfer.',
     'privacy_sharing_ai' => 'GigaChat (Sberbank): anonymized spending figures, categories and goal names, without your phone number or name, to generate AI advice.',
     'privacy_sharing_payment' => 'Robokassa (payment service): details needed to process the payment and issue the receipt.',
     'privacy_sharing_email' => 'Emails (address confirmation and the digest) are sent from our own infrastructure, no third party email services are used.',
@@ -67,7 +68,7 @@ return [
     'terms_service_text' => 'Entropiq is a personal finance assistant with inflation awareness. The Service provides tools for tracking income and expenses, setting financial goals, analytics, and AI recommendations. The Service is not a financial advisor and bears no responsibility for user financial decisions.',
 
     'terms_account_title' => '3. Registration and Account',
-    'terms_account_auth' => 'Registration is done via phone number using an SMS code.',
+    'terms_account_auth' => 'Registration is done via phone number with a confirmation code sent to Telegram or by SMS.',
     'terms_account_responsibility' => 'You are responsible for maintaining the confidentiality of your account access.',
     'terms_account_accuracy' => 'You agree to provide accurate information.',
 

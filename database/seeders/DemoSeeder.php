@@ -23,7 +23,9 @@ use Illuminate\Support\Facades\DB;
 
 class DemoSeeder extends Seeder
 {
-    private const DEMO_PHONE = '+79990000001';
+    private const DEFAULT_PHONE = '79990000001';
+
+    private const LEGACY_PHONE = '+79990000001';
 
     private const DEMO_NAME = 'Алексей';
 
@@ -49,10 +51,27 @@ class DemoSeeder extends Seeder
         });
     }
 
+    /**
+     * The demo account lives on the SMS demo phone, so the login form reaches it
+     * with the fixed code even when real SMS are enabled.
+     */
+    public static function phone(): string
+    {
+        $demoPhone = config('services.sms.demo_phone');
+
+        return is_string($demoPhone) && $demoPhone !== '' ? $demoPhone : self::DEFAULT_PHONE;
+    }
+
     private function createDemoUser(): User
     {
+        $phone = self::phone();
+
+        if (! User::where('phone', $phone)->exists()) {
+            User::where('phone', self::LEGACY_PHONE)->update(['phone' => $phone]);
+        }
+
         return User::updateOrCreate(
-            ['phone' => self::DEMO_PHONE],
+            ['phone' => $phone],
             [
                 'name' => self::DEMO_NAME,
                 'locale' => 'ru',

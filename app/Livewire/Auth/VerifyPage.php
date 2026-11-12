@@ -5,7 +5,10 @@ namespace App\Livewire\Auth;
 use App\Actions\RecordConsent;
 use App\Actions\SendVerificationCode;
 use App\Actions\VerifyCode;
+use App\Contracts\VerificationDeliveryCheckerInterface;
 use App\Enums\ConsentType;
+use App\Enums\VerificationChannel;
+use App\Enums\VerificationDeliveryStatus;
 use App\Models\VerificationCode;
 use App\Support\PhoneFormatter;
 use Illuminate\Support\Carbon;
@@ -20,6 +23,8 @@ use Random\RandomException;
 #[Layout('components.layouts.guest')]
 class VerifyPage extends Component
 {
+    public const MAX_DELIVERY_CHECKS = 12;
+
     public string $phone = '';
 
     #[Validate('required|string|size:4')]
@@ -28,6 +33,12 @@ class VerifyPage extends Component
     public bool $isSubmitting = false;
 
     public int $resendCooldown = 0;
+
+    public bool $watchDelivery = false;
+
+    public bool $codeUndelivered = false;
+
+    public int $deliveryChecks = 0;
 
     public function mount(): void
     {
@@ -38,6 +49,25 @@ class VerifyPage extends Component
         }
 
         $this->resendCooldown = VerificationCode::RESEND_COOLDOWN_SECONDS;
+
+        $this->startWatchingDelivery();
+    }
+
+    public function checkDelivery(VerificationDeliveryCheckerInterface $checker): void
+    {
+        if (! $this->watchDelivery) {
+            return;
+        }
+
+        $this->deliveryChecks++;
+
+        $status = $checker->deliveryStatus($this->phone);
+
+        $this->codeUndelivered = $status === VerificationDeliveryStatus::Undelivered;
+
+        if ($status->isFinal() || $this->deliveryChecks >= self::MAX_DELIVERY_CHECKS) {
+            $this->watchDelivery = false;
+        }
     }
 
     /**
@@ -85,9 +115,11 @@ class VerifyPage extends Component
 
         $this->resendCooldown = VerificationCode::RESEND_COOLDOWN_SECONDS;
 
+        $this->startWatchingDelivery();
+
         $this->dispatch('timer-reset');
 
-        session()->flash('success', __('auth.code_sent', ['phone' => PhoneFormatter::mask($this->phone)]));
+        session()->flash('success', VerificationChannel::current()->trans('code_sent', ['phone' => PhoneFormatter::mask($this->phone)]));
     }
 
     public function render(): View
@@ -95,5 +127,12 @@ class VerifyPage extends Component
         return view('livewire.auth.verify-page', [
             'maskedPhone' => PhoneFormatter::mask($this->phone),
         ]);
+    }
+
+    private function startWatchingDelivery(): void
+    {
+        $this->watchDelivery = VerificationChannel::current() === VerificationChannel::Telegram;
+        $this->codeUndelivered = false;
+        $this->deliveryChecks = 0;
     }
 }

@@ -37,7 +37,8 @@ return [
         [
             'title' => '4. Who receives data',
             'items' => [
-                'SMS Aero: phone number and the text of the SMS with the sign-in code.',
+                'SMS Aero: phone number and the sign-in code, sent by SMS or to Telegram.',
+                'Telegram (Telegram Messenger Inc., a foreign company): phone number and the sign-in code when the code is sent to Telegram. This is a cross-border data transfer.',
                 'Robokassa (payment service): details needed to process the payment and issue the receipt.',
                 'GigaChat (Sberbank): anonymised spending figures, categories and goal names, without phone number or name.',
             ],

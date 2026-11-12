@@ -31,4 +31,13 @@ return [
     'code_sent' => 'Код отправлен на номер :phone.',
     'verification_sms' => 'Entropiq: ваш код подтверждения — :code',
     'sms_send_failed' => 'Не удалось отправить SMS. Попробуйте позже.',
+
+    // Telegram codes (SMS_DRIVER=sms_aero_telegram)
+    'verify_title_telegram' => 'Введите код из Telegram',
+    'verify_subtitle_telegram' => 'Мы отправили код в Telegram, в чат «Коды верификации», на аккаунт с номером :phone',
+    'sms_code_telegram' => 'Код из Telegram',
+    'code_sent_telegram' => 'Код отправлен в Telegram на номер :phone.',
+    'sms_send_failed_telegram' => 'Не удалось отправить код в Telegram. Попробуйте позже.',
+    'telegram_undelivered' => 'Код не доставлен: на этот номер не зарегистрирован Telegram. Проверьте номер или напишите нам на :email.',
+    'login_hint_telegram' => 'Код придёт в Telegram на аккаунт с этим номером.',
 ];

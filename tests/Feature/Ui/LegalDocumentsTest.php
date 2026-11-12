@@ -83,7 +83,7 @@ describe('personal data consent document', function () {
             ->assertSee('SMS Aero')
             ->assertSee('Робокасса')
             ->assertSee('Я могу отозвать согласие')
-            ->assertSee('19.10.2026');
+            ->assertSee('12.11.2026');
     });
 
     it('has the same structure in Russian and English', function () {

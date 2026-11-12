@@ -1,9 +1,19 @@
 <div class="mx-auto max-w-md px-4 py-20">
     <div class="rounded-md border border-gray-200 bg-white p-8">
-        <h1 class="text-center text-h1">{{ __('auth.verify_title') }}</h1>
+        <h1 class="text-center text-h1">{{ \App\Enums\VerificationChannel::current()->trans('verify_title') }}</h1>
         <p class="mt-2 text-center text-caption text-gray-500">
-            {{ __('auth.verify_subtitle', ['phone' => $maskedPhone]) }}
+            {{ \App\Enums\VerificationChannel::current()->trans('verify_subtitle', ['phone' => $maskedPhone]) }}
         </p>
+
+        @if($watchDelivery)
+            <div wire:poll.5s="checkDelivery" class="hidden"></div>
+        @endif
+
+        @if($codeUndelivered)
+            <div class="mt-4 rounded-lg bg-danger-50 p-3 text-center text-sm text-danger-700" role="alert">
+                {{ __('auth.telegram_undelivered', ['email' => \App\Support\Seller::email()]) }}
+            </div>
+        @endif
 
         @if(session('success'))
             <div class="mt-4 rounded-lg bg-success-50 p-3 text-center text-sm text-success-700">
@@ -62,7 +72,7 @@
                 }
             }" class="w-full">
                 <label class="mb-1 block text-sm font-medium text-gray-700">
-                    {{ __('auth.sms_code') }}
+                    {{ \App\Enums\VerificationChannel::current()->trans('sms_code') }}
                 </label>
 
                 <div class="flex justify-center gap-3">
