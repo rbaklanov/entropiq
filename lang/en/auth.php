@@ -6,7 +6,7 @@ return [
     'phone_label' => 'Phone number',
     'send_code' => 'Get code',
     'verify_title' => 'Enter the SMS code',
-    'verify_subtitle' => 'We sent an SMS code to :phone',
+    'verify_subtitle' => 'We sent an SMS code to',
     'verify_button' => 'Verify',
     'change_number' => 'Change number',
     'resend_code' => 'Resend code',
@@ -34,7 +34,7 @@ return [
 
     // Telegram codes (SMS_DRIVER=sms_aero_telegram)
     'verify_title_telegram' => 'Enter the code from Telegram',
-    'verify_subtitle_telegram' => 'We sent the code to Telegram, in the “Verification Codes” chat, for the account with number :phone',
+    'verify_subtitle_telegram' => 'We sent the code to Telegram, in the “Verification Codes” chat, for the account with number',
     'sms_code_telegram' => 'Code from Telegram',
     'code_sent_telegram' => 'The code was sent to Telegram for :phone.',
     'sms_send_failed_telegram' => 'Could not send the code to Telegram. Please try again later.',

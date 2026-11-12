@@ -2,7 +2,8 @@
     <div class="rounded-md border border-gray-200 bg-white p-8">
         <h1 class="text-center text-h1">{{ \App\Enums\VerificationChannel::current()->trans('verify_title') }}</h1>
         <p class="mt-2 text-center text-caption text-gray-500">
-            {{ \App\Enums\VerificationChannel::current()->trans('verify_subtitle', ['phone' => $maskedPhone]) }}
+            {{ \App\Enums\VerificationChannel::current()->trans('verify_subtitle') }}
+            <span class="block whitespace-nowrap">{{ $maskedPhone }}</span>
         </p>
 
         @if($watchDelivery)
@@ -21,139 +22,150 @@
             </div>
         @endif
 
-        <form wire:submit="verify" class="mt-8">
-            <div x-data="{
-                digits: ['', '', '', ''],
-                syncAll() {
-                    for (let i = 0; i < 4; i++) {
-                        this.$refs['digit' + i].value = this.digits[i];
-                    }
-                    $wire.set('code', this.digits.join(''));
-                },
-                onInput(index, e) {
-                    let val = e.target.value.replace(/\D/g, '');
-
-                    if (val.length > 1) {
-                        let chars = val.split('');
-                        for (let i = 0; i < chars.length && (index + i) < 4; i++) {
-                            this.digits[index + i] = chars[i];
+        @unless($codeUndelivered)
+            <form wire:submit="verify" class="mt-8">
+                <div x-data="{
+                    digits: ['', '', '', ''],
+                    syncAll() {
+                        for (let i = 0; i < 4; i++) {
+                            this.$refs['digit' + i].value = this.digits[i];
                         }
-                        let nextIdx = Math.min(index + chars.length, 3);
-                        this.syncAll();
-                        this.$nextTick(() => this.$refs['digit' + nextIdx].focus());
-                        return;
-                    }
-
-                    this.digits[index] = val;
-                    e.target.value = val;
-                    $wire.set('code', this.digits.join(''));
-
-                    if (val && index < 3) {
-                        this.$nextTick(() => this.$refs['digit' + (index + 1)].focus());
-                    }
-                },
-                onKeydown(index, e) {
-                    if (e.key === 'Backspace' && !this.digits[index] && index > 0) {
-                        this.digits[index - 1] = '';
-                        this.$refs['digit' + (index - 1)].value = '';
                         $wire.set('code', this.digits.join(''));
-                        this.$nextTick(() => this.$refs['digit' + (index - 1)].focus());
-                    }
-                },
-                onPaste(e) {
-                    e.preventDefault();
-                    let pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
-                    for (let i = 0; i < 4; i++) {
-                        this.digits[i] = pasted[i] || '';
-                    }
-                    this.syncAll();
-                    let focusIdx = Math.min(pasted.length, 3);
-                    this.$nextTick(() => this.$refs['digit' + focusIdx].focus());
-                }
-            }" class="w-full">
-                <label class="mb-1 block text-sm font-medium text-gray-700">
-                    {{ \App\Enums\VerificationChannel::current()->trans('sms_code') }}
-                </label>
+                    },
+                    onInput(index, e) {
+                        let val = e.target.value.replace(/\D/g, '');
 
-                <div class="flex justify-center gap-3">
-                    @for($i = 0; $i < 4; $i++)
-                        <input
-                            type="text"
-                            inputmode="numeric"
-                            maxlength="{{ $i === 0 ? 4 : 1 }}"
-                            x-ref="digit{{ $i }}"
-                            @input="onInput({{ $i }}, $event)"
-                            @keydown="onKeydown({{ $i }}, $event)"
-                            @paste="onPaste($event)"
-                            @if($i === 0) autofocus @endif
-                            @class([
-                                'h-14 w-14 rounded-md border text-center font-serif text-2xl font-semibold outline-none transition-colors duration-200',
-                                'border-gray-300 bg-white focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30' => !$errors->has('code'),
-                                'border-danger-400 bg-danger-50 focus:border-danger-500 focus:ring-2 focus:ring-danger-500/20' => $errors->has('code'),
-                            ])
-                        />
-                    @endfor
+                        if (val.length > 1) {
+                            let chars = val.split('');
+                            for (let i = 0; i < chars.length && (index + i) < 4; i++) {
+                                this.digits[index + i] = chars[i];
+                            }
+                            let nextIdx = Math.min(index + chars.length, 3);
+                            this.syncAll();
+                            this.$nextTick(() => this.$refs['digit' + nextIdx].focus());
+                            return;
+                        }
+
+                        this.digits[index] = val;
+                        e.target.value = val;
+                        $wire.set('code', this.digits.join(''));
+
+                        if (val && index < 3) {
+                            this.$nextTick(() => this.$refs['digit' + (index + 1)].focus());
+                        }
+                    },
+                    onKeydown(index, e) {
+                        if (e.key === 'Backspace' && !this.digits[index] && index > 0) {
+                            this.digits[index - 1] = '';
+                            this.$refs['digit' + (index - 1)].value = '';
+                            $wire.set('code', this.digits.join(''));
+                            this.$nextTick(() => this.$refs['digit' + (index - 1)].focus());
+                        }
+                    },
+                    onPaste(e) {
+                        e.preventDefault();
+                        let pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                        for (let i = 0; i < 4; i++) {
+                            this.digits[i] = pasted[i] || '';
+                        }
+                        this.syncAll();
+                        let focusIdx = Math.min(pasted.length, 3);
+                        this.$nextTick(() => this.$refs['digit' + focusIdx].focus());
+                    }
+                }" class="w-full">
+                    <label class="mb-1 block text-center text-sm font-medium text-gray-700">
+                        {{ \App\Enums\VerificationChannel::current()->trans('sms_code') }}
+                    </label>
+
+                    <div class="flex justify-center gap-3">
+                        @for($i = 0; $i < 4; $i++)
+                            <input
+                                type="text"
+                                inputmode="numeric"
+                                maxlength="{{ $i === 0 ? 4 : 1 }}"
+                                x-ref="digit{{ $i }}"
+                                @input="onInput({{ $i }}, $event)"
+                                @keydown="onKeydown({{ $i }}, $event)"
+                                @paste="onPaste($event)"
+                                @if($i === 0) autofocus @endif
+                                @class([
+                                    'h-14 w-14 rounded-md border text-center font-serif text-2xl font-semibold outline-none transition-colors duration-200',
+                                    'border-gray-300 bg-white focus:border-gray-900 focus:ring-2 focus:ring-primary-600/30' => !$errors->has('code'),
+                                    'border-danger-400 bg-danger-50 focus:border-danger-500 focus:ring-2 focus:ring-danger-500/20' => $errors->has('code'),
+                                ])
+                            />
+                        @endfor
+                    </div>
+
+                    @error('code')
+                        <p class="mt-2 text-center text-sm text-danger-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                @error('code')
-                    <p class="mt-2 text-center text-sm text-danger-600">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <button
-                type="submit"
-                wire:loading.attr="disabled"
-                class="mt-6 w-full min-h-12 rounded-md bg-primary-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
-            >
-                <span wire:loading.remove wire:target="verify">{{ __('auth.verify_button') }}</span>
-                <span wire:loading wire:target="verify" class="inline-flex items-center gap-2">
-                    <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
-                    {{ __('auth.verify_button') }}
-                </span>
-            </button>
-        </form>
-
-        <div
-            x-data="{
-                seconds: @js($resendCooldown),
-                interval: null,
-                start() {
-                    this.interval = setInterval(() => {
-                        if (this.seconds > 0) this.seconds--;
-                        if (this.seconds === 0) clearInterval(this.interval);
-                    }, 1000);
-                },
-                init() {
-                    this.start();
-                }
-            }"
-            x-on:timer-reset.window="seconds = @js(\App\Models\VerificationCode::RESEND_COOLDOWN_SECONDS); clearInterval(interval); start()"
-            class="mt-4 text-center"
-        >
-            <template x-if="seconds > 0">
-                <p class="text-caption text-gray-500">
-                    {{ __('auth.resend_timer_prefix') }} <span x-text="seconds"></span> {{ __('auth.resend_timer_suffix') }}
-                </p>
-            </template>
-
-            <template x-if="seconds === 0">
                 <button
-                    type="button"
-                    wire:click="resendCode"
-                    class="text-caption text-primary-600 transition hover:underline"
+                    type="submit"
+                    wire:loading.attr="disabled"
+                    class="mt-6 w-full min-h-12 rounded-md bg-primary-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
                 >
-                    {{ __('auth.resend_code') }}
+                    <span wire:loading.remove wire:target="verify">{{ __('auth.verify_button') }}</span>
+                    <span wire:loading wire:target="verify" class="inline-flex items-center gap-2">
+                        <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        {{ __('auth.verify_button') }}
+                    </span>
                 </button>
-            </template>
-        </div>
+            </form>
 
-        <p class="mt-4 text-center text-caption text-gray-500">
-            <a href="{{ route('auth.login') }}" class="text-primary-600 hover:underline">
+            <div
+                x-data="{
+                    seconds: @js($resendCooldown),
+                    interval: null,
+                    start() {
+                        this.interval = setInterval(() => {
+                            if (this.seconds > 0) this.seconds--;
+                            if (this.seconds === 0) clearInterval(this.interval);
+                        }, 1000);
+                    },
+                    init() {
+                        this.start();
+                    }
+                }"
+                x-on:timer-reset.window="seconds = @js(\App\Models\VerificationCode::RESEND_COOLDOWN_SECONDS); clearInterval(interval); start()"
+                class="mt-4 text-center"
+            >
+                <template x-if="seconds > 0">
+                    <p class="text-caption text-gray-500">
+                        {{ __('auth.resend_timer_prefix') }} <span x-text="seconds"></span> {{ __('auth.resend_timer_suffix') }}
+                    </p>
+                </template>
+
+                <template x-if="seconds === 0">
+                    <button
+                        type="button"
+                        wire:click="resendCode"
+                        class="text-caption text-primary-600 transition hover:underline"
+                    >
+                        {{ __('auth.resend_code') }}
+                    </button>
+                </template>
+            </div>
+        @endunless
+
+        @if($codeUndelivered)
+            <a
+                href="{{ route('auth.login') }}"
+                class="mt-6 flex w-full min-h-12 items-center justify-center rounded-md bg-primary-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+            >
                 {{ __('auth.change_number') }}
             </a>
-        </p>
+        @else
+            <p class="mt-4 text-center text-caption text-gray-500">
+                <a href="{{ route('auth.login') }}" class="text-primary-600 hover:underline">
+                    {{ __('auth.change_number') }}
+                </a>
+            </p>
+        @endif
     </div>
 </div>
