@@ -7,6 +7,7 @@ use App\Enums\VerificationDeliveryStatus;
 use App\Exceptions\SmsDeliveryException;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\Auth\VerifyPage;
+use App\Support\PhoneFormatter;
 use App\Support\Seller;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
@@ -39,6 +40,7 @@ describe('sign-in with codes in Telegram', function () {
         Livewire::test(VerifyPage::class)
             ->assertSee(__('auth.verify_title_telegram'))
             ->assertSee(__('auth.sms_code_telegram'))
+            ->assertSeeHtml('<span class="block whitespace-nowrap">'.PhoneFormatter::mask('79001234567').'</span>')
             ->assertDontSee(__('auth.verify_title'));
     });
 
@@ -95,7 +97,8 @@ describe('Telegram delivery check on the verify page', function () {
             ->call('checkDelivery')
             ->assertSet('watchDelivery', true)
             ->assertSet('codeUndelivered', false)
-            ->assertSeeHtml('wire:poll.5s="checkDelivery"');
+            ->assertSeeHtml('wire:poll.5s="checkDelivery"')
+            ->assertSeeHtml('wire:submit="verify"');
     });
 
     it('warns that the number has no Telegram and stops polling', function () {
@@ -107,7 +110,10 @@ describe('Telegram delivery check on the verify page', function () {
             ->assertSet('codeUndelivered', true)
             ->assertSet('watchDelivery', false)
             ->assertSee(__('auth.telegram_undelivered', ['email' => Seller::email()]))
-            ->assertDontSeeHtml('wire:poll.5s="checkDelivery"');
+            ->assertDontSeeHtml('wire:poll.5s="checkDelivery"')
+            ->assertDontSeeHtml('wire:submit="verify"')
+            ->assertDontSee(__('auth.resend_code'))
+            ->assertSee(__('auth.change_number'));
     });
 
     it('stops polling once the code is delivered', function () {
