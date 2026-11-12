@@ -44,6 +44,23 @@ describe('sign-in with codes in Telegram', function () {
             ->assertDontSee(__('auth.verify_title'));
     });
 
+    it('confirms the sent code with the phone on its own line', function () {
+        session()->put('phone', '79001234567');
+        session()->flash('code_sent', true);
+
+        Livewire::test(VerifyPage::class)
+            ->assertSee(__('auth.code_sent_to_telegram'))
+            ->assertDontSee(__('auth.code_sent_to'));
+    });
+
+    it('confirms the sent code after a resend', function () {
+        session()->put('phone', '79001234567');
+
+        Livewire::test(VerifyPage::class)
+            ->call('resendCode')
+            ->assertSee(__('auth.code_sent_to_telegram'));
+    });
+
     it('reports a Telegram delivery failure without mentioning SMS', function () {
         config(['services.sms.fixed_code' => false]);
 

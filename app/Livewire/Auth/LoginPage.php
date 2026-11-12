@@ -3,8 +3,6 @@
 namespace App\Livewire\Auth;
 
 use App\Actions\SendVerificationCode;
-use App\Enums\VerificationChannel;
-use App\Support\PhoneFormatter;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -35,7 +33,7 @@ class LoginPage extends Component
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
-        session()->flash('success', VerificationChannel::current()->trans('code_sent', ['phone' => PhoneFormatter::mask($this->phone)]));
+        session()->flash('code_sent', true);
 
         $this->redirectRoute('auth.verify');
     }
