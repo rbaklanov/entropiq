@@ -16,9 +16,10 @@
             </div>
         @endif
 
-        @if(session('success'))
+        @if(session('code_sent'))
             <div class="mt-4 rounded-lg bg-success-50 p-3 text-center text-sm text-success-700">
-                {{ session('success') }}
+                {{ \App\Enums\VerificationChannel::current()->trans('code_sent_to') }}
+                <span class="block whitespace-nowrap">{{ $maskedPhone }}</span>
             </div>
         @endif
 

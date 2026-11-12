@@ -119,7 +119,7 @@ class VerifyPage extends Component
 
         $this->dispatch('timer-reset');
 
-        session()->flash('success', VerificationChannel::current()->trans('code_sent', ['phone' => PhoneFormatter::mask($this->phone)]));
+        session()->flash('code_sent', true);
     }
 
     public function render(): View
