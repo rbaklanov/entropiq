@@ -6,6 +6,7 @@ use App\Actions\RecordConsent;
 use App\Actions\SendVerificationCode;
 use App\Actions\VerifyCode;
 use App\Enums\ConsentType;
+use App\Enums\VerificationChannel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SendCodeRequest;
 use App\Http\Requests\VerifyCodeRequest;
@@ -27,7 +28,7 @@ class AuthController extends Controller
         $action->execute($phone);
 
         return response()->json([
-            'message' => __('auth.code_sent', ['phone' => $phone]),
+            'message' => VerificationChannel::current()->trans('code_sent', ['phone' => $phone]),
         ]);
     }
 

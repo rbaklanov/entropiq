@@ -7,11 +7,11 @@ return [
             'items' => [
                 [
                     'q' => 'How do I sign in, and do I need a password?',
-                    'a' => 'No password is needed. Enter your phone number, receive a four digit code by SMS and type it in. If you do not have an account yet, it is created automatically.',
+                    'a' => 'No password is needed. Enter your phone number, receive a four digit code in Telegram (the “Verification Codes” chat of the account with this number) or by SMS and type it in. If you do not have an account yet, it is created automatically.',
                 ],
                 [
-                    'q' => 'The SMS code does not arrive. What should I do?',
-                    'a' => 'Check that the number is correct and wait a minute: you can request a new code after 60 seconds. A code is valid for 5 minutes and you get 3 attempts to enter it. If the SMS still does not arrive, write to support@entropiq.ru.',
+                    'q' => 'The code does not arrive. What should I do?',
+                    'a' => 'Check that the number is correct and wait a minute: you can request a new code after 60 seconds. A code is valid for 5 minutes and you get 3 attempts to enter it. A Telegram code arrives only if a Telegram account is registered to this number. If the code still does not arrive, write to support@entropiq.ru.',
                 ],
                 [
                     'q' => 'Do I need to connect a bank?',

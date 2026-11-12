@@ -2,9 +2,7 @@
 
 namespace App\Contracts;
 
-interface SmsServiceInterface
+interface SmsServiceInterface extends VerificationCodeSenderInterface
 {
     public function send(string $phone, string $message): void;
-
-    public function sendVerificationCode(string $phone, string $code): void;
 }

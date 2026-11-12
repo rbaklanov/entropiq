@@ -37,6 +37,7 @@ describe('privacy policy page', function () {
 
         $this->get('/privacy')->assertOk()
             ->assertSee('SMS Aero')
+            ->assertSee(__('legal.privacy_sharing_telegram'))
             ->assertSee('GigaChat')
             ->assertSee(__('legal.privacy_sharing_email'))
             ->assertSee(__('legal.privacy_sharing_law'));
@@ -50,7 +51,7 @@ describe('privacy policy page', function () {
     });
 
     it('shows the new last updated date', function () {
-        $this->get('/privacy')->assertOk()->assertSee('19.10.2026');
+        $this->get('/privacy')->assertOk()->assertSee('12.11.2026');
     });
 
     it('has the same policy keys in Russian and English', function () {
@@ -84,7 +85,7 @@ describe('what the policy promises matches the code', function () {
     it('sends no phone number or name to GigaChat in the advice request', function () {
         $this->seed(CategorySeeder::class);
         $this->seed(DemoSeeder::class);
-        $user = User::where('phone', '+79990000001')->first();
+        $user = User::where('phone', DemoSeeder::phone())->first();
 
         $payloads = app(AiAdviceRuleEngine::class)->evaluate($user);
         $method = new ReflectionMethod(GigaChatService::class, 'buildMessages');
@@ -95,7 +96,7 @@ describe('what the policy promises matches the code', function () {
         foreach ($payloads as $payload) {
             $request = json_encode($method->invoke($service, $payload), JSON_UNESCAPED_UNICODE);
 
-            expect($request)->not->toContain('79990000001')->not->toContain($user->name);
+            expect($request)->not->toContain(DemoSeeder::phone())->not->toContain($user->name);
         }
     });
 

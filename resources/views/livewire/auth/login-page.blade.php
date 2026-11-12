@@ -4,6 +4,9 @@
         <p class="mt-2 text-center text-caption text-gray-500">
             {{ __('auth.login_subtitle') }}
         </p>
+        @if(\App\Enums\VerificationChannel::current() === \App\Enums\VerificationChannel::Telegram)
+            <p class="mt-2 text-center text-caption text-gray-500">{{ __('auth.login_hint_telegram') }}</p>
+        @endif
 
         <form wire:submit="sendCode" class="mt-8">
             <div x-data="{
