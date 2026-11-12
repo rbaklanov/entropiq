@@ -13,6 +13,9 @@ use App\Contracts\LlmServiceInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\SmsServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
+use App\Contracts\VerificationCodeSenderInterface;
+use App\Contracts\VerificationDeliveryCheckerInterface;
+use App\Enums\VerificationChannel;
 use App\Integrations\Emiss\EmissConnector;
 use App\Integrations\Robokassa\RobokassaCredentials;
 use App\Integrations\Rosstat\RosstatConnector;
@@ -33,6 +36,7 @@ use App\Services\Payments\FakePaymentGateway;
 use App\Services\Payments\RobokassaGateway;
 use App\Services\RosstatCpiService;
 use App\Services\SmsAeroService;
+use App\Services\SmsAeroTelegramService;
 use App\Services\SubscriptionService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Container\Container;
@@ -168,6 +172,13 @@ class AppServiceProvider extends ServiceProvider
 
             return $app->make(LogSmsService::class);
         });
+
+        $this->app->bind(VerificationCodeSenderInterface::class, fn (Container $app): VerificationCodeSenderInterface => match (VerificationChannel::current()) {
+            VerificationChannel::Telegram => $app->make(SmsAeroTelegramService::class),
+            VerificationChannel::Sms => $app->make(SmsServiceInterface::class),
+        });
+
+        $this->app->bind(VerificationDeliveryCheckerInterface::class, SmsAeroTelegramService::class);
 
         if ($this->app->environment('local') && class_exists(TelescopeApplicationServiceProvider::class)) {
             $this->app->register(TelescopeServiceProvider::class);

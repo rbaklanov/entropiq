@@ -2,7 +2,8 @@
 
 namespace App\Actions;
 
-use App\Contracts\SmsServiceInterface;
+use App\Contracts\VerificationCodeSenderInterface;
+use App\Enums\VerificationChannel;
 use App\Exceptions\SmsDeliveryException;
 use App\Models\VerificationCode;
 use Illuminate\Support\Facades\RateLimiter;
@@ -14,7 +15,7 @@ readonly class SendVerificationCode
     public const DEFAULT_OTP_CODE = '1111';
 
     public function __construct(
-        private SmsServiceInterface $smsService,
+        private VerificationCodeSenderInterface $codeSender,
     ) {}
 
     /**
@@ -37,12 +38,12 @@ readonly class SendVerificationCode
 
         if (! $this->shouldSkipSms($phone)) {
             try {
-                $this->smsService->sendVerificationCode($phone, $code);
+                $this->codeSender->sendVerificationCode($phone, $code);
             } catch (SmsDeliveryException) {
                 $verificationCode->delete();
 
                 throw ValidationException::withMessages([
-                    'phone' => [__('auth.sms_send_failed')],
+                    'phone' => [VerificationChannel::current()->trans('sms_send_failed')],
                 ]);
             }
         }
@@ -72,7 +73,8 @@ readonly class SendVerificationCode
             return $this->fixedCode();
         }
 
-        return str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        // No leading zero: SMS Aero takes the Telegram code as an integer.
+        return (string) random_int(1000, 9999);
     }
 
     private function shouldSkipSms(string $phone): bool

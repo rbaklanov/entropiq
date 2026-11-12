@@ -1,5 +1,7 @@
 <?php
 
+use App\Actions\SendVerificationCode;
+use App\Actions\VerifyCode;
 use App\Contracts\AiAdviceServiceInterface;
 use App\Enums\TransactionType;
 use App\Models\AiAdvice;
@@ -19,10 +21,42 @@ uses(RefreshDatabase::class);
 
 function demoUser(): ?User
 {
-    return User::where('phone', '+79990000001')->first();
+    return User::where('phone', DemoSeeder::phone())->first();
 }
 
 describe('DemoSeeder', function () {
+    it('puts the demo account on the SMS demo phone', function () {
+        config()->set('services.sms.demo_phone', '79991112233');
+
+        $this->seed(CategorySeeder::class);
+        $this->seed(DemoSeeder::class);
+
+        expect(User::where('phone', '79991112233')->value('name'))->toBe('Алексей');
+    });
+
+    it('moves the account seeded with the old plus-prefixed phone', function () {
+        $legacy = User::factory()->create(['phone' => '+79990000001']);
+
+        $this->seed(CategorySeeder::class);
+        $this->seed(DemoSeeder::class);
+
+        expect($legacy->fresh()->phone)->toBe(DemoSeeder::phone())
+            ->and(User::where('phone', '+79990000001')->exists())->toBeFalse();
+    });
+
+    it('lets the login form reach the demo account with the fixed demo code', function () {
+        config()->set('services.sms.fixed_code', false);
+
+        $this->seed(CategorySeeder::class);
+        $this->seed(DemoSeeder::class);
+
+        $code = app(SendVerificationCode::class)->execute(DemoSeeder::phone());
+        $user = app(VerifyCode::class)->execute(DemoSeeder::phone(), '1111');
+
+        expect($code->phone)->toBe(DemoSeeder::phone())
+            ->and($user->is(demoUser()))->toBeTrue();
+    });
+
     it('creates a complete Premium demo account', function () {
         $this->seed(CategorySeeder::class);
         $this->seed(DemoSeeder::class);
@@ -60,7 +94,7 @@ describe('DemoSeeder', function () {
 
         $this->seed(DemoSeeder::class);
 
-        expect(User::where('phone', '+79990000001')->count())->toBe(1)
+        expect(User::where('phone', DemoSeeder::phone())->count())->toBe(1)
             ->and(demoUser()->goals()->count())->toBe($goals)
             ->and(demoUser()->aiAdvices()->count())->toBe($advices);
     });

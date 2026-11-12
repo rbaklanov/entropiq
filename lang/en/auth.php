@@ -31,4 +31,13 @@ return [
     'code_sent' => 'Code sent to :phone.',
     'verification_sms' => 'Entropiq: your verification code is :code',
     'sms_send_failed' => 'Could not send the SMS. Please try again later.',
+
+    // Telegram codes (SMS_DRIVER=sms_aero_telegram)
+    'verify_title_telegram' => 'Enter the code from Telegram',
+    'verify_subtitle_telegram' => 'We sent the code to Telegram, in the “Verification Codes” chat, for the account with number :phone',
+    'sms_code_telegram' => 'Code from Telegram',
+    'code_sent_telegram' => 'The code was sent to Telegram for :phone.',
+    'sms_send_failed_telegram' => 'Could not send the code to Telegram. Please try again later.',
+    'telegram_undelivered' => 'The code was not delivered: no Telegram account is registered to this number. Check the number or write to :email.',
+    'login_hint_telegram' => 'The code will arrive in Telegram for the account with this number.',
 ];
