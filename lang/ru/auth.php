@@ -6,7 +6,7 @@ return [
     'phone_label' => 'Номер телефона',
     'send_code' => 'Получить код',
     'verify_title' => 'Введите код из SMS',
-    'verify_subtitle' => 'Мы отправили SMS-код на номер :phone',
+    'verify_subtitle' => 'Мы отправили SMS-код на номер',
     'verify_button' => 'Подтвердить',
     'change_number' => 'Изменить номер',
     'resend_code' => 'Отправить код повторно',
@@ -34,7 +34,7 @@ return [
 
     // Telegram codes (SMS_DRIVER=sms_aero_telegram)
     'verify_title_telegram' => 'Введите код из Telegram',
-    'verify_subtitle_telegram' => 'Мы отправили код в Telegram, в чат «Коды верификации», на аккаунт с номером :phone',
+    'verify_subtitle_telegram' => 'Мы отправили код в Telegram, в чат «Коды верификации», на аккаунт с номером',
     'sms_code_telegram' => 'Код из Telegram',
     'code_sent_telegram' => 'Код отправлен в Telegram на номер :phone.',
     'sms_send_failed_telegram' => 'Не удалось отправить код в Telegram. Попробуйте позже.',
