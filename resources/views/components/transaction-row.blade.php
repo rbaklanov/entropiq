@@ -48,7 +48,10 @@
     {{-- Swipe-to-delete action --}}
     <button
         x-show="showActions"
-        x-on:click="if (confirm('{{ __('transactions.delete_confirm') }}')) $wire.deleteTransaction({{ $transaction->id }})"
+        type="button"
+        wire:click="deleteTransaction({{ $transaction->id }})"
+        wire:confirm="{{ __('transactions.delete_confirm') }}"
+        aria-label="{{ __('transactions.delete') }}"
         class="absolute inset-y-0 right-0 flex w-20 items-center justify-center bg-danger-500 text-white"
         x-transition
     >

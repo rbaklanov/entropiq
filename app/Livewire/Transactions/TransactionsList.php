@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Transactions;
 
+use App\Actions\DeleteTransaction;
 use App\Contracts\SubscriptionServiceInterface;
 use App\Models\Category;
 use App\Models\Transaction;
@@ -75,17 +76,11 @@ class TransactionsList extends Component
         $this->perPage = 20;
     }
 
-    public function deleteTransaction(int $id): void
+    public function deleteTransaction(int $id, DeleteTransaction $deleteTransaction): void
     {
-        $transaction = Transaction::find($id);
-
-        if (! $transaction || $transaction->user_id !== auth()->id()) {
-            return;
+        if ($deleteTransaction->execute(auth()->user(), $id)) {
+            $this->dispatch('transaction-deleted');
         }
-
-        $transaction->delete();
-
-        $this->dispatch('transaction-deleted');
     }
 
     private function getAnchorDate(): Carbon
