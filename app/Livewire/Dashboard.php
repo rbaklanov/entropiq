@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Actions\DeleteTransaction;
 use App\Contracts\AnalyticsServiceInterface;
 use App\Contracts\InflationServiceInterface;
 use App\Contracts\SubscriptionServiceInterface;
@@ -33,6 +34,11 @@ class Dashboard extends Component
         $openAdviceId = $subscriptionService->openAdviceId($user);
 
         return $openAdviceId !== null && $openAdviceId !== $advice->id;
+    }
+
+    public function deleteTransaction(int $id, DeleteTransaction $deleteTransaction): void
+    {
+        $deleteTransaction->execute(auth()->user(), $id);
     }
 
     public function render(): View

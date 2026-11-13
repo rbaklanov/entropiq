@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Transactions;
 
+use App\Actions\DeleteTransaction;
 use App\Contracts\SubscriptionServiceInterface;
 use App\Enums\RecurringInterval;
 use App\Models\Category;
@@ -184,6 +185,18 @@ class TransactionForm extends Component
             session()->flash('success', __('transactions.created'));
         }
 
+        $this->redirectRoute('transactions.index');
+    }
+
+    public function delete(DeleteTransaction $deleteTransaction): void
+    {
+        if ($this->transactionId === null) {
+            return;
+        }
+
+        abort_unless($deleteTransaction->execute(auth()->user(), $this->transactionId), 404);
+
+        session()->flash('success', __('transactions.deleted'));
         $this->redirectRoute('transactions.index');
     }
 
