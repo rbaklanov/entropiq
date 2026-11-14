@@ -97,7 +97,7 @@
 
     {{-- Inflation Calculator (ENQ-100) --}}
     <section class="py-16 sm:py-24">
-        <div class="mx-auto grid max-w-6xl items-start gap-12 px-4 sm:px-6 lg:grid-cols-[1fr_1.4fr]">
+        <div class="mx-auto grid max-w-6xl grid-cols-1 items-start gap-12 px-4 sm:px-6 lg:grid-cols-[1fr_1.4fr]">
             <div>
                 <h2 class="font-serif text-3xl font-semibold leading-tight sm:text-[2.375rem]">{{ __('landing.calculator_title') }}</h2>
                 <p class="mt-4 text-gray-500">{{ __('landing.calculator_subtitle') }}</p>
