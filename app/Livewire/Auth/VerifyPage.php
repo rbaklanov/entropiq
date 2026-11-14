@@ -10,7 +10,7 @@ use App\Enums\ConsentType;
 use App\Enums\VerificationChannel;
 use App\Enums\VerificationDeliveryStatus;
 use App\Models\VerificationCode;
-use App\Support\PhoneFormatter;
+use App\Support\PhoneNumbers;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -111,7 +111,7 @@ class VerifyPage extends Component
      */
     public function resendCode(SendVerificationCode $action): void
     {
-        $action->execute($this->phone);
+        $action->execute($this->phone, request()->ip());
 
         $this->resendCooldown = VerificationCode::RESEND_COOLDOWN_SECONDS;
 
@@ -125,7 +125,7 @@ class VerifyPage extends Component
     public function render(): View
     {
         return view('livewire.auth.verify-page', [
-            'maskedPhone' => PhoneFormatter::mask($this->phone),
+            'maskedPhone' => PhoneNumbers::format($this->phone),
         ]);
     }
 

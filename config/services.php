@@ -40,6 +40,10 @@ return [
         'demo_phone' => env('SMS_DEMO_PHONE', '79990000001'),
         'demo_code' => env('SMS_DEMO_CODE', '1111'),
         'fixed_code' => filter_var(env('SMS_FIXED_CODE', true), FILTER_VALIDATE_BOOLEAN),
+        // Comma separated ISO codes (RU,KZ,FI). Empty allows every country.
+        'allowed_countries' => env('SMS_ALLOWED_COUNTRIES', ''),
+        // Codes the whole service may send per day before sign-in stops (the admin gets mail at 80%).
+        'daily_limit' => (int) env('SMS_DAILY_LIMIT', 300),
     ],
 
     'admin' => [

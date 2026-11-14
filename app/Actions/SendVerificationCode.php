@@ -6,6 +6,7 @@ use App\Contracts\VerificationCodeSenderInterface;
 use App\Enums\VerificationChannel;
 use App\Exceptions\SmsDeliveryException;
 use App\Models\VerificationCode;
+use App\Services\VerificationSendLimiter;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Random\RandomException;
@@ -16,15 +17,22 @@ readonly class SendVerificationCode
 
     public function __construct(
         private VerificationCodeSenderInterface $codeSender,
+        private VerificationSendLimiter $limiter,
     ) {}
 
     /**
      * @throws RandomException
      * @throws ValidationException
      */
-    public function execute(string $phone): VerificationCode
+    public function execute(string $phone, ?string $ip = null): VerificationCode
     {
         $this->ensureNotRateLimited($phone);
+
+        $paidDelivery = ! $this->shouldSkipSms($phone);
+
+        if ($paidDelivery) {
+            $this->limiter->ensureCanSend($phone, $ip);
+        }
 
         VerificationCode::forPhone($phone)->active()->delete();
 
@@ -36,7 +44,7 @@ readonly class SendVerificationCode
             'expires_at' => now()->addMinutes(VerificationCode::EXPIRATION_MINUTES),
         ]);
 
-        if (! $this->shouldSkipSms($phone)) {
+        if ($paidDelivery) {
             try {
                 $this->codeSender->sendVerificationCode($phone, $code);
             } catch (SmsDeliveryException) {
@@ -46,6 +54,8 @@ readonly class SendVerificationCode
                     'phone' => [VerificationChannel::current()->trans('sms_send_failed')],
                 ]);
             }
+
+            $this->limiter->recordSent($phone, $ip);
         }
 
         RateLimiter::hit($this->rateLimiterKey($phone), VerificationCode::RESEND_COOLDOWN_SECONDS);
