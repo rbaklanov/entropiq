@@ -19,32 +19,32 @@
 <body class="min-h-screen bg-paper font-sans text-gray-900 antialiased">
 
     <header class="fixed top-0 z-50 w-full border-b border-gray-200 bg-paper">
-        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <a href="/" aria-label="Entropiq"><x-wordmark class="text-2xl" /></a>
+        <div class="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6">
+            <a href="/" aria-label="Entropiq" class="shrink-0"><x-wordmark class="text-xl sm:text-2xl" /></a>
             <nav aria-label="{{ __('landing.features_title') }}" class="hidden items-center gap-7 sm:flex">
                 <a href="{{ route('landing') }}#features" class="text-[15px] text-gray-500 transition-colors hover:text-gray-900">{{ __('landing.features_title') }}</a>
                 <a href="{{ route('landing') }}#pricing" class="text-[15px] text-gray-500 transition-colors hover:text-gray-900">{{ __('landing.nav_pricing') }}</a>
                 <a href="{{ route('faq') }}" class="text-[15px] text-gray-500 transition-colors hover:text-gray-900">{{ __('landing.footer_faq') }}</a>
             </nav>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3">
                 <div class="flex items-center gap-0.5 rounded-md border border-gray-200 p-0.5">
                     <a href="{{ route('locale.switch', 'ru') }}" @class([
-                        'rounded px-2.5 py-1 text-xs font-medium transition-colors',
+                        'rounded px-2 py-1 text-xs font-medium transition-colors sm:px-2.5',
                         'bg-gray-900 text-white' => app()->getLocale() === 'ru',
                         'text-gray-500 hover:text-gray-900' => app()->getLocale() !== 'ru',
                     ])>RU</a>
                     <a href="{{ route('locale.switch', 'en') }}" @class([
-                        'rounded px-2.5 py-1 text-xs font-medium transition-colors',
+                        'rounded px-2 py-1 text-xs font-medium transition-colors sm:px-2.5',
                         'bg-gray-900 text-white' => app()->getLocale() === 'en',
                         'text-gray-500 hover:text-gray-900' => app()->getLocale() !== 'en',
                     ])>EN</a>
                 </div>
                 @auth
-                    <a href="{{ route('dashboard') }}" class="inline-flex min-h-11 items-center rounded-md bg-primary-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-primary-700">
+                    <a href="{{ route('dashboard') }}" class="inline-flex min-h-11 items-center whitespace-nowrap rounded-md bg-primary-600 px-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-primary-700 sm:px-5 sm:text-sm">
                         {{ __('common.nav_dashboard') }}
                     </a>
                 @else
-                    <a href="/login" class="inline-flex min-h-11 items-center rounded-md bg-primary-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-primary-700">
+                    <a href="/login" class="inline-flex min-h-11 items-center whitespace-nowrap rounded-md bg-primary-600 px-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-primary-700 sm:px-5 sm:text-sm">
                         {{ __('auth.send_code') }}
                     </a>
                 @endauth

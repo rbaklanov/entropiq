@@ -4,7 +4,7 @@ use App\Livewire\Auth\LoginPage;
 use App\Livewire\Auth\VerifyPage;
 use App\Models\Goal;
 use App\Models\User;
-use App\Support\PhoneFormatter;
+use App\Support\PhoneNumbers;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -38,7 +38,7 @@ describe('validation messages follow the locale', function () {
             ->set('phone', '7900')
             ->set('consent', true)
             ->call('sendCode')
-            ->assertSee('Введите номер телефона полностью.');
+            ->assertSee('Проверьте номер: нужен мобильный номер выбранной страны.');
     });
 
     it('keeps English messages for the English locale', function () {
@@ -54,12 +54,12 @@ describe('validation messages follow the locale', function () {
 
 describe('phone mask', function () {
     it('formats a canonical phone', function () {
-        expect(PhoneFormatter::mask('79001234567'))->toBe('+7 (900) 123-45-67');
+        expect(PhoneNumbers::format('79001234567'))->toBe('+7 (900) 123-45-67');
     });
 
     it('leaves unexpected values untouched', function () {
-        expect(PhoneFormatter::mask('12345'))->toBe('12345')
-            ->and(PhoneFormatter::mask(''))->toBe('');
+        expect(PhoneNumbers::format('12345'))->toBe('12345')
+            ->and(PhoneNumbers::format(''))->toBe('');
     });
 
     it('shows the masked phone on the verify page', function () {

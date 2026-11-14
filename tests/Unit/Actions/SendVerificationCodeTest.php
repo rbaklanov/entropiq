@@ -4,6 +4,7 @@ use App\Actions\SendVerificationCode;
 use App\Contracts\SmsServiceInterface;
 use App\Exceptions\SmsDeliveryException;
 use App\Models\VerificationCode;
+use App\Services\VerificationSendLimiter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
@@ -20,7 +21,7 @@ it('stores a fixed code 1111 for any phone and does not send SMS by default', fu
     $sms = Mockery::mock(SmsServiceInterface::class);
     $sms->shouldNotReceive('sendVerificationCode');
 
-    $verificationCode = (new SendVerificationCode($sms))->execute('79610893196');
+    $verificationCode = (new SendVerificationCode($sms, app(VerificationSendLimiter::class)))->execute('79610893196');
 
     expect($verificationCode)->toBeInstanceOf(VerificationCode::class)
         ->and($verificationCode->phone)->toBe('79610893196')
@@ -40,7 +41,7 @@ it('sends a verification code through the SMS contract when fixed code is disabl
             return true;
         });
 
-    $verificationCode = (new SendVerificationCode($sms))->execute('79001234567');
+    $verificationCode = (new SendVerificationCode($sms, app(VerificationSendLimiter::class)))->execute('79001234567');
 
     expect($verificationCode)->toBeInstanceOf(VerificationCode::class)
         ->and($verificationCode->phone)->toBe('79001234567');
@@ -54,7 +55,7 @@ it('hides provider errors from the user and does not leak the OTP when SMS is en
         ->once()
         ->andThrow(new SmsDeliveryException);
 
-    expect(fn () => (new SendVerificationCode($sms))->execute('79001234567'))
+    expect(fn () => (new SendVerificationCode($sms, app(VerificationSendLimiter::class)))->execute('79001234567'))
         ->toThrow(function (ValidationException $exception) {
             $messages = implode(' ', $exception->errors()['phone'] ?? []);
 
@@ -77,7 +78,7 @@ it('stores a fixed code for the demo phone and does not send SMS even if fixed c
     $sms = Mockery::mock(SmsServiceInterface::class);
     $sms->shouldNotReceive('sendVerificationCode');
 
-    $verificationCode = (new SendVerificationCode($sms))->execute('79990000000');
+    $verificationCode = (new SendVerificationCode($sms, app(VerificationSendLimiter::class)))->execute('79990000000');
 
     expect($verificationCode->phone)->toBe('79990000000')
         ->and($verificationCode->code)->toBe('1111');

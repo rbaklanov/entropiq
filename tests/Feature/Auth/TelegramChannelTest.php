@@ -7,7 +7,8 @@ use App\Enums\VerificationDeliveryStatus;
 use App\Exceptions\SmsDeliveryException;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\Auth\VerifyPage;
-use App\Support\PhoneFormatter;
+use App\Services\VerificationSendLimiter;
+use App\Support\PhoneNumbers;
 use App\Support\Seller;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
@@ -40,7 +41,7 @@ describe('sign-in with codes in Telegram', function () {
         Livewire::test(VerifyPage::class)
             ->assertSee(__('auth.verify_title_telegram'))
             ->assertSee(__('auth.sms_code_telegram'))
-            ->assertSeeHtml('<span class="block whitespace-nowrap">'.PhoneFormatter::mask('79001234567').'</span>')
+            ->assertSeeHtml('<span class="block whitespace-nowrap">'.PhoneNumbers::format('79001234567').'</span>')
             ->assertDontSee(__('auth.verify_title'));
     });
 
@@ -67,7 +68,7 @@ describe('sign-in with codes in Telegram', function () {
         $sender = Mockery::mock(VerificationCodeSenderInterface::class);
         $sender->shouldReceive('sendVerificationCode')->once()->andThrow(new SmsDeliveryException);
 
-        expect(fn () => (new SendVerificationCode($sender))->execute('79001234567'))
+        expect(fn () => (new SendVerificationCode($sender, app(VerificationSendLimiter::class)))->execute('79001234567'))
             ->toThrow(function (ValidationException $exception) {
                 expect($exception->errors()['phone'])->toBe([__('auth.sms_send_failed_telegram')]);
             });
@@ -86,7 +87,8 @@ describe('sign-in with codes in Telegram', function () {
 
         foreach (range(1, 50) as $attempt) {
             RateLimiter::clear('sms:79001234567');
-            (new SendVerificationCode($sender))->execute('79001234567');
+            RateLimiter::clear('sms-daily:79001234567');
+            (new SendVerificationCode($sender, app(VerificationSendLimiter::class)))->execute('79001234567');
         }
 
         expect($codes)->each->toMatch('/^[1-9]\d{3}$/');

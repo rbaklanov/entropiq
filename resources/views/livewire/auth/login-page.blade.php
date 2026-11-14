@@ -10,23 +10,49 @@
 
         <form wire:submit="sendCode" class="mt-8">
             <div x-data="{
+                countries: @js(collect($countries)->keyBy('code')->map(fn ($c) => ['dial' => $c['dial'], 'flag' => $c['flag'], 'example' => $c['example']])),
+                country: $wire.entangle('country'),
                 raw: '',
+                get isRussia() {
+                    return this.country === '{{ \App\Support\PhoneNumbers::DEFAULT_REGION }}' && !this.raw.startsWith('+');
+                },
+                get selected() {
+                    return this.countries[this.country] ?? { dial: '', flag: '', example: '' };
+                },
                 get formatted() {
                     let d = this.raw;
-                    if (!d) return '';
+                    if (!this.isRussia || !d) return d;
                     let result = '(' + d.substring(0, 3);
                     if (d.length > 3) result += ') ' + d.substring(3, 6);
                     if (d.length > 6) result += '-' + d.substring(6, 8);
                     if (d.length > 8) result += '-' + d.substring(8, 10);
                     return result;
                 },
+                get digitCount() {
+                    return this.raw.replace(/\D/g, '').length;
+                },
                 get isComplete() {
-                    return this.raw.length === 10;
+                    return this.isRussia ? this.digitCount === 10 : this.digitCount >= 6;
                 },
                 onInput(e) {
-                    let digits = e.target.value.replace(/\D/g, '');
-                    this.raw = digits.substring(0, 10);
-                    $wire.set('phone', this.raw.length === 10 ? '7' + this.raw : '');
+                    let value = e.target.value;
+                    let plus = value.trim().startsWith('+');
+                    let digits = value.replace(/\D/g, '');
+                    if (plus) {
+                        this.raw = '+' + digits.substring(0, 15);
+                    } else if (this.isRussia) {
+                        this.raw = digits.substring(0, 10);
+                    } else {
+                        this.raw = value.replace(/[^\d\s\-()]/g, '').substring(0, 24);
+                    }
+                    e.target.value = this.formatted;
+                    $wire.phone = this.raw;
+                },
+                onCountryChange() {
+                    this.raw = '';
+                    this.$refs.phone.value = '';
+                    $wire.phone = '';
+                    this.$refs.phone.focus();
                 }
             }" class="w-full">
                 <label for="phone" class="mb-1 block text-sm font-medium text-gray-700">
@@ -35,24 +61,44 @@
 
                 <div @class([
                     'flex items-center overflow-hidden rounded-lg border transition',
-                    'border-gray-300 focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500' => !$errors->has('phone'),
-                    'border-danger-500 focus-within:border-danger-500 focus-within:ring-1 focus-within:ring-danger-500' => $errors->has('phone'),
+                    'border-gray-300 focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500' => !$errors->has('phone') && !$errors->has('country'),
+                    'border-danger-500 focus-within:border-danger-500 focus-within:ring-1 focus-within:ring-danger-500' => $errors->has('phone') || $errors->has('country'),
                 ])>
-                    <span class="flex h-12 items-center bg-gray-100 px-3 text-sm font-medium text-gray-500">+7</span>
+                    <div class="relative flex h-12 shrink-0 items-center gap-1 bg-gray-100 pl-3 pr-2 text-sm font-medium text-gray-700 focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary-600">
+                        <span aria-hidden="true" x-text="selected.flag + ' +' + selected.dial">🇷🇺 +7</span>
+                        <svg class="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                        <select
+                            id="country"
+                            x-model="country"
+                            x-on:change="onCountryChange()"
+                            aria-label="{{ __('auth.country_label') }}"
+                            class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                        >
+                            @foreach($countries as $item)
+                                <option value="{{ $item['code'] }}">{{ $item['flag'] }} {{ $item['name'] }} +{{ $item['dial'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
                     <input
                         type="tel"
                         id="phone"
-                        :value="formatted"
+                        x-ref="phone"
                         @input="onInput($event)"
+                        :placeholder="isRussia ? '(900) 123-45-67' : selected.example"
                         placeholder="(900) 123-45-67"
-                        autocomplete="tel"
-                        inputmode="numeric"
+                        autocomplete="tel-national"
+                        inputmode="tel"
                         autofocus
-                        class="h-12 w-full border-0 bg-white px-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0"
+                        class="h-12 w-full min-w-0 border-0 bg-white px-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0"
                     />
                 </div>
 
+                @error('country')
+                    <p class="mt-1 text-sm text-danger-600">{{ $message }}</p>
+                @enderror
                 @error('phone')
                     <p class="mt-1 text-sm text-danger-600">{{ $message }}</p>
                 @enderror
