@@ -5,7 +5,7 @@
 <x-layouts.guest :title="__('offer.title')">
 
     <section class="py-20 sm:py-24">
-        <article class="prose prose-gray mx-auto max-w-3xl px-4 sm:px-6">
+        <article class="prose prose-gray mx-auto max-w-3xl break-words [&_h1]:hyphens-auto px-4 sm:px-6">
             <h1>{{ __('offer.title') }}</h1>
             <p class="text-sm text-gray-500">{{ __('offer.last_updated', ['date' => '02.11.2026']) }}</p>
 
