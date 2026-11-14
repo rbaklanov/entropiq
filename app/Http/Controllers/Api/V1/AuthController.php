@@ -25,7 +25,7 @@ class AuthController extends Controller
     {
         $phone = $request->validated('phone');
 
-        $action->execute($phone);
+        $action->execute($phone, $request->ip());
 
         return response()->json([
             'message' => VerificationChannel::current()->trans('code_sent', ['phone' => $phone]),

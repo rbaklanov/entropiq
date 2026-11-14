@@ -42,4 +42,9 @@ return [
     'sms_send_failed_telegram' => 'Could not send the code to Telegram. Please try again later.',
     'telegram_undelivered' => 'The code was not delivered: no Telegram account is registered to this number. Check the number or write to :email.',
     'login_hint_telegram' => 'The code will arrive in Telegram for the account with this number.',
+    'country_label' => 'Country',
+    'phone_invalid' => 'Check the number: it must be a mobile number of the selected country.',
+    'country_invalid' => 'Choose a country from the list.',
+    'too_many_codes_phone' => 'Too many codes have been sent to this number. Try again tomorrow.',
+    'sms_budget_exhausted' => 'We cannot send a code right now. Try again later or write to us at :email.',
 ];
