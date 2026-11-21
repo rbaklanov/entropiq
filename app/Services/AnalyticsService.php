@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Contracts\AnalyticsServiceInterface;
 use App\Contracts\InflationServiceInterface;
-use App\Enums\TransactionType;
 use App\Models\Category;
 use App\Models\Transaction;
 use Illuminate\Support\Carbon;
@@ -20,7 +19,7 @@ readonly class AnalyticsService implements AnalyticsServiceInterface
     public function getExpensesByCategory(int $userId, Carbon $from, Carbon $to): array
     {
         $rows = Transaction::where('user_id', $userId)
-            ->expense()
+            ->consumption()
             ->forPeriod($from, $to)
             ->selectRaw('category_id, SUM(amount) as total, COUNT(*) as count')
             ->groupBy('category_id')
@@ -61,11 +60,14 @@ readonly class AnalyticsService implements AnalyticsServiceInterface
 
         $dateFormat = $granularity === 'month' ? 'Y-m-01' : 'Y-m-d';
 
+        $savingsCategoryIds = Category::savings()->pluck('id')->all();
+
         $rows = Transaction::where('user_id', $userId)
             ->forPeriod($from, $to)
             ->selectRaw("{$truncExpression} as period_date")
             ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income")
             ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense")
+            ->selectRaw($this->savingsSumExpression($savingsCategoryIds), $savingsCategoryIds)
             ->groupByRaw($truncExpression)
             ->orderByRaw("{$truncExpression}")
             ->get();
@@ -76,7 +78,8 @@ readonly class AnalyticsService implements AnalyticsServiceInterface
         return $rows->map(function ($row) use (&$cumulativeBalance, $latestDate, $dateFormat) {
             $income = (int) $row->getAttribute('income');
             $expense = (int) $row->getAttribute('expense');
-            $balance = $income - $expense;
+            $savings = (int) $row->getAttribute('savings');
+            $balance = $income - $expense + $savings;
             $cumulativeBalance += $balance;
 
             $periodDate = Carbon::parse($row->getAttribute('period_date'));
@@ -91,6 +94,7 @@ readonly class AnalyticsService implements AnalyticsServiceInterface
                 'date' => $periodDate->format($dateFormat),
                 'income' => $income,
                 'expense' => $expense,
+                'savings' => $savings,
                 'balance' => $balance,
                 'cumulative_balance' => $cumulativeBalance,
                 'real_cumulative_balance' => $realCumulativeBalance,
@@ -102,7 +106,7 @@ readonly class AnalyticsService implements AnalyticsServiceInterface
     public function getPersonalInflationBreakdown(int $userId, Carbon $from, Carbon $to): array
     {
         $expenses = Transaction::where('user_id', $userId)
-            ->where('type', TransactionType::Expense)
+            ->consumption()
             ->forPeriod($from, $to)
             ->selectRaw('category_id, SUM(amount) as total')
             ->groupBy('category_id')
@@ -138,8 +142,8 @@ readonly class AnalyticsService implements AnalyticsServiceInterface
                 'category_name' => $category->name,
                 'category_icon' => $category->icon,
                 'share' => round($share, 4),
-                'category_cpi' => round($categoryCpi, 4),
-                'contribution' => round($share * $categoryCpi, 4),
+                'category_cpi' => $categoryCpi,
+                'contribution' => $share * $categoryCpi,
             ];
         })->all();
 
@@ -206,12 +210,28 @@ readonly class AnalyticsService implements AnalyticsServiceInterface
     }
 
     /**
+     * Transfers to savings stay in the balance: the money is kept, and inflation erodes it.
+     *
+     * @param  array<int, int>  $savingsCategoryIds
+     */
+    private function savingsSumExpression(array $savingsCategoryIds): string
+    {
+        if ($savingsCategoryIds === []) {
+            return '0 as savings';
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($savingsCategoryIds), '?'));
+
+        return "SUM(CASE WHEN type = 'expense' AND category_id IN ({$placeholders}) THEN amount ELSE 0 END) as savings";
+    }
+
+    /**
      * @return Collection<int, int>
      */
     private function getGroupedExpenses(int $userId, Carbon $from, Carbon $to): Collection
     {
         return Transaction::where('user_id', $userId)
-            ->expense()
+            ->consumption()
             ->forPeriod($from, $to)
             ->selectRaw('category_id, SUM(amount) as total')
             ->groupBy('category_id')

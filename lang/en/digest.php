@@ -7,6 +7,7 @@ return [
     'intro' => 'Here is your week from :from to :to.',
     'income' => 'Income',
     'expense' => 'Expense',
+    'savings' => 'To savings',
     'balance' => 'Balance',
     'transactions_count' => 'Total transactions: :count.',
     'top_categories' => 'Top expenses',

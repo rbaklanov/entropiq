@@ -44,6 +44,9 @@
         <tr>
             <td><span class="label">{{ __('export.income') }}</span><span class="value income">{{ number_format($income / 100, 2, ',', ' ') }} {{ $currency }}</span></td>
             <td><span class="label">{{ __('export.expense') }}</span><span class="value">{{ number_format($expense / 100, 2, ',', ' ') }} {{ $currency }}</span></td>
+            @if($savings > 0)
+                <td><span class="label">{{ __('export.savings') }}</span><span class="value">{{ number_format($savings / 100, 2, ',', ' ') }} {{ $currency }}</span></td>
+            @endif
             <td><span class="label">{{ __('export.balance') }}</span><span class="value">{{ $balance < 0 ? '−' : '' }}{{ number_format(abs($balance) / 100, 2, ',', ' ') }} {{ $currency }}</span></td>
         </tr>
     </table>

@@ -331,7 +331,7 @@ describe('getPersonalInflationBreakdown', function () {
 
         expect($result['breakdown'])->toHaveCount(1);
         expect($result['breakdown'][0]['share'])->toBe(1.0);
-        expect($result['breakdown'][0]['category_cpi'])->toBe(round($result['official_rate'], 4));
+        expect($result['breakdown'][0]['category_cpi'])->toBe($result['official_rate']);
     });
 });
 

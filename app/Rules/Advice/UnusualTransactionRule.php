@@ -4,7 +4,6 @@ namespace App\Rules\Advice;
 
 use App\Contracts\AdviceRuleInterface;
 use App\Dto\AdvicePayload;
-use App\Enums\TransactionType;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
@@ -26,7 +25,7 @@ class UnusualTransactionRule implements AdviceRuleInterface
         $statsStart = $now->copy()->subMonths(self::LOOKBACK_MONTHS)->startOfMonth();
 
         $recentTransactions = Transaction::where('user_id', $user->id)
-            ->where('type', TransactionType::Expense)
+            ->consumption()
             ->where('date', '>=', $weekAgo)
             ->orderByDesc('amount')
             ->limit(20)
@@ -37,7 +36,7 @@ class UnusualTransactionRule implements AdviceRuleInterface
         }
 
         $historicalStats = Transaction::where('user_id', $user->id)
-            ->where('type', TransactionType::Expense)
+            ->consumption()
             ->where('date', '<', $weekAgo)
             ->where('date', '>=', $statsStart)
             ->selectRaw('category_id, AVG(amount) as avg_amount, STDDEV(amount) as stddev_amount, COUNT(*) as cnt')

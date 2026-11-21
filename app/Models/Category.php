@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property array<string, string> $name
  * @property TransactionType $type
+ * @property bool $is_savings
  */
 class Category extends Model
 {
@@ -25,6 +26,7 @@ class Category extends Model
         'icon',
         'color',
         'is_system',
+        'is_savings',
         'user_id',
         'sort_order',
     ];
@@ -36,6 +38,7 @@ class Category extends Model
             'name' => 'json',
             'type' => TransactionType::class,
             'is_system' => 'boolean',
+            'is_savings' => 'boolean',
         ];
     }
 
@@ -62,6 +65,17 @@ class Category extends Model
     public function scopeSystem(Builder $query): void
     {
         $query->where('is_system', true);
+    }
+
+    /**
+     * Money moved to savings is kept, not spent: such categories stay out of
+     * personal inflation and do not reduce the balance that inflation erodes.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeSavings(Builder $query): void
+    {
+        $query->where('is_savings', true);
     }
 
     /** @param Builder<self> $query */

@@ -18,6 +18,7 @@ class CategoryFactory extends Factory
             'icon' => fake()->randomElement(['cart', 'home', 'car', 'food', 'health', 'gift']),
             'color' => fake()->hexColor(),
             'is_system' => false,
+            'is_savings' => false,
             'user_id' => null,
             'sort_order' => fake()->numberBetween(0, 100),
         ];
@@ -35,6 +36,14 @@ class CategoryFactory extends Factory
     {
         return $this->state(fn () => [
             'type' => TransactionType::Income,
+        ]);
+    }
+
+    public function savings(): static
+    {
+        return $this->state(fn () => [
+            'type' => TransactionType::Expense,
+            'is_savings' => true,
         ]);
     }
 

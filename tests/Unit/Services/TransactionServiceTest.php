@@ -129,7 +129,7 @@ describe('getSummary', function () {
             Carbon::parse('2026-02-28'),
         );
 
-        expect($summary)->toBe(['income' => 0, 'expense' => 0, 'balance' => 0]);
+        expect($summary)->toBe(['income' => 0, 'expense' => 0, 'savings' => 0, 'balance' => 0]);
     });
 
     it('excludes transactions outside period', function () {

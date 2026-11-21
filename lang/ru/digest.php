@@ -7,6 +7,7 @@ return [
     'intro' => 'Вот как прошла ваша неделя с :from по :to.',
     'income' => 'Доходы',
     'expense' => 'Расходы',
+    'savings' => 'В накопления',
     'balance' => 'Баланс',
     'transactions_count' => 'Всего операций: :count.',
     'top_categories' => 'Топ расходов',

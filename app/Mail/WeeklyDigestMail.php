@@ -2,6 +2,8 @@
 
 namespace App\Mail;
 
+use App\Enums\TransactionType;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -39,7 +41,7 @@ class WeeklyDigestMail extends Mailable
         );
     }
 
-    /** @return array{total_income: int, total_expense: int, balance: int, transactions_count: int, top_categories: array<int, array{name: string, total: int}>} */
+    /** @return array{total_income: int, total_expense: int, total_savings: int, balance: int, transactions_count: int, top_categories: array<int, array{name: string, total: int}>} */
     private function buildDigest(): array
     {
         $transactions = $this->user->transactions()
@@ -47,11 +49,15 @@ class WeeklyDigestMail extends Mailable
             ->forPeriod($this->periodFrom, $this->periodTo)
             ->get();
 
-        $totalIncome = $transactions->where('type', \App\Enums\TransactionType::Income)->sum('amount');
-        $totalExpense = $transactions->where('type', \App\Enums\TransactionType::Expense)->sum('amount');
+        $savingsTransfers = $transactions->filter(fn (Transaction $transaction) => $transaction->isSavingsTransfer());
+        $spending = $transactions
+            ->where('type', TransactionType::Expense)
+            ->reject(fn (Transaction $transaction) => $transaction->isSavingsTransfer());
 
-        $topCategories = $transactions
-            ->where('type', \App\Enums\TransactionType::Expense)
+        $totalIncome = $transactions->where('type', TransactionType::Income)->sum('amount');
+        $totalExpense = $spending->sum('amount');
+
+        $topCategories = $spending
             ->groupBy('category_id')
             ->map(fn ($group) => [
                 'name' => $group->first()->category->localizedName(),
@@ -65,6 +71,7 @@ class WeeklyDigestMail extends Mailable
         return [
             'total_income' => (int) $totalIncome,
             'total_expense' => (int) $totalExpense,
+            'total_savings' => (int) $savingsTransfers->sum('amount'),
             'balance' => (int) ($totalIncome - $totalExpense),
             'transactions_count' => $transactions->count(),
             'top_categories' => $topCategories,

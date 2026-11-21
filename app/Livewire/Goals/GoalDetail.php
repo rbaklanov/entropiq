@@ -106,9 +106,7 @@ class GoalDetail extends Component
         $transactionId = null;
 
         if ($this->createTransaction) {
-            $savingsCategory = Category::where('name->ru', 'Накопления')
-                ->where('type', TransactionType::Expense)
-                ->first();
+            $savingsCategory = Category::system()->savings()->first();
 
             $transaction = Transaction::create([
                 'user_id' => auth()->id(),

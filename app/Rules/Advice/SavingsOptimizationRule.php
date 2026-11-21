@@ -38,7 +38,7 @@ class SavingsOptimizationRule implements AdviceRuleInterface
         $to = $now->copy()->endOfMonth();
 
         $expensesByCategory = Transaction::where('user_id', $user->id)
-            ->where('type', TransactionType::Expense)
+            ->consumption()
             ->whereBetween('date', [$from, $to])
             ->selectRaw('category_id, SUM(amount) as total')
             ->groupBy('category_id')
