@@ -23,11 +23,13 @@ interface AnalyticsServiceInterface
 
     /**
      * Balance dynamics by day or month (nominal + real value adjusted for inflation).
+     * Expenses include transfers to savings, the balance does not subtract them.
      *
      * @return array<int, array{
      *     date: string,
      *     income: int,
      *     expense: int,
+     *     savings: int,
      *     balance: int,
      *     cumulative_balance: int,
      *     real_cumulative_balance: int,

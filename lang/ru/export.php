@@ -9,6 +9,7 @@ return [
     'comment' => 'Комментарий',
     'income' => 'Доход',
     'expense' => 'Расход',
+    'savings' => 'В накопления',
     'balance' => 'Баланс',
     'pdf_title' => 'Операции Entropiq',
     'period' => 'Период',

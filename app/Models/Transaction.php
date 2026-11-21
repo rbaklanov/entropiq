@@ -65,6 +65,34 @@ class Transaction extends Model
         $query->where('type', TransactionType::Expense);
     }
 
+    /**
+     * Expenses that buy goods and services, without transfers to savings.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeConsumption(Builder $query): void
+    {
+        $query->where('type', TransactionType::Expense)
+            ->whereDoesntHave('category', fn (Builder $category) => $category->where('is_savings', true));
+    }
+
+    /**
+     * Transfers to savings: the money is kept, not spent.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeSavingsTransfer(Builder $query): void
+    {
+        $query->where('type', TransactionType::Expense)
+            ->whereHas('category', fn (Builder $category) => $category->where('is_savings', true));
+    }
+
+    public function isSavingsTransfer(): bool
+    {
+        return $this->type === TransactionType::Expense
+            && $this->category?->is_savings === true;
+    }
+
     /** @param Builder<self> $query */
     public function scopeForPeriod(Builder $query, Carbon $from, Carbon $to): void
     {

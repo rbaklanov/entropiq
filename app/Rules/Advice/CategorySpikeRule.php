@@ -4,7 +4,6 @@ namespace App\Rules\Advice;
 
 use App\Contracts\AdviceRuleInterface;
 use App\Dto\AdvicePayload;
-use App\Enums\TransactionType;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Support\Money;
@@ -81,7 +80,7 @@ class CategorySpikeRule implements AdviceRuleInterface
     private function expensesByCategory(int $userId, Carbon $from, Carbon $to): array
     {
         return Transaction::where('user_id', $userId)
-            ->where('type', TransactionType::Expense)
+            ->consumption()
             ->whereBetween('date', [$from, $to])
             ->selectRaw('category_id, SUM(amount) as total')
             ->groupBy('category_id')

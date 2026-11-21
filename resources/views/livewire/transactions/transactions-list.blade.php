@@ -21,6 +21,12 @@
         <div class="rounded-xl bg-white p-4 shadow-sm">
             <p class="text-small text-gray-500">{{ __('transactions.summary_expense') }}</p>
             <x-money-display :amount="$summary['expense']" type="expense" size="md" />
+            @if($summary['savings'] > 0)
+                <p class="mt-1 text-caption text-gray-500">
+                    {{ __('transactions.summary_savings') }}
+                    <x-money-display :amount="$summary['savings']" size="sm" />
+                </p>
+            @endif
         </div>
         <div class="rounded-xl bg-white p-4 shadow-sm">
             <p class="text-small text-gray-500">{{ __('transactions.summary_balance') }}</p>

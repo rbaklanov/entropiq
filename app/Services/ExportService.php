@@ -64,7 +64,8 @@ class ExportService implements ExportServiceInterface
         $transactions = $this->fetchTransactions($user, $filters);
 
         $income = $transactions->where('type', TransactionType::Income)->sum('amount');
-        $expense = $transactions->where('type', TransactionType::Expense)->sum('amount');
+        $savings = $transactions->filter(fn (Transaction $transaction) => $transaction->isSavingsTransfer())->sum('amount');
+        $expense = $transactions->where('type', TransactionType::Expense)->sum('amount') - $savings;
 
         // DomPDF caches metrics of the bundled TTF fonts here; on production storage is a volume that predates the folder.
         File::ensureDirectoryExists(config('dompdf.options.font_cache', storage_path('fonts')));
@@ -73,6 +74,7 @@ class ExportService implements ExportServiceInterface
             'transactions' => $transactions,
             'income' => $income,
             'expense' => $expense,
+            'savings' => $savings,
             'balance' => $income - $expense,
             'currency' => $user->currency_code,
             'from' => $filters['from'] ?? null,

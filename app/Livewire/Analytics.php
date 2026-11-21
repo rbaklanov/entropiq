@@ -185,7 +185,7 @@ class Analytics extends Component
 
         $lastRow = ! empty($dynamics) ? end($dynamics) : null;
         $inflationLoss = $lastRow
-            ? abs($lastRow['cumulative_balance'] - $lastRow['real_cumulative_balance'])
+            ? max(0, $lastRow['cumulative_balance'] - $lastRow['real_cumulative_balance'])
             : 0;
 
         $dateFormat = $granularity === 'month' ? 'M y' : 'd M';

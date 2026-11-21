@@ -9,6 +9,7 @@ return [
     'comment' => 'Comment',
     'income' => 'Income',
     'expense' => 'Expense',
+    'savings' => 'To savings',
     'balance' => 'Balance',
     'pdf_title' => 'Entropiq transactions',
     'period' => 'Period',
