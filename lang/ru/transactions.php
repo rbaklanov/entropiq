@@ -39,6 +39,7 @@ return [
 
     'summary_income' => 'Доходы',
     'summary_expense' => 'Расходы',
+    'summary_savings' => 'Ещё отложено в накопления:',
     'summary_balance' => 'Баланс',
 
     'all_transactions' => 'Все операции',

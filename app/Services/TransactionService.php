@@ -45,19 +45,23 @@ class TransactionService
     }
 
     /**
-     * @return array{income: int, expense: int, balance: int}
+     * Expenses leave out transfers to savings, the balance keeps them.
+     *
+     * @return array{income: int, expense: int, savings: int, balance: int}
      */
     public function getSummary(int $userId, Carbon $from, Carbon $to): array
     {
         $query = Transaction::where('user_id', $userId)->forPeriod($from, $to);
 
-        $income = (clone $query)->income()->sum('amount');
-        $expense = (clone $query)->expense()->sum('amount');
+        $income = (int) (clone $query)->income()->sum('amount');
+        $expense = (int) (clone $query)->consumption()->sum('amount');
+        $savings = (int) (clone $query)->savingsTransfer()->sum('amount');
 
         return [
-            'income' => (int) $income,
-            'expense' => (int) $expense,
-            'balance' => (int) ($income - $expense),
+            'income' => $income,
+            'expense' => $expense,
+            'savings' => $savings,
+            'balance' => $income - $expense,
         ];
     }
 
@@ -68,7 +72,11 @@ class TransactionService
     {
         return Transaction::where('user_id', $userId)
             ->forPeriod($from, $to)
-            ->where('type', $type)
+            ->when(
+                $type === TransactionType::Expense,
+                fn (Builder $query) => $query->consumption(),
+                fn (Builder $query) => $query->where('type', $type),
+            )
             ->selectRaw('category_id, SUM(amount) as total, COUNT(*) as count')
             ->groupBy('category_id')
             ->orderByDesc('total')

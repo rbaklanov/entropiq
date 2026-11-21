@@ -39,6 +39,7 @@ return [
 
     'summary_income' => 'Income',
     'summary_expense' => 'Expenses',
+    'summary_savings' => 'Also put into savings:',
     'summary_balance' => 'Balance',
 
     'all_transactions' => 'All transactions',

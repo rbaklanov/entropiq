@@ -165,7 +165,7 @@ class InflationService implements InflationServiceInterface
     public function calculatePersonalInflation(int $userId, Carbon $from, Carbon $to): float
     {
         $expenses = Transaction::where('user_id', $userId)
-            ->where('type', TransactionType::Expense)
+            ->consumption()
             ->whereBetween('date', [$from, $to])
             ->selectRaw('category_id, SUM(amount) as total')
             ->groupBy('category_id')
@@ -221,7 +221,7 @@ class InflationService implements InflationServiceInterface
             ->sum('amount');
 
         $expense = Transaction::where('user_id', $userId)
-            ->where('type', TransactionType::Expense)
+            ->consumption()
             ->whereBetween('date', [$from, $to])
             ->sum('amount');
 
