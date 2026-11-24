@@ -269,9 +269,23 @@ describe('getMonthsLeft', function () {
 
         $months = $this->service->getMonthsLeft($goal);
 
-        expect($months)->toBeGreaterThanOrEqual(5);
-        expect($months)->toBeLessThanOrEqual(7);
+        expect($months)->toBe(6);
     });
+
+    it('counts payments up to the target date', function (string $now, string $targetDate, int $expected) {
+        $this->travelTo(Carbon::parse($now));
+        $goal = Goal::factory()->for($this->user)->create([
+            'target_date' => $targetDate,
+        ]);
+
+        expect($this->service->getMonthsLeft($goal))->toBe($expected);
+    })->with([
+        'exact months in the middle of the day' => ['2026-11-21 16:30:00', '2027-03-21', 4],
+        'incomplete last month' => ['2026-11-24 10:00:00', '2027-03-21', 4],
+        'one day over a month' => ['2026-11-21 10:00:00', '2026-12-22', 2],
+        'less than a month' => ['2026-11-21 10:00:00', '2026-12-01', 1],
+        'target is today' => ['2026-11-21 10:00:00', '2026-11-21', 1],
+    ]);
 });
 
 describe('estimateCurrentMonthlyPayment', function () {

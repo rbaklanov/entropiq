@@ -208,9 +208,17 @@ class GoalCalculationService
             return 12;
         }
 
-        $months = (int) Carbon::now()->diffInMonths($goal->target_date, false);
+        return $this->monthsUntil($goal->target_date);
+    }
 
-        return max(1, $months);
+    /**
+     * Number of monthly payments that fit before the date; a started month counts as a whole one.
+     */
+    public function monthsUntil(Carbon $targetDate): int
+    {
+        $months = Carbon::today()->diffInMonths($targetDate->copy()->startOfDay(), false);
+
+        return max(1, (int) ceil($months));
     }
 
     /**
