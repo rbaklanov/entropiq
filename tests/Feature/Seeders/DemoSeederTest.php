@@ -74,7 +74,7 @@ describe('DemoSeeder', function () {
             ->and(NotificationSetting::where('user_id', $user->id)->exists())->toBeTrue();
     });
 
-    it('spreads transactions over six months', function () {
+    it('spreads transactions over a year and a half', function () {
         $this->seed(CategorySeeder::class);
         $this->seed(DemoSeeder::class);
 
@@ -82,7 +82,7 @@ describe('DemoSeeder', function () {
             ->map(fn ($date) => $date->format('Y-m'))
             ->unique();
 
-        expect($months->count())->toBeGreaterThanOrEqual(6);
+        expect($months->count())->toBeGreaterThanOrEqual(18);
     });
 
     it('can be run again without duplicating the demo account', function () {
@@ -166,29 +166,32 @@ describe('DemoSeeder current month scenario', function () {
             ->and(demoUser()->transactions()->where('date', '>', now()->endOfDay())->count())->toBe(0);
     })->with($dates);
 
-    it('makes the current month overspend', function (string $date) {
+    it('does not overspend in a finished month except for the July trip', function () {
+        $this->travelTo(Carbon::parse('2026-11-24 12:00:00'));
+        $this->seed(DemoSeeder::class);
+
+        $savings = Category::savings()->pluck('id');
+
+        for ($monthsAgo = 1; $monthsAgo <= 18; $monthsAgo++) {
+            $month = now()->startOfMonth()->subMonths($monthsAgo);
+            $rows = demoUser()->transactions()->whereBetween('date', [$month, $month->copy()->endOfMonth()])->get();
+            $income = $rows->where('type', TransactionType::Income)->sum('amount');
+            $expense = $rows->where('type', TransactionType::Expense)->whereNotIn('category_id', $savings)->sum('amount');
+
+            expect($income > $expense)->toBe($month->month !== 7);
+        }
+    });
+
+    it('always triggers the spike, unusual transaction, goal and savings rules', function (string $date) {
         $this->travelTo(Carbon::parse($date));
         $this->seed(DemoSeeder::class);
 
-        $month = demoUser()->transactions()->where('date', '>=', now()->startOfMonth());
+        $payloads = collect(app(AiAdviceRuleEngine::class)->evaluate(demoUser()))->keyBy('ruleKey');
 
-        $income = (int) (clone $month)->where('type', TransactionType::Income)->sum('amount');
-        $expense = (int) (clone $month)->where('type', TransactionType::Expense)->sum('amount');
-
-        expect($income)->toBeGreaterThan(0)
-            ->and($expense)->toBeGreaterThan($income);
-    })->with($dates);
-
-    it('always triggers the spike, unusual transaction and overspending rules', function (string $date) {
-        $this->travelTo(Carbon::parse($date));
-
-        foreach (range(1, 5) as $attempt) {
-            $this->seed(DemoSeeder::class);
-
-            $rules = collect(app(AiAdviceRuleEngine::class)->evaluate(demoUser()))->pluck('ruleKey')->all();
-
-            expect($rules)->toContain('category_spike', 'unusual_transaction', 'overspending');
-        }
+        expect($payloads->keys()->all())->toContain('category_spike', 'unusual_transaction', 'goal_behind_schedule', 'savings_optimization')
+            ->and($payloads['category_spike']->basisData['category_name'])->toBe('Кафе и рестораны')
+            ->and($payloads['category_spike']->basisData['growth_percent'])->toBeGreaterThanOrEqual(35)
+            ->and($payloads['goal_behind_schedule']->basisData['goal_name'])->toBe('Отпуск в Турцию');
     })->with($dates);
 
     it('lets advice generation create advice for the demo account', function () {
@@ -198,10 +201,10 @@ describe('DemoSeeder current month scenario', function () {
         $rules = $advices->map(fn (AiAdvice $advice) => $advice->basis_data['rule'] ?? null)->all();
 
         expect($advices->count())->toBeGreaterThanOrEqual(3)
-            ->and($rules)->toContain('category_spike', 'unusual_transaction', 'overspending');
+            ->and($rules)->toContain('category_spike', 'unusual_transaction', 'savings_optimization');
     });
 
-    it('keeps the previous six months', function () {
+    it('keeps the previous eighteen months', function () {
         $this->seed(DemoSeeder::class);
 
         $months = demoUser()->transactions()
@@ -210,7 +213,7 @@ describe('DemoSeeder current month scenario', function () {
             ->map(fn ($date) => $date->format('Y-m'))
             ->unique();
 
-        expect($months->count())->toBe(6);
+        expect($months->count())->toBe(18);
     });
 });
 
@@ -222,14 +225,59 @@ describe('DemoSeeder advice texts', function () {
 
         $advices = app(AiAdviceServiceInterface::class)->generateForUser(demoUser());
 
-        $overspending = $advices->first(fn (AiAdvice $a) => ($a->basis_data['rule'] ?? null) === 'overspending');
+        $spike = $advices->first(fn (AiAdvice $a) => ($a->basis_data['rule'] ?? null) === 'category_spike');
 
-        expect($overspending)->not->toBeNull()
-            ->and($overspending->body)->toContain(App\Support\Money::amount($overspending->basis_data['expense']).' ₽')
-            ->and($overspending->body)->not->toContain((string) $overspending->basis_data['expense']);
+        expect($spike)->not->toBeNull()
+            ->and($spike->body)->toContain(App\Support\Money::amount($spike->basis_data['current_total']).' ₽')
+            ->and($spike->body)->not->toContain((string) $spike->basis_data['current_total']);
 
         foreach ($advices as $advice) {
             expect($advice->body)->not->toMatch('/\d{7,}\s*₽/');
         }
+    });
+});
+
+describe('DemoSeeder history', function () {
+    beforeEach(function () {
+        $this->travelTo(Carbon::parse('2026-11-24 12:00:00'));
+        $this->seed(CategorySeeder::class);
+        $this->seed(DemoSeeder::class);
+    });
+
+    it('gives the same transactions on every run', function () {
+        $snapshot = fn () => demoUser()->transactions()
+            ->orderBy('date')->orderBy('category_id')->orderBy('amount')->orderBy('comment')
+            ->get(['date', 'category_id', 'amount', 'comment'])
+            ->toArray();
+
+        $first = $snapshot();
+        $this->seed(DemoSeeder::class);
+
+        expect($snapshot())->toBe($first);
+    });
+
+    it('keeps goal balances equal to their contributions and savings transfers', function () {
+        $goals = demoUser()->goals()->with('contributions.transaction')->get();
+
+        foreach ($goals as $goal) {
+            expect((int) $goal->contributions->sum('amount'))->toBe($goal->current_amount)
+                ->and((int) $goal->contributions->sum(fn ($c) => $c->transaction->amount))->toBe($goal->current_amount)
+                ->and($goal->contributions->min('date')->gte($goal->started_at))->toBeTrue();
+        }
+
+        expect($goals->pluck('name')->all())->toContain('Отпуск в Турцию', 'Обучение в вузе');
+    });
+
+    it('stores past advice produced by the rules', function () {
+        $advices = demoUser()->aiAdvices()->orderBy('generated_at')->get();
+
+        expect($advices)->toHaveCount(3)
+            ->and($advices->pluck('basis_data.rule')->unique()->values()->all())->toBe(['category_spike'])
+            ->and($advices->pluck('basis_data.category_name')->all())->toBe(['Одежда', 'Развлечения', 'Здоровье'])
+            ->and($advices->max('generated_at')->isPast())->toBeTrue();
+    });
+
+    it('schedules recurring rules in the future only', function () {
+        expect(demoUser()->recurringRules->every(fn ($rule) => $rule->next_run_at->isFuture()))->toBeTrue();
     });
 });

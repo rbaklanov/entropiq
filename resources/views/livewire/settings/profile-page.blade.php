@@ -12,6 +12,12 @@
     </div>
 
     {{-- Flash messages --}}
+    @if(session('error'))
+        <div class="rounded-md border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-700" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
     @if(session('success'))
         <div class="rounded-md border border-success-200 bg-success-50 p-4 text-sm font-medium text-success-700" role="status">
             {{ session('success') }}
