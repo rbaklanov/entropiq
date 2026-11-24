@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'demo_locked' => 'This is a shared demo account. Its profile, payments and deletion are locked.',
+
     'no_name' => 'Set your name',
     'name' => 'Name',
     'name_placeholder' => 'What is your name?',

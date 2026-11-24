@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProfileController extends Controller
 {
@@ -18,6 +19,8 @@ class ProfileController extends Controller
 
     public function update(UpdateProfileRequest $request, ChangeUserEmail $changeUserEmail): UserResource
     {
+        $this->denyForDemo($request);
+
         $data = $request->validated();
 
         if (array_key_exists('email', $data)) {
@@ -32,6 +35,8 @@ class ProfileController extends Controller
 
     public function destroy(Request $request): JsonResponse
     {
+        $this->denyForDemo($request);
+
         $user = $request->user();
 
         $user->tokens()->delete();
@@ -46,5 +51,10 @@ class ProfileController extends Controller
         $user->delete();
 
         return response()->json(['message' => __('profile.account_deleted')]);
+    }
+
+    private function denyForDemo(Request $request): void
+    {
+        abort_if($request->user()->isDemo(), Response::HTTP_FORBIDDEN, __('settings.demo_locked'));
     }
 }

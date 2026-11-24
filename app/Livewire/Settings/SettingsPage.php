@@ -77,6 +77,13 @@ class SettingsPage extends Component
     {
         $user = auth()->user();
 
+        if ($user->isDemo()) {
+            session()->flash('error', __('settings.demo_locked'));
+            $this->redirectRoute('settings.index');
+
+            return;
+        }
+
         $user->tokens()->delete();
 
         $user->update([
