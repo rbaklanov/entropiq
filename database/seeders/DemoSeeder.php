@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Dto\AdvicePayload;
 use App\Enums\GoalStatus;
 use App\Enums\GoalType;
 use App\Enums\RecurringInterval;
@@ -17,6 +18,7 @@ use App\Models\RecurringRule;
 use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\AiAdviceRuleEngine;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +31,14 @@ class DemoSeeder extends Seeder
 
     private const DEMO_NAME = 'Алексей';
 
+    private const HISTORY_MONTHS = 18;
+
+    private const ADVICE_HISTORY_MONTHS = 3;
+
+    private const MONTHLY_PRICE_GROWTH = 0.005;
+
+    private const DINING_GROWTH = 1.35;
+
     public function run(): void
     {
         DB::transaction(function () {
@@ -36,14 +46,16 @@ class DemoSeeder extends Seeder
 
             $this->command->info("Demo user created: {$user->phone}");
 
+            $this->clear($user);
+
             $categories = $this->getCategories();
             $transactionCount = $this->seedTransactions($user, $categories);
 
-            $this->command->info("Created {$transactionCount} transactions over 6 months.");
+            $months = self::HISTORY_MONTHS;
+            $this->command->info("Created {$transactionCount} transactions over {$months} months.");
 
             $this->seedRecurringRules($user, $categories);
             $this->seedGoals($user);
-            $this->seedAiAdvice($user);
             $this->seedSubscription($user);
             $this->seedNotificationSettings($user);
 
@@ -74,13 +86,23 @@ class DemoSeeder extends Seeder
             ['phone' => $phone],
             [
                 'name' => self::DEMO_NAME,
+                'email' => null,
+                'email_verified_at' => null,
                 'locale' => 'ru',
                 'currency_code' => 'RUB',
                 'subscription_plan' => SubscriptionPlan::Yearly,
                 'phone_verified_at' => now(),
-                'onboarding_completed_at' => now()->subMonths(6),
+                'onboarding_completed_at' => now()->subMonths(self::HISTORY_MONTHS),
             ],
         );
+    }
+
+    private function clear(User $user): void
+    {
+        $user->goals()->delete();
+        $user->recurringRules()->delete();
+        $user->transactions()->delete();
+        $user->aiAdvices()->delete();
     }
 
     /**
@@ -105,85 +127,177 @@ class DemoSeeder extends Seeder
     }
 
     /**
+     * Amounts and dates depend only on the calendar month, so every run gives the same history.
+     *
      * @param  array{expense: array<string, Category>, income: array<string, Category>}  $categories
      */
     private function seedTransactions(User $user, array $categories): int
     {
-        $user->transactions()->delete();
+        $today = Carbon::today();
+        $currentMonth = $today->copy()->startOfMonth();
 
-        $count = 0;
-        $startDate = Carbon::now()->startOfMonth()->subMonths(6);
+        for ($monthsAgo = self::HISTORY_MONTHS; $monthsAgo >= 0; $monthsAgo--) {
+            $month = $currentMonth->copy()->subMonths($monthsAgo);
 
-        for ($month = 0; $month < 6; $month++) {
-            $monthStart = $startDate->copy()->addMonths($month);
-            $monthEnd = $monthStart->copy()->endOfMonth();
-            $monthNumber = $monthStart->month;
+            $this->seedMonthlyIncome($user, $categories['income'], $month, $today);
+            $this->seedMonthlyExpenses($user, $categories['expense'], $month, $today);
+            $this->seedPastEvent($user, $categories['expense'], $month, $monthsAgo);
 
-            $count += $this->seedMonthlyIncome($user, $categories['income'], $monthStart, $monthEnd);
-            $count += $this->seedMonthlyExpenses($user, $categories['expense'], $monthStart, $monthEnd, $monthNumber);
+            if ($monthsAgo >= 1 && $monthsAgo <= self::ADVICE_HISTORY_MONTHS) {
+                $this->seedPastAdvice($user, $month->copy()->endOfMonth(), $monthsAgo);
+            }
         }
 
-        return $count + $this->seedCurrentMonth($user, $categories);
+        $this->seedCurrentMonthScenario($user, $categories['expense'], $currentMonth);
+
+        return $user->transactions()->count();
     }
 
     /**
-     * @param  array{expense: array<string, Category>, income: array<string, Category>}  $categories
+     * @param  array<string, Category>  $incomeCategories
      */
-    private function seedCurrentMonth(User $user, array $categories): int
+    private function seedMonthlyIncome(User $user, array $incomeCategories, Carbon $month, Carbon $today): void
     {
-        $today = Carbon::today();
-        $monthStart = $today->copy()->startOfMonth();
-        $elapsedShare = $today->day / $today->daysInMonth;
+        $salary = $incomeCategories['Зарплата'] ?? null;
 
-        $count = $this->seedMonthlyExpenses($user, $categories['expense'], $monthStart, $today, $monthStart->month, $elapsedShare);
+        if (! $salary) {
+            return;
+        }
 
-        return $count + $this->seedCurrentMonthScenario($user, $categories, $monthStart);
+        $amount = $month->lt(Carbon::create(2026, 1, 1)) ? 89_000_00 : 97_500_00;
+
+        foreach ([5 => 'Зарплата', 20 => 'Аванс'] as $day => $comment) {
+            $date = $month->copy()->day($day);
+
+            if ($date->lte($today)) {
+                $this->createTransaction($user, $salary, TransactionType::Income, $amount, $date, $comment);
+            }
+        }
     }
 
     /**
-     * Adds a growth in one category, a one off purchase and an advance that is smaller than the
-     * month's expenses, so the spike, unusual transaction and overspending advice rules all fire.
+     * @param  array<string, Category>  $expenseCategories
+     */
+    private function seedMonthlyExpenses(User $user, array $expenseCategories, Carbon $month, Carbon $today): void
+    {
+        foreach ($this->getExpensePatterns() as $categoryName => $config) {
+            $category = $expenseCategories[$categoryName] ?? null;
+
+            if (! $category) {
+                continue;
+            }
+
+            for ($i = 0; $i < $config['times']; $i++) {
+                $key = "{$month->format('Y-m')}|{$categoryName}|{$i}";
+                $date = isset($config['day'])
+                    ? $month->copy()->day($config['day'])
+                    : $month->copy()->addDays($this->spreadDay($key, $i, $config['times'], $month->daysInMonth));
+
+                if ($date->gt($today)) {
+                    continue;
+                }
+
+                $amount = $this->priceIn($month, $config['amount'], $key, $config['variance'] ?? 8);
+                $comment = $config['comments'][$i % count($config['comments'])];
+
+                $this->createTransaction($user, $category, TransactionType::Expense, $amount, $date, $comment);
+            }
+        }
+
+        $travel = $expenseCategories['Путешествия'] ?? null;
+        $tripDate = $month->copy()->day(12);
+
+        if ($travel && $month->month === 7 && $tripDate->lte($today)) {
+            $this->createTransaction($user, $travel, TransactionType::Expense, $this->priceIn($month, 65_000_00, 'trip', 0), $tripDate, 'Отпуск в Сочи');
+        }
+    }
+
+    /**
+     * One larger purchase in each of the last full months, so past advice differs from month to month.
      *
-     * @param  array{expense: array<string, Category>, income: array<string, Category>}  $categories
+     * @param  array<string, Category>  $expenseCategories
      */
-    private function seedCurrentMonthScenario(User $user, array $categories, Carbon $monthStart): int
+    private function seedPastEvent(User $user, array $expenseCategories, Carbon $month, int $monthsAgo): void
     {
-        $dining = $categories['expense']['Кафе и рестораны'] ?? null;
-        $groceries = $categories['expense']['Продукты'] ?? null;
-        $salary = $categories['income']['Зарплата'] ?? null;
+        $events = [
+            1 => ['Здоровье', 4_800_00, 'Стоматолог'],
+            2 => ['Развлечения', 5_600_00, 'Билеты на концерт'],
+            3 => ['Одежда', 7_200_00, 'Куртка'],
+        ];
 
-        if (! $dining || ! $groceries || ! $salary) {
-            return 0;
+        [$categoryName, $amount, $comment] = $events[$monthsAgo] ?? [null, 0, null];
+        $category = $expenseCategories[$categoryName ?? ''] ?? null;
+
+        if ($category) {
+            $this->createTransaction($user, $category, TransactionType::Expense, $amount, $month->copy()->day(17), $comment);
+        }
+    }
+
+    /**
+     * The advice the rules would have given at the end of that month.
+     */
+    private function seedPastAdvice(User $user, Carbon $monthEnd, int $monthsAgo): void
+    {
+        /** @var list<AdvicePayload> $payloads */
+        $payloads = Carbon::withTestNow($monthEnd, fn () => app(AiAdviceRuleEngine::class)->evaluate($user));
+        $payload = $payloads[0] ?? null;
+
+        if (! $payload) {
+            return;
         }
 
+        AiAdvice::create([
+            'user_id' => $user->id,
+            'title' => $payload->title,
+            'body' => $payload->body,
+            'basis_data' => $payload->basisData,
+            'is_read' => true,
+            'rating' => $monthsAgo === 2 ? AiAdvice::RATING_UNHELPFUL : AiAdvice::RATING_HELPFUL,
+            'generated_at' => $monthEnd->copy()->setTime(9, 0),
+        ]);
+    }
+
+    /**
+     * Cafe spending above the usual level and one untypical taxi ride, so the spike and unusual
+     * transaction advice rules always fire.
+     *
+     * @param  array<string, Category>  $expenseCategories
+     */
+    private function seedCurrentMonthScenario(User $user, array $expenseCategories, Carbon $month): void
+    {
         $today = Carbon::today();
+        $dining = $expenseCategories['Кафе и рестораны'] ?? null;
+        $transport = $expenseCategories['Транспорт'] ?? null;
 
-        $this->createTransaction(
-            $user,
-            $dining,
-            TransactionType::Expense,
-            (int) ceil($this->previousMonthlyAverage($user, $dining, $monthStart) * 1.8),
-            $today,
-            'Корпоратив и ужин с командой',
-        );
+        if (! $dining || ! $transport) {
+            return;
+        }
 
-        $this->createTransaction(
-            $user,
-            $groceries,
-            TransactionType::Expense,
-            (int) ceil($this->unusualPurchaseThreshold($user, $groceries) * 1.5),
-            $today,
-            'Разовая закупка к празднику',
-        );
-
-        $monthExpenses = (int) $user->transactions()
-            ->where('type', TransactionType::Expense)
-            ->where('date', '>=', $monthStart)
+        $average = $this->previousMonthlyAverage($user, $dining, $month);
+        $spent = (int) $user->transactions()
+            ->where('category_id', $dining->id)
+            ->where('date', '>=', $month)
             ->sum('amount');
+        $extra = (int) ceil($average * self::DINING_GROWTH) - $spent;
 
-        $this->createTransaction($user, $salary, TransactionType::Income, (int) round($monthExpenses * 0.6), $monthStart, 'Аванс');
+        if ($extra > 0) {
+            $comments = ['Ужин с друзьями', 'День рождения в ресторане', 'Ужин с коллегами', 'Доставка еды'];
 
-        return 3;
+            foreach ($comments as $index => $comment) {
+                $date = $today->copy()->subDays($index * 2)->max($month);
+
+                $this->createTransaction($user, $dining, TransactionType::Expense, (int) ceil($extra / count($comments) / 1000) * 1000, $date, $comment);
+            }
+        }
+
+        $this->createTransaction(
+            $user,
+            $transport,
+            TransactionType::Expense,
+            (int) ceil($this->unusualPurchaseThreshold($user, $transport) * 1.2 / 1000) * 1000,
+            $today,
+            'Такси в аэропорт',
+        );
     }
 
     private function previousMonthlyAverage(User $user, Category $category, Carbon $monthStart): float
@@ -215,165 +329,45 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * @param  array<string, Category>  $incomeCategories
+     * Amounts are average prices of November 2026.
+     *
+     * @return array<string, array{amount: int, times: int, day?: int, variance?: int, comments: list<string|null>}>
      */
-    private function seedMonthlyIncome(User $user, array $incomeCategories, Carbon $monthStart, Carbon $monthEnd): int
-    {
-        $count = 0;
-        $salary = $incomeCategories['Зарплата'] ?? null;
-
-        if ($salary) {
-            $this->createTransaction($user, $salary, TransactionType::Income, $this->vary(95_000_00), $monthStart->copy()->day(10), 'Аванс');
-            $this->createTransaction($user, $salary, TransactionType::Income, $this->vary(95_000_00), $monthStart->copy()->day(25), 'Зарплата');
-            $count += 2;
-        }
-
-        $freelance = $incomeCategories['Фриланс'] ?? null;
-
-        if ($freelance && random_int(1, 100) <= 40) {
-            $this->createTransaction($user, $freelance, TransactionType::Income, $this->vary(25_000_00, 40), $this->randomDate($monthStart, $monthEnd), 'Проект');
-            $count++;
-        }
-
-        return $count;
-    }
-
-    /**
-     * @param  array<string, Category>  $expenseCategories
-     */
-    private function seedMonthlyExpenses(User $user, array $expenseCategories, Carbon $monthStart, Carbon $monthEnd, int $monthNumber, float $monthShare = 1.0): int
-    {
-        $isSummer = in_array($monthNumber, [6, 7, 8], true);
-
-        $patterns = $this->getExpensePatterns($isSummer);
-        $count = 0;
-
-        foreach ($patterns as $categoryName => $config) {
-            $category = $expenseCategories[$categoryName] ?? null;
-
-            if (! $category) {
-                continue;
-            }
-
-            $times = (int) round(random_int($config['min_times'], $config['max_times']) * $monthShare);
-
-            for ($i = 0; $i < $times; $i++) {
-                $amount = $this->vary($config['avg_amount'], $config['variance'] ?? 20);
-                $date = $this->randomDate($monthStart, $monthEnd);
-                $comment = $config['comments'][array_rand($config['comments'])] ?? null;
-
-                $this->createTransaction($user, $category, TransactionType::Expense, $amount, $date, $comment);
-                $count++;
-            }
-        }
-
-        return $count;
-    }
-
-    /**
-     * @return array<string, array{avg_amount: int, min_times: int, max_times: int, variance?: int, comments: array<int, string|null>}>
-     */
-    private function getExpensePatterns(bool $isSummer): array
+    private function getExpensePatterns(): array
     {
         return [
-            'Продукты' => [
-                'avg_amount' => 2_500_00,
-                'min_times' => 8,
-                'max_times' => 12,
-                'variance' => 30,
-                'comments' => ['Пятёрочка', 'Перекрёсток', 'ВкусВилл', 'Магнит', null],
-            ],
-            'Кафе и рестораны' => [
-                'avg_amount' => 1_200_00,
-                'min_times' => $isSummer ? 6 : 4,
-                'max_times' => $isSummer ? 8 : 6,
-                'comments' => ['Бизнес-ланч', 'Кофе', 'Ужин с друзьями', null],
-            ],
-            'Транспорт' => [
-                'avg_amount' => 350_00,
-                'min_times' => 18,
-                'max_times' => 24,
-                'variance' => 15,
-                'comments' => ['Метро', 'Яндекс Такси', 'Автобус', null],
-            ],
-            'Коммунальные' => [
-                'avg_amount' => 6_500_00,
-                'min_times' => 1,
-                'max_times' => 1,
-                'variance' => 10,
-                'comments' => ['ЖКУ'],
-            ],
-            'Связь и интернет' => [
-                'avg_amount' => 900_00,
-                'min_times' => 1,
-                'max_times' => 1,
-                'variance' => 5,
-                'comments' => ['Мобильная связь'],
-            ],
-            'Подписки' => [
-                'avg_amount' => 500_00,
-                'min_times' => 2,
-                'max_times' => 3,
-                'variance' => 30,
-                'comments' => ['Яндекс Плюс', 'Spotify', 'YouTube Premium'],
-            ],
-            'Здоровье' => [
-                'avg_amount' => 2_000_00,
-                'min_times' => 0,
-                'max_times' => 2,
-                'variance' => 50,
-                'comments' => ['Аптека', 'Стоматолог', null],
-            ],
-            'Одежда' => [
-                'avg_amount' => 4_500_00,
-                'min_times' => 0,
-                'max_times' => 2,
-                'variance' => 40,
-                'comments' => ['Uniqlo', 'H&M', null],
-            ],
-            'Развлечения' => [
-                'avg_amount' => 1_800_00,
-                'min_times' => $isSummer ? 4 : 2,
-                'max_times' => $isSummer ? 6 : 4,
-                'variance' => 35,
-                'comments' => ['Кино', 'Концерт', 'Боулинг', 'Парк', null],
-            ],
-            'Красота' => [
-                'avg_amount' => 2_500_00,
-                'min_times' => 0,
-                'max_times' => 1,
-                'variance' => 30,
-                'comments' => ['Барбершоп', null],
-            ],
-            'Образование' => [
-                'avg_amount' => 3_000_00,
-                'min_times' => 0,
-                'max_times' => 1,
-                'variance' => 40,
-                'comments' => ['Курс на Stepik', 'Книга', null],
-            ],
-            'Домашние животные' => [
-                'avg_amount' => 1_500_00,
-                'min_times' => 1,
-                'max_times' => 2,
-                'variance' => 25,
-                'comments' => ['Корм для кота', 'Ветеринар'],
-            ],
-            'Подарки' => [
-                'avg_amount' => 3_000_00,
-                'min_times' => 0,
-                'max_times' => 1,
-                'variance' => 50,
-                'comments' => ['День рождения друга', null],
-            ],
-            'Прочие расходы' => [
-                'avg_amount' => 1_000_00,
-                'min_times' => 1,
-                'max_times' => 3,
-                'variance' => 40,
-                'comments' => [null],
-            ],
+            'Жильё' => ['amount' => 55_000_00, 'times' => 1, 'day' => 7, 'variance' => 0, 'comments' => ['Аренда квартиры']],
+            'Коммунальные' => ['amount' => 6_500_00, 'times' => 1, 'day' => 12, 'comments' => ['ЖКУ']],
+            'Связь и интернет' => ['amount' => 1_300_00, 'times' => 1, 'day' => 15, 'variance' => 0, 'comments' => ['Мобильная связь и интернет']],
+            'Продукты' => ['amount' => 2_800_00, 'times' => 12, 'variance' => 25, 'comments' => ['Пятёрочка', 'Перекрёсток', 'ВкусВилл', 'Магнит', null]],
+            'Кафе и рестораны' => ['amount' => 1_500_00, 'times' => 8, 'variance' => 20, 'comments' => ['Бизнес-ланч', 'Кофе', 'Ужин', null]],
+            'Транспорт' => ['amount' => 400_00, 'times' => 20, 'variance' => 15, 'comments' => ['Метро', 'Такси', 'Автобус', null]],
+            'Подписки' => ['amount' => 400_00, 'times' => 3, 'variance' => 0, 'comments' => ['Яндекс Плюс', 'Облачное хранилище', 'Музыка']],
+            'Здоровье' => ['amount' => 1_500_00, 'times' => 2, 'comments' => ['Аптека', 'Анализы']],
+            'Одежда' => ['amount' => 2_750_00, 'times' => 2, 'comments' => ['Одежда', 'Обувь']],
+            'Развлечения' => ['amount' => 2_000_00, 'times' => 4, 'variance' => 10, 'comments' => ['Кино', 'Боулинг', 'Театр', 'Настольные игры']],
+            'Красота' => ['amount' => 2_000_00, 'times' => 1, 'comments' => ['Барбершоп']],
+            'Образование' => ['amount' => 3_500_00, 'times' => 1, 'comments' => ['Курс английского']],
+            'Домашние животные' => ['amount' => 1_600_00, 'times' => 2, 'comments' => ['Корм для кота', 'Наполнитель']],
+            'Подарки' => ['amount' => 3_000_00, 'times' => 1, 'comments' => ['День рождения']],
+            'Прочие расходы' => ['amount' => 1_500_00, 'times' => 2, 'comments' => ['Хозтовары', null]],
         ];
+    }
+
+    private function priceIn(Carbon $month, int $amount, string $key, int $variancePercent): int
+    {
+        $months = ($month->year - 2026) * 12 + $month->month - 11;
+        $inflated = $amount * (1 + self::MONTHLY_PRICE_GROWTH) ** $months;
+        $variance = (crc32($key) % 2001 - 1000) / 1000 * $variancePercent / 100;
+
+        return (int) round($inflated * (1 + $variance) / 1000) * 1000;
+    }
+
+    private function spreadDay(string $key, int $index, int $times, int $daysInMonth): int
+    {
+        $step = $daysInMonth / $times;
+
+        return min($daysInMonth - 1, (int) floor($index * $step) + crc32("day|{$key}") % max(1, (int) floor($step)));
     }
 
     /**
@@ -381,49 +375,28 @@ class DemoSeeder extends Seeder
      */
     private function seedRecurringRules(User $user, array $categories): void
     {
-        $user->recurringRules()->delete();
+        $rules = [
+            [$categories['income']['Зарплата'] ?? null, TransactionType::Income, 97_500_00, 'Зарплата', 5],
+            [$categories['expense']['Жильё'] ?? null, TransactionType::Expense, 55_000_00, 'Аренда квартиры', 7],
+            [$categories['expense']['Связь и интернет'] ?? null, TransactionType::Expense, 1_300_00, 'Мобильная связь и интернет', 15],
+        ];
 
-        $salary = $categories['income']['Зарплата'] ?? null;
-        if ($salary) {
+        foreach ($rules as [$category, $type, $amount, $comment, $day]) {
+            if (! $category) {
+                continue;
+            }
+
+            $nextRun = Carbon::today()->startOfMonth()->day($day);
+
             RecurringRule::create([
                 'user_id' => $user->id,
-                'type' => TransactionType::Income,
-                'amount' => 95_000_00,
-                'category_id' => $salary->id,
+                'type' => $type,
+                'amount' => $amount,
+                'category_id' => $category->id,
                 'currency_code' => 'RUB',
-                'comment' => 'Зарплата',
+                'comment' => $comment,
                 'interval' => RecurringInterval::Monthly,
-                'next_run_at' => Carbon::now()->startOfMonth()->addDays(24),
-                'is_active' => true,
-            ]);
-        }
-
-        $utilities = $categories['expense']['Коммунальные'] ?? null;
-        if ($utilities) {
-            RecurringRule::create([
-                'user_id' => $user->id,
-                'type' => TransactionType::Expense,
-                'amount' => 6_500_00,
-                'category_id' => $utilities->id,
-                'currency_code' => 'RUB',
-                'comment' => 'ЖКУ',
-                'interval' => RecurringInterval::Monthly,
-                'next_run_at' => Carbon::now()->startOfMonth()->addDays(4),
-                'is_active' => true,
-            ]);
-        }
-
-        $phone = $categories['expense']['Связь и интернет'] ?? null;
-        if ($phone) {
-            RecurringRule::create([
-                'user_id' => $user->id,
-                'type' => TransactionType::Expense,
-                'amount' => 900_00,
-                'category_id' => $phone->id,
-                'currency_code' => 'RUB',
-                'comment' => 'Мобильная связь',
-                'interval' => RecurringInterval::Monthly,
-                'next_run_at' => Carbon::now()->startOfMonth()->addDays(14),
+                'next_run_at' => $nextRun->gt(Carbon::today()) ? $nextRun : $nextRun->addMonth(),
                 'is_active' => true,
             ]);
         }
@@ -431,179 +404,56 @@ class DemoSeeder extends Seeder
 
     private function seedGoals(User $user): void
     {
-        $user->goals()->delete();
+        $savings = Category::system()->savings()->first();
 
         $goals = [
-            [
-                'name' => 'Отпуск в Турцию',
-                'type' => GoalType::Travel,
-                'icon' => '✈️',
-                'target_amount' => 200_000_00,
-                'current_amount' => 60_000_00,
-                'started_at' => Carbon::now()->subMonths(4),
-                'target_date' => Carbon::now()->addMonths(4),
-                'contributions_count' => 4,
-            ],
-            [
-                'name' => 'Подушка безопасности',
-                'type' => GoalType::SafetyNet,
-                'icon' => '🛡️',
-                'target_amount' => 300_000_00,
-                'current_amount' => 45_000_00,
-                'started_at' => Carbon::now()->subMonths(5),
-                'target_date' => Carbon::now()->addMonths(7),
-                'contributions_count' => 5,
-            ],
-            [
-                'name' => 'Новый ноутбук',
-                'type' => GoalType::LargePurchase,
-                'icon' => '💻',
-                'target_amount' => 120_000_00,
-                'current_amount' => 72_000_00,
-                'started_at' => Carbon::now()->subMonths(3),
-                'target_date' => Carbon::now()->addMonth(),
-                'contributions_count' => 3,
-            ],
+            ['name' => 'Отпуск в Турцию', 'type' => GoalType::Travel, 'icon' => '✈️', 'target' => 200_000_00, 'monthly' => 15_000_00, 'paid' => 4, 'left' => 4],
+            ['name' => 'Подушка безопасности', 'type' => GoalType::SafetyNet, 'icon' => '🛡️', 'target' => 240_000_00, 'monthly' => 10_000_00, 'paid' => 14, 'left' => 10],
+            ['name' => 'Обучение в вузе', 'type' => GoalType::Education, 'icon' => '🎓', 'target' => 1_000_000_00, 'monthly' => 15_000_00, 'paid' => 3, 'left' => 45],
         ];
 
-        foreach ($goals as $goalData) {
-            $contributionsCount = $goalData['contributions_count'];
-            unset($goalData['contributions_count']);
-
+        foreach ($goals as $data) {
             $goal = Goal::create([
                 'user_id' => $user->id,
                 'status' => GoalStatus::Active,
                 'currency_code' => 'RUB',
-                ...$goalData,
+                'name' => $data['name'],
+                'type' => $data['type'],
+                'icon' => $data['icon'],
+                'target_amount' => $data['target'],
+                'current_amount' => $data['monthly'] * $data['paid'],
+                'started_at' => Carbon::today()->subMonthsNoOverflow($data['paid']),
+                'target_date' => Carbon::today()->addMonthsNoOverflow($data['left']),
             ]);
 
-            $this->seedGoalContributions($goal, $contributionsCount);
+            $this->seedGoalContributions($user, $goal, $data['monthly'], $data['paid'], $savings);
         }
 
         $this->command->info('Created 3 goals with contributions.');
     }
 
-    private function seedGoalContributions(Goal $goal, int $count): void
+    private function seedGoalContributions(User $user, Goal $goal, int $amount, int $count, ?Category $savings): void
     {
-        $totalAmount = $goal->current_amount;
-        $remaining = $totalAmount;
+        $lastPayment = Carbon::today()->startOfMonth()->day(6);
 
-        for ($i = 0; $i < $count; $i++) {
-            $isLast = ($i === $count - 1);
-            $amount = $isLast ? $remaining : (int) round($totalAmount / $count * $this->vary(100, 15) / 100);
-            $amount = min($amount, $remaining);
-            $remaining -= $amount;
+        if ($lastPayment->gt(Carbon::today())) {
+            $lastPayment->subMonth();
+        }
 
-            $monthsAgo = $count - $i;
-            $date = Carbon::now()->subMonths($monthsAgo)->addDays(random_int(1, 15));
+        for ($monthsAgo = $count - 1; $monthsAgo >= 0; $monthsAgo--) {
+            $date = $lastPayment->copy()->subMonths($monthsAgo);
+
+            $transaction = $savings
+                ? $this->createTransaction($user, $savings, TransactionType::Expense, $amount, $date, __('goals.contribution_comment', ['goal' => $goal->name], 'ru'))
+                : null;
 
             GoalContribution::create([
                 'goal_id' => $goal->id,
-                'amount' => max(100, $amount),
+                'transaction_id' => $transaction?->id,
+                'amount' => $amount,
                 'date' => $date,
             ]);
         }
-    }
-
-    private function seedAiAdvice(User $user): void
-    {
-        $user->aiAdvices()->delete();
-
-        $advices = [
-            [
-                'title' => 'Расходы на кафе выросли на 35%',
-                'body' => 'В этом месяце вы потратили на кафе и рестораны значительно больше, чем в прошлом. Средний чек вырос с 1 100 ₽ до 1 500 ₽, а количество визитов увеличилось. Попробуйте установить лимит на эту категорию или чередовать обеды в кафе с домашней едой.',
-                'basis_data' => ['rule' => 'category_spike', 'category' => 'dining', 'growth_percent' => 35],
-                'is_read' => true,
-                'rating' => AiAdvice::RATING_HELPFUL,
-                'days_ago' => 3,
-            ],
-            [
-                'title' => 'Расходы превышают доходы',
-                'body' => 'За последний месяц расходы составили 108% от доходов. Дефицит покрывается из накоплений. Рекомендуем пересмотреть необязательные траты: подписки, развлечения и кафе составляют 28% всех расходов.',
-                'basis_data' => ['rule' => 'overspending', 'expense_ratio' => 1.08],
-                'is_read' => true,
-                'rating' => AiAdvice::RATING_HELPFUL,
-                'days_ago' => 7,
-            ],
-            [
-                'title' => 'Цель "Новый ноутбук" отстаёт от графика',
-                'body' => 'Для достижения цели в срок нужно откладывать 16 000 ₽/мес, но за последний месяц взнос составил 12 000 ₽. Увеличьте ежемесячный взнос на 4 000 ₽ или перенесите дедлайн.',
-                'basis_data' => ['rule' => 'goal_behind_schedule', 'goal' => 'Новый ноутбук', 'gap_percent' => 25],
-                'is_read' => true,
-                'rating' => null,
-                'days_ago' => 10,
-            ],
-            [
-                'title' => 'Крупная покупка в "Одежда"',
-                'body' => 'Транзакция на 8 500 ₽ в категории "Одежда" значительно превышает ваш средний чек 3 200 ₽. Если это разовая покупка, ничего страшного. Если нет, стоит пересмотреть бюджет.',
-                'basis_data' => ['rule' => 'unusual_transaction', 'category' => 'clothing', 'amount' => 850000, 'avg' => 320000],
-                'is_read' => false,
-                'rating' => null,
-                'days_ago' => 5,
-            ],
-            [
-                'title' => 'Можно оптимизировать необязательные траты',
-                'body' => 'Дискреционные расходы (кафе, развлечения, подписки) составляют 22% от общих трат. Сокращение на 10% высвободит около 4 500 ₽/мес, которые можно направить на цель "Подушка безопасности".',
-                'basis_data' => ['rule' => 'savings_optimization', 'discretionary_share' => 0.22],
-                'is_read' => false,
-                'rating' => null,
-                'days_ago' => 2,
-            ],
-            [
-                'title' => 'Транспортные расходы стабильны',
-                'body' => 'Расходы на транспорт за последние 3 месяца держатся в диапазоне 7 000–8 500 ₽. Это хороший показатель контроля. Если перейти на проездной за 2 900 ₽, экономия составит до 5 000 ₽/мес.',
-                'basis_data' => ['rule' => 'savings_optimization', 'category' => 'transport', 'potential_savings' => 500000],
-                'is_read' => true,
-                'rating' => AiAdvice::RATING_UNHELPFUL,
-                'days_ago' => 14,
-            ],
-            [
-                'title' => 'Расходы на продукты выросли на 12%',
-                'body' => 'В этом месяце вы потратили на продукты 24 300 ₽, в среднем за три предыдущих месяца 21 700 ₽. Это может быть связано как с ростом цен, так и с увеличением объёма покупок. Сравните чеки за разные месяцы.',
-                'basis_data' => ['rule' => 'category_spike', 'category_name' => 'Продукты', 'current_total' => 2430000, 'avg_monthly' => 2170000, 'growth_percent' => 12],
-                'is_read' => false,
-                'rating' => null,
-                'days_ago' => 18,
-            ],
-            [
-                'title' => 'Вы экономите 15% дохода',
-                'body' => 'За последние 3 месяца вы стабильно откладываете около 15% от дохода. Это выше среднего по России (10%). Продолжайте в том же духе! При текущем темпе цель "Подушка безопасности" будет достигнута через 8 месяцев.',
-                'basis_data' => ['rule' => 'savings_optimization', 'savings_rate' => 0.15],
-                'is_read' => true,
-                'rating' => AiAdvice::RATING_HELPFUL,
-                'days_ago' => 21,
-            ],
-            [
-                'title' => 'Подписки: проверьте неиспользуемые',
-                'body' => 'Вы оплачиваете 3 подписки общей стоимостью 1 400 ₽/мес. Проверьте, все ли из них вы активно используете. Отмена одной неиспользуемой подписки за год сэкономит до 6 000 ₽.',
-                'basis_data' => ['rule' => 'savings_optimization', 'category' => 'subscriptions', 'total' => 140000],
-                'is_read' => false,
-                'rating' => null,
-                'days_ago' => 25,
-            ],
-            [
-                'title' => 'Цель "Отпуск в Турцию" на 30% выполнена',
-                'body' => 'Вы накопили 60 000 ₽ из 200 000 ₽. При текущем темпе (15 000 ₽/мес) цель будет достигнута вовремя. Учтите, что с учётом инфляции (~0,8%/мес) реальная стоимость поездки может вырасти на 6–8%.',
-                'basis_data' => ['rule' => 'goal_behind_schedule', 'goal' => 'Отпуск в Турцию', 'progress' => 30],
-                'is_read' => true,
-                'rating' => AiAdvice::RATING_HELPFUL,
-                'days_ago' => 30,
-            ],
-        ];
-
-        foreach ($advices as $advice) {
-            $daysAgo = $advice['days_ago'];
-            unset($advice['days_ago']);
-
-            AiAdvice::create([
-                'user_id' => $user->id,
-                'generated_at' => Carbon::now()->subDays($daysAgo),
-                ...$advice,
-            ]);
-        }
-
-        $this->command->info('Created 10 AI advice records.');
     }
 
     private function seedSubscription(User $user): void
@@ -649,19 +499,5 @@ class DemoSeeder extends Seeder
             'comment' => $comment,
             'is_recurring' => false,
         ]);
-    }
-
-    private function vary(int $baseAmount, int $variancePercent = 20): int
-    {
-        $factor = 1 + (random_int(-$variancePercent, $variancePercent) / 100);
-
-        return (int) round($baseAmount * $factor);
-    }
-
-    private function randomDate(Carbon $start, Carbon $end): Carbon
-    {
-        $days = $start->diffInDays($end);
-
-        return $start->copy()->addDays(random_int(0, max(0, $days)));
     }
 }

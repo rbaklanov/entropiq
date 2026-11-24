@@ -41,11 +41,18 @@ class ProfilePage extends Component
 
     public function save(ChangeUserEmail $changeUserEmail): void
     {
+        $user = auth()->user();
+
+        if ($user->isDemo()) {
+            session()->flash('error', __('settings.demo_locked'));
+            $this->redirectRoute('settings.profile');
+
+            return;
+        }
+
         $this->email = mb_strtolower(trim($this->email));
 
         $this->validate();
-
-        $user = auth()->user();
 
         $user->update(['name' => $this->name]);
         $changeUserEmail->execute($user, $this->email);

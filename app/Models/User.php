@@ -190,6 +190,20 @@ class User extends Authenticatable
         );
     }
 
+    /**
+     * The shared account anyone can enter with the public demo code.
+     */
+    public function isDemo(): bool
+    {
+        $demoPhone = config('services.sms.demo_phone');
+
+        if (! is_string($demoPhone) || $demoPhone === '') {
+            return false;
+        }
+
+        return self::canonicalPhone((string) $this->phone) === self::canonicalPhone($demoPhone);
+    }
+
     public function isAdmin(): bool
     {
         $phone = self::canonicalPhone((string) $this->phone);
@@ -198,8 +212,7 @@ class User extends Authenticatable
             return false;
         }
 
-        $demoPhone = config('services.sms.demo_phone');
-        if (is_string($demoPhone) && $demoPhone !== '' && $phone === self::canonicalPhone($demoPhone)) {
+        if ($this->isDemo()) {
             return false;
         }
 

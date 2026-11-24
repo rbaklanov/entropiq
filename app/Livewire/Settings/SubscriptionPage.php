@@ -28,8 +28,17 @@ class SubscriptionPage extends Component
 
     public function subscribe(StartCheckout $startCheckout): void
     {
+        $user = auth()->user();
+
+        if ($user->isDemo()) {
+            session()->flash('error', __('settings.demo_locked'));
+            $this->redirectRoute('settings.subscription');
+
+            return;
+        }
+
         $url = $startCheckout->execute(
-            auth()->user(),
+            $user,
             $this->plan(),
             $this->autoRenew,
             request()->ip(),
