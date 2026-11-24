@@ -6,6 +6,7 @@ use App\Contracts\SubscriptionServiceInterface;
 use App\Enums\GoalStatus;
 use App\Enums\GoalType;
 use App\Services\GoalCalculationService;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -151,12 +152,14 @@ class GoalForm extends Component
             return 0;
         }
 
+        $calculator = app(GoalCalculationService::class);
+
         $months = 12;
         if ($this->targetDate !== '') {
-            $months = max(1, (int) now()->diffInMonths($this->targetDate, false));
+            $months = $calculator->monthsUntil(Carbon::parse($this->targetDate));
         }
 
-        return app(GoalCalculationService::class)->requiredMonthlyPayment(
+        return $calculator->requiredMonthlyPayment(
             $this->targetAmount,
             $this->initialAmount,
             $months,
